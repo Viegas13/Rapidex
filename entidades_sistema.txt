@@ -1,0 +1,23 @@
+Classes:
+
+Pessoa - nome, cpf, senha, email, telefone, dataNascimento, endereco;
+
+
+Fornecedor - 
+
+
+Cartao - numero, cvv, validade, nomeTitular, agencia, bandeira;
+
+
+Produto - id, nome, validade, preco, imagem, descricao, Fornecedor, restritoPorIdade; 
+
+
+Cliente - *herda de Pessoa* -  Cartoes, 
+
+Entrega - Cliente, Fornecedor, Entregador, enderecoEntrega, Produtos, preco;
+Entregador - *herda de Pessoa* - 
+
+
+
+
+FALTA IMPLEMENTAR: inventário, receitas, cupons
