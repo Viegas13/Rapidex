@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class Entregador extends Pessoa{
 
+
     private String veiculo;
     private ArrayList<Entrega> entregas;
     

@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Produto {
 
-    private long id;
+    private long id; // PRIMARY KEY
     private String nome;
     private Date validade;
     private double preco;

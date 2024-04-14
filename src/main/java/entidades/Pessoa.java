@@ -7,7 +7,7 @@ import java.util.Date;
 public class Pessoa {
     
     private String nome;
-    private String CPF;
+    private String CPF; // PRIMARY KEY
     private String senha;
     private String email;
     private long telefone;

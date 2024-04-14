@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Fornecedor {
     
     private String nome;
-    private String CNPJ;
+    private String CNPJ; // PRIMARY KEY
     private Endereco endereco;
     private String email;
     private ArrayList<Produto> produtos;

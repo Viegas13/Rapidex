@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Cartao {
     
-    private long numero;
+    private long numero; // PRIMARY KEY
     private int cvv;
     private Date validade;
     private String nomeTitular;
