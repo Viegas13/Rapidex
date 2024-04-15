@@ -1,6 +1,6 @@
 package DAO;
 
-import entidades.Produto;
+import entidades.Cliente;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -9,16 +9,16 @@ import java.util.Scanner;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
-public class ProdutoDAO {
+public class ClienteDAO {
 
-    public void cadastrarProduto(Produto produto) {
+    public void cadastrarProduto(Cliente cliente) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(produto);
+            entityManager.persist(cliente);
             entityManager.getTransaction().commit();
 
         } catch (Exception ex) {
@@ -28,7 +28,7 @@ public class ProdutoDAO {
         }
     }
 
-    public void removerProduto(long id) {
+    public void removerProduto(String CPF) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -36,12 +36,12 @@ public class ProdutoDAO {
         try {
             entityManager.getTransaction().begin();
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Cliente cliente = entityManager.find(Cliente.class, CPF);
 
-            if (produto != null) {
-                entityManager.remove(produto);
+            if (cliente != null) {
+                entityManager.remove(cliente);
             } else {
-                System.out.println("Produto não cadastrado no sistema");
+                System.out.println("Endereço não cadastrado no sistema");
             }
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
@@ -51,7 +51,7 @@ public class ProdutoDAO {
 
     }
 
-    public void atualizarProduto(long id) {
+    public void atualizarProduto(String CPF) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -59,15 +59,15 @@ public class ProdutoDAO {
 
         try {
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Cliente cliente = entityManager.find(Cliente.class, CPF);
 
-            if (produto != null) {
+            if (cliente != null) {
 
-                produto.setId(scan.nextLong());
-                produto.setImagem(scan.next());
-                produto.setNome(scan.next());
-                produto.setDescricao(scan.next());
-                produto.setPreco(scan.nextDouble());
+                cliente.setCPF(scan.next());
+                cliente.setNome(scan.next());
+                cliente.setEmail(scan.next());
+                cliente.setSenha(scan.next());
+                cliente.setTelefone(scan.nextLong());
             }
 
         } catch (Exception ex) {
@@ -85,16 +85,17 @@ public class ProdutoDAO {
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        CriteriaQuery<Produto> criteria = entityManager.getCriteriaBuilder().createQuery(Produto.class);
-        criteria.select(criteria.from(Produto.class));
+        CriteriaQuery<Cliente> criteria = entityManager.getCriteriaBuilder().createQuery(Cliente.class);
+        criteria.select(criteria.from(Cliente.class));
 
-        List<Produto> produtos = entityManager.createQuery(criteria).getResultList();
+        List<Cliente> clientes = entityManager.createQuery(criteria).getResultList();
 
-        for (Produto produto : produtos) {
-            System.out.println("Nome: " + produto.getNome());
-            System.out.println("ID: " + produto.getId());
-            System.out.println("Descrição: " + produto.getDescricao());
-            System.out.println("Preco: " + produto.getPreco());
+        for (Cliente cliente : clientes) {
+            System.out.println("CPF: " + cliente.getCPF());
+            System.out.println("Nome: " + cliente.getNome());
+            System.out.println("Email: " + cliente.getEmail());
+            System.out.println("Senha: " + cliente.getSenha());
+            System.out.println("Número: " + cliente.getTelefone());
         }
         entityManager.close();
     }

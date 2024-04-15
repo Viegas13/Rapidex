@@ -1,7 +1,6 @@
 package DAO;
 
-import entidades.Produto;
-
+import entidades.Fornecedor;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -9,16 +8,16 @@ import java.util.Scanner;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
-public class ProdutoDAO {
+public class FornecedorDAO {
 
-    public void cadastrarProduto(Produto produto) {
+    public void cadastrarProduto(Fornecedor fornecedor) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(produto);
+            entityManager.persist(fornecedor);
             entityManager.getTransaction().commit();
 
         } catch (Exception ex) {
@@ -28,7 +27,7 @@ public class ProdutoDAO {
         }
     }
 
-    public void removerProduto(long id) {
+    public void removerProduto(String CNPJ) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -36,12 +35,12 @@ public class ProdutoDAO {
         try {
             entityManager.getTransaction().begin();
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Fornecedor fornecedor = entityManager.find(Fornecedor.class, CNPJ);
 
-            if (produto != null) {
-                entityManager.remove(produto);
+            if (fornecedor != null) {
+                entityManager.remove(fornecedor);
             } else {
-                System.out.println("Produto não cadastrado no sistema");
+                System.out.println("Fornecedor não cadastrado no sistema");
             }
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
@@ -51,7 +50,7 @@ public class ProdutoDAO {
 
     }
 
-    public void atualizarProduto(long id) {
+    public void atualizarProduto(String CNPJ) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -59,15 +58,15 @@ public class ProdutoDAO {
 
         try {
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Fornecedor fornecedor = entityManager.find(Fornecedor.class, CNPJ);
 
-            if (produto != null) {
+            if (fornecedor != null) {
 
-                produto.setId(scan.nextLong());
-                produto.setImagem(scan.next());
-                produto.setNome(scan.next());
-                produto.setDescricao(scan.next());
-                produto.setPreco(scan.nextDouble());
+                fornecedor.setNome(scan.next());
+                fornecedor.setCNPJ(scan.next());
+                fornecedor.setEmail(scan.next());
+                fornecedor.setTelefone(scan.nextLong());
+
             }
 
         } catch (Exception ex) {
@@ -85,16 +84,16 @@ public class ProdutoDAO {
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        CriteriaQuery<Produto> criteria = entityManager.getCriteriaBuilder().createQuery(Produto.class);
-        criteria.select(criteria.from(Produto.class));
+        CriteriaQuery<Fornecedor> criteria = entityManager.getCriteriaBuilder().createQuery(Fornecedor.class);
+        criteria.select(criteria.from(Fornecedor.class));
 
-        List<Produto> produtos = entityManager.createQuery(criteria).getResultList();
+        List<Fornecedor> fornecedores = entityManager.createQuery(criteria).getResultList();
 
-        for (Produto produto : produtos) {
-            System.out.println("Nome: " + produto.getNome());
-            System.out.println("ID: " + produto.getId());
-            System.out.println("Descrição: " + produto.getDescricao());
-            System.out.println("Preco: " + produto.getPreco());
+        for (Fornecedor fornecedor : fornecedores) {
+            System.out.println("Nome: " + fornecedor.getNome());
+            System.out.println("CNPJ: " + fornecedor.getCNPJ());
+            System.out.println("Email: " + fornecedor.getEmail());
+            System.out.println("Telefone: " + fornecedor.getTelefone());
         }
         entityManager.close();
     }

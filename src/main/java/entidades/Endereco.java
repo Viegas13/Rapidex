@@ -2,7 +2,7 @@ package entidades;
 
 public class Endereco {
 
-    private String pessoa_cpf; // PRIMARY KEY
+    private String pessoa_cpf; // FOREIGN KEY
     private String bairro;
     private String rua;
     private int numero;

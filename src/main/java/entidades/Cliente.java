@@ -18,8 +18,4 @@ public class Cliente extends Pessoa{
     public void setCartoes(ArrayList<Cartao> cartoes) {
         this.cartoes = cartoes;
     }
-
-    public int getCliente_id() {
-        return cliente_id;
-    }
 }

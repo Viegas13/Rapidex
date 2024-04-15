@@ -1,6 +1,6 @@
 package DAO;
 
-import entidades.Produto;
+import entidades.Endereco;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -9,16 +9,16 @@ import java.util.Scanner;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
-public class ProdutoDAO {
+public class EnderecoDAO {
 
-    public void cadastrarProduto(Produto produto) {
+    public void cadastrarProduto(Endereco endereco) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(produto);
+            entityManager.persist(endereco);
             entityManager.getTransaction().commit();
 
         } catch (Exception ex) {
@@ -28,7 +28,7 @@ public class ProdutoDAO {
         }
     }
 
-    public void removerProduto(long id) {
+    public void removerProduto(String CEP) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -36,12 +36,12 @@ public class ProdutoDAO {
         try {
             entityManager.getTransaction().begin();
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Endereco endereco = entityManager.find(Endereco.class, CEP);
 
-            if (produto != null) {
-                entityManager.remove(produto);
+            if (endereco != null) {
+                entityManager.remove(endereco);
             } else {
-                System.out.println("Produto não cadastrado no sistema");
+                System.out.println("Endereço não cadastrado no sistema");
             }
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
@@ -51,7 +51,7 @@ public class ProdutoDAO {
 
     }
 
-    public void atualizarProduto(long id) {
+    public void atualizarProduto(String CEP) {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -59,15 +59,16 @@ public class ProdutoDAO {
 
         try {
 
-            Produto produto = entityManager.find(Produto.class, id);
+            Endereco endereco = entityManager.find(Endereco.class, CEP);
 
-            if (produto != null) {
+            if (endereco != null) {
 
-                produto.setId(scan.nextLong());
-                produto.setImagem(scan.next());
-                produto.setNome(scan.next());
-                produto.setDescricao(scan.next());
-                produto.setPreco(scan.nextDouble());
+                endereco.setPessoa_cpf(scan.next());
+                endereco.setCEP(scan.nextByte());
+                endereco.setBairro(scan.next());
+                endereco.setRua(scan.next());
+                endereco.setNumero(scan.nextInt());
+                endereco.setComplemento(scan.next());
             }
 
         } catch (Exception ex) {
@@ -85,18 +86,19 @@ public class ProdutoDAO {
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        CriteriaQuery<Produto> criteria = entityManager.getCriteriaBuilder().createQuery(Produto.class);
-        criteria.select(criteria.from(Produto.class));
+        CriteriaQuery<Endereco> criteria = entityManager.getCriteriaBuilder().createQuery(Endereco.class);
+        criteria.select(criteria.from(Endereco.class));
 
-        List<Produto> produtos = entityManager.createQuery(criteria).getResultList();
+        List<Endereco> enderecos = entityManager.createQuery(criteria).getResultList();
 
-        for (Produto produto : produtos) {
-            System.out.println("Nome: " + produto.getNome());
-            System.out.println("ID: " + produto.getId());
-            System.out.println("Descrição: " + produto.getDescricao());
-            System.out.println("Preco: " + produto.getPreco());
+        for (Endereco endereco : enderecos) {
+            System.out.println("CPF titular: " + endereco.getPessoa_cpf());
+            System.out.println("CEP: " + endereco.getCEP());
+            System.out.println("Bairro: " + endereco.getBairro());
+            System.out.println("Rua: " + endereco.getRua());
+            System.out.println("Número: " + endereco.getNumero());
+            System.out.println("Complemento: " + endereco.getComplemento());
         }
         entityManager.close();
     }
-
 }

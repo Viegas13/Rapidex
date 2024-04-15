@@ -56,7 +56,7 @@ public class CartaoDAO {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Scanner scan = new Scanner (System.in);
+        Scanner scan = new Scanner(System.in);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         try {
 
@@ -81,7 +81,7 @@ public class CartaoDAO {
 
     }
 
-    public void listarCartoes () {
+    public void listarCartoes() {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -92,7 +92,7 @@ public class CartaoDAO {
         List<Cartao> cartoes = entityManager.createQuery(criteria).getResultList();
 
         for (Cartao cartao : cartoes) {
-            System.out.println("Bandeira: " +cartao.getBandeira());
+            System.out.println("Bandeira: " + cartao.getBandeira());
             System.out.println("Nome do Titular: " + cartao.getNomeTitular());
             System.out.println("Agencia: " + cartao.getAgencia());
             System.out.println("Cvv: " + cartao.getCvv());
