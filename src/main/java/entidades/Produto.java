@@ -13,14 +13,13 @@ public class Produto {
     private Fornecedor fornecedor;
     private boolean restritoPorIdade;
 
-    public Produto(long id, String nome, Date validade, double preco, String imagem, String descricao, Fornecedor fornecedor, boolean restritoPorIdade) {
+    public Produto(long id, String nome, Date validade, double preco, String imagem, String descricao, boolean restritoPorIdade) {
         this.id = id;
         this.nome = nome;
         this.validade = validade;
         this.preco = preco;
         this.imagem = imagem;
         this.descricao = descricao;
-        this.fornecedor = fornecedor;
         this.restritoPorIdade = restritoPorIdade;
     }
 
