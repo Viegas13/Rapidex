@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Pedido {
 
-    private int pedido_id; // PRIMARY KEY e possui um iterador automatico para definir seu valor no banco de dados
+    private long pedido_id;
     private Cliente cliente;
     private Fornecedor fornecedor;
     private ArrayList<Produto> produtos;
@@ -49,7 +49,11 @@ public class Pedido {
         this.preco = preco;
     }
 
-    public int getPedido_id() {
+    public long getPedido_id() {
         return pedido_id;
+    }
+
+    public void setPedido_id(long pedido_id) {
+        this.pedido_id = pedido_id;
     }
 }
