@@ -3,7 +3,8 @@ package entidades;
 import java.util.ArrayList;
 
 public class Pedido {
-    
+
+    private int pedido_id; // PRIMARY KEY e possui um iterador automatico para definir seu valor no banco de dados
     private Cliente cliente;
     private Fornecedor fornecedor;
     private ArrayList<Produto> produtos;
@@ -47,5 +48,8 @@ public class Pedido {
     public void setPreco(double preco) {
         this.preco = preco;
     }
-    
+
+    public int getPedido_id() {
+        return pedido_id;
+    }
 }

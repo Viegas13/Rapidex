@@ -1,11 +1,12 @@
 package entidades;
 
 public class Endereco {
-    
+
+    private String pessoa_cpf; // PRIMARY KEY
     private String bairro;
     private String rua;
     private int numero;
-    private long CEP;
+    private long CEP; // PRIMARY KEY
     private String complemento;
 
     public Endereco(String bairro, String rua, int numero, long CEP, String complemento) {
@@ -55,5 +56,12 @@ public class Endereco {
     public void setComplemento(String complemento) {
         this.complemento = complemento;
     }
-    
+
+    public String getPessoa_cpf() {
+        return pessoa_cpf;
+    }
+
+    public void setPessoa_cpf(String pessoa_cpf) {
+        this.pessoa_cpf = pessoa_cpf;
+    }
 }

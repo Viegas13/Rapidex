@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Entrega {
 
+    private int entrega_id; // PRIMARY KEY
     private Pedido pedido;
     private Entregador entregador;
     private boolean pendente;
@@ -57,7 +58,13 @@ public class Entrega {
     public void setFrete(double frete) {
         this.frete = frete;
     }
-    
-    
-    
+
+
+    public int getEntrega_id() {
+        return entrega_id;
+    }
+
+    public void setEntrega_id(int entrega_id) {
+        this.entrega_id = entrega_id;
+    }
 }
