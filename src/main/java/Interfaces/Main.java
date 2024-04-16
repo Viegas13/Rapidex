@@ -34,11 +34,23 @@ public class Main {
                     break;
                 case 2:
 
-                    System.out.println("Digite, respectivamente, o id do produto, o nome do produto,"
-                            + " validade, preco, imagem, descrição e restrição de idade");
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    Produto produto = new Produto(scan.nextLong(), scan.next(), scan.next(), scan.nextDouble(), scan.next(), scan.next(), scan.nextLong(), scan.next());
-
+                    Produto produto = new Produto();
+                    System.out.println("Digite o id do produto");
+                    produto.setId(scan.nextLong());
+                    System.out.println("Digite o nome do produto");
+                    produto.setNome(scan.next());
+                    System.out.println("Sua validade");
+                    produto.setValidade(scan.next());
+                    System.out.println("O preço");
+                    produto.setPreco(scan.nextDouble());
+                    System.out.println("A URL do imagem");
+                    produto.setImagem(scan.next());
+                    System.out.println("A descrição");
+                    produto.setDescricao(scan.next());
+                    System.out.println("Informe o CNPJ do fornecedor");
+                    produto.setFornecedor(scan.nextLong());
+                    System.out.println("Restrição por idade (sim ou nao)");
+                    produto.setRestritoPorIdade(scan.next());         
                     produtoDAO.cadastrarProduto(produto);
 
                     break;

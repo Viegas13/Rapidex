@@ -44,12 +44,12 @@ CREATE TABLE Endereco (
 CREATE TABLE Produto (
     id BIGINT PRIMARY KEY,
     nome VARCHAR(255),
-    validade DATE,
+    validade VARCHAR(10),
     preco FLOAT,
     imagem VARCHAR(255),
     descricao VARCHAR(255),
-    fornecedor_cnpj VARCHAR(14),
-    restritoPorIdade BOOLEAN
+    fornecedor_cnpj BIGINT,
+    restritoPorIdade VARCHAR(10)
 	--FOREIGN KEY () REFERENCES Endereco()
 );
 

@@ -64,7 +64,7 @@ public class ProdutoDAO {
 
             if (produto != null) {
 
-                System.out.println("Insira a nova imagem:");
+                System.out.println("Insira a nova url de imagem:");
                 produto.setImagem(scan.next());
                 System.out.println("Insira o novo nome:");
                 produto.setNome(scan.next());
