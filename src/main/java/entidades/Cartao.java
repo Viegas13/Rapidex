@@ -1,7 +1,9 @@
 package entidades;
 
 import java.util.Date;
+import jakarta.persistence.*;
 
+@Entity
 public class Cartao {
     
     private long numero; // PRIMARY KEY

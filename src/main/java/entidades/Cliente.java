@@ -2,7 +2,9 @@ package entidades;
 
 import java.util.ArrayList;
 import java.util.Date;
+import jakarta.persistence.*;
 
+@Entity
 public class Cliente extends Pessoa{
     
     private ArrayList<Cartao> cartoes;

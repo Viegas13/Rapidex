@@ -37,7 +37,7 @@ public class Main {
                     System.out.println("Digite, respectivamente, o id do produto, o nome do produto,"
                             + " validade, preco, imagem, descrição e restrição de idade");
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    Produto produto = new Produto(scan.nextLong(), scan.next(), sdf.parse(scan.next()), scan.nextDouble(), scan.next(), scan.next(), scan.nextBoolean());
+                    Produto produto = new Produto(scan.nextLong(), scan.next(), scan.next(), scan.nextDouble(), scan.next(), scan.next(), scan.nextLong(), scan.next());
 
                     produtoDAO.cadastrarProduto(produto);
 
@@ -46,6 +46,7 @@ public class Main {
                 case 3:
                     System.out.println("Digite o Id do Produto: ");
                     produtoDAO.atualizarProduto(scan.nextLong());
+                    break;
 
                 case 4:
                     System.out.println("Digite o Id do Produto: ");

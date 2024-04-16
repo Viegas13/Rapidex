@@ -1,7 +1,9 @@
 package entidades;
 
 import java.util.ArrayList;
+import jakarta.persistence.*;
 
+@Entity
 public class Pedido {
 
     private long pedido_id;

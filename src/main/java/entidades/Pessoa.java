@@ -3,7 +3,9 @@ package entidades;
 import java.util.ArrayList;
 
 import java.util.Date;
+import jakarta.persistence.*;
 
+@Entity
 public class Pessoa {
     
     private String nome;

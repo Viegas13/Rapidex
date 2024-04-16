@@ -1,7 +1,9 @@
 package entidades;
 
 import java.util.ArrayList;
+import jakarta.persistence.*;
 
+@Entity
 public class Entrega {
 
     private int entrega_id; // PRIMARY KEY

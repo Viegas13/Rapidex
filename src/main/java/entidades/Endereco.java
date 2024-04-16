@@ -1,5 +1,7 @@
 package entidades;
+import jakarta.persistence.*;
 
+@Entity
 public class Endereco {
 
     private String pessoa_cpf; // FOREIGN KEY

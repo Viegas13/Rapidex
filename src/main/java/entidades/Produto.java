@@ -1,25 +1,34 @@
 package entidades;
 
 import java.util.Date;
+import jakarta.persistence.*;
 
+@Entity
 public class Produto {
 
+    @Id
     private long id; // PRIMARY KEY
+    
     private String nome;
-    private Date validade;
+    private String validade;
     private double preco;
     private String imagem;
     private String descricao;
-    private Fornecedor fornecedor;
-    private boolean restritoPorIdade;
+    private long fornecedor_cnpj;
+    private String restritoPorIdade;
 
-    public Produto(long id, String nome, Date validade, double preco, String imagem, String descricao, boolean restritoPorIdade) {
+    public Produto() {
+        
+    }
+    
+    public Produto(long id, String nome, String validade, double preco, String imagem, String descricao, long cnpjFornecedor, String restritoPorIdade) {
         this.id = id;
         this.nome = nome;
         this.validade = validade;
         this.preco = preco;
         this.imagem = imagem;
         this.descricao = descricao;
+        this.fornecedor_cnpj = cnpjFornecedor;
         this.restritoPorIdade = restritoPorIdade;
     }
 
@@ -39,11 +48,11 @@ public class Produto {
         this.nome = nome;
     }
 
-    public Date getValidade() {
+    public String getValidade() {
         return validade;
     }
 
-    public void setValidade(Date validade) {
+    public void setValidade(String validade) {
         this.validade = validade;
     }
 
@@ -71,19 +80,19 @@ public class Produto {
         this.descricao = descricao;
     }
 
-    public Fornecedor getFornecedor() {
-        return fornecedor;
+    public long getFornecedor() {
+        return fornecedor_cnpj;
     }
 
-    public void setFornecedor(Fornecedor fornecedor) {
-        this.fornecedor = fornecedor;
+    public void setFornecedor(long fornecedor) {
+        this.fornecedor_cnpj = fornecedor;
     }
 
-    public boolean isRestritoPorIdade() {
+    public String isRestritoPorIdade() {
         return restritoPorIdade;
     }
 
-    public void setRestritoPorIdade(boolean restritoPorIdade) {
+    public void setRestritoPorIdade(String restritoPorIdade) {
         this.restritoPorIdade = restritoPorIdade;
     }
     

@@ -2,11 +2,11 @@ package DAO;
 
 import entidades.Produto;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import java.util.Scanner;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 public class ProdutoDAO {
@@ -40,6 +40,7 @@ public class ProdutoDAO {
 
             if (produto != null) {
                 entityManager.remove(produto);
+                entityManager.getTransaction().commit();
             } else {
                 System.out.println("Produto não cadastrado no sistema");
             }
@@ -63,11 +64,18 @@ public class ProdutoDAO {
 
             if (produto != null) {
 
-                produto.setId(scan.nextLong());
+                System.out.println("Insira a nova imagem:");
                 produto.setImagem(scan.next());
+                System.out.println("Insira o novo nome:");
                 produto.setNome(scan.next());
+                System.out.println("Insira o nova descrição:");
                 produto.setDescricao(scan.next());
+                System.out.println("Insira o novo preço:");
                 produto.setPreco(scan.nextDouble());
+                
+                entityManager.getTransaction().begin();
+                entityManager.persist(produto);
+                entityManager.getTransaction().commit();
             }
 
         } catch (Exception ex) {
