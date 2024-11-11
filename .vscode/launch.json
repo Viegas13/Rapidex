@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "interfaces",
+            "cwd": "src\\view-rapidex\\interfaces",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "interfaces (profile mode)",
+            "cwd": "src\\view-rapidex\\interfaces",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "interfaces (release mode)",
+            "cwd": "src\\view-rapidex\\interfaces",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "rapidex",
+            "cwd": "src\\view-rapidex\\rapidex",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "rapidex (profile mode)",
+            "cwd": "src\\view-rapidex\\rapidex",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "rapidex (release mode)",
+            "cwd": "src\\view-rapidex\\rapidex",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "sdk gphone64 x86 64 (mobile)",
+            "program": "lib/main.dart",
+            "cwd": "src\\view-rapidex\\interfaces",
+            "deviceId": "emulator-5554",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}
