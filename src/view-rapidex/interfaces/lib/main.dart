@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const HomeScreen(),
+      home: const CadastroClienteScreen(),
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),
