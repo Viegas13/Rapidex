@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/home.dart';
-import 'package:interfaces/busca.dart';
-import 'package:interfaces/perfil.dart';
+import 'package:interfaces/View/IBusca.dart';
+import 'package:interfaces/View/IPerfil.dart';
+import 'package:interfaces/View/IHome.dart';
+// import 'package:interfaces/View/ICadastroCliente.dart';
 
 void main() {
   runApp(const MyApp());
