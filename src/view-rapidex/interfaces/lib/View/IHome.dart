@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/busca.dart';
-import 'package:interfaces/perfil.dart';
+import 'package:interfaces/View/IBusca.dart';
+import 'package:interfaces/View/IPerfil.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

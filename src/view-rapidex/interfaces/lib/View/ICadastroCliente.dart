@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
-import '../banco_de_dados/Db_helper/ConexaoBD.dart';
-import '../banco_de_dados/Db_helper/ValidarCpf.dart';
-import '../banco_de_dados/Db_helper/ValidarEmail.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/widgets/DatePicker.dart';
 // import '../banco_de_dados/DAO/ClienteDAO.dart';
@@ -17,7 +18,7 @@ class CadastroClienteScreen extends StatefulWidget {
 
 class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   late ConexaoDB conexaoDB;
-  late DatabaseHelper databaseHelper;
+  late ClienteDAO clienteDAO;
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
@@ -30,18 +31,18 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize database connection
+    // Parâmetros da conexão do banco de dados
     PostgreSQLConnection connection = PostgreSQLConnection(
       'localhost',
-      5432,
+      49798,
       'rapidex',
       username: '123456',
       password: '123456',
     );
     conexaoDB = ConexaoDB(connection: connection);
-    databaseHelper = DatabaseHelper(conexaoDB: conexaoDB);
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
 
-    // Open the database connection
+    // Usa a classe de conexão pra ligar com o pgAdmin
     conexaoDB.openConnection();
   }
 
@@ -85,7 +86,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
     };
 
     try {
-      await databaseHelper.cadastrarCliente(cliente);
+      await clienteDAO.cadastrarCliente(cliente);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );

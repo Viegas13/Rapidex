@@ -1,11 +1,11 @@
-bool verifica_cpf(String cpf) {
+bool validar_cpf(String cpf) {
   // Remove caracteres não numéricos
   cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
 
   // Verifica se o CPF tem 11 dígitos
   if (cpf.length != 11) return false;
 
-  // Não permite CPFs com todos os números iguais (ex: 111.111.111-11)
+  // Não permite CPFs com todos os números iguais 
   if (RegExp(r'(\d)\1{10}').hasMatch(cpf)) return false;
 
   // Cálculo do primeiro dígito verificador

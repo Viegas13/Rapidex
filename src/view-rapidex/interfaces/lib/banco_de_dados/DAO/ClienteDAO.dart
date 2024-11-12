@@ -1,4 +1,5 @@
-import 'package:postgres/postgres.dart';
+
+import '../DBHelper/ConexaoDB.dart';
 
 class ClienteDAO {
   final ConexaoDB conexaoDB;
@@ -24,7 +25,7 @@ class ClienteDAO {
       print('Cliente cadastrado com sucesso!');
     } catch (e) {
       print('Erro ao cadastrar cliente: $e');
-      throw e; // Lançando erro para ser tratado na camada superior
+      rethrow; 
     }
   }
 }

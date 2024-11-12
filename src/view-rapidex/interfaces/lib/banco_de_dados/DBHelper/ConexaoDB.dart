@@ -12,7 +12,7 @@ class ConexaoDB {
       print('Conexão com o banco de dados aberta.');
     } catch (e) {
       print('Erro ao abrir a conexão: $e');
-      throw e; // Lançando erro para ser tratado na camada superior
+      rethrow; 
     }
   }
 
@@ -23,7 +23,7 @@ class ConexaoDB {
       print('Conexão com o banco de dados fechada.');
     } catch (e) {
       print('Erro ao fechar a conexão: $e');
-      throw e; // Lançando erro para ser tratado na camada superior
+      rethrow;
     }
   }
 }
