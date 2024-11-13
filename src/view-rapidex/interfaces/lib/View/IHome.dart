@@ -96,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               // Ação do carrinho de compras
+              Navigator.pushNamed(context, '/carrinho');
             },
           ),
         ],
