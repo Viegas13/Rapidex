@@ -4,7 +4,6 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final bool obscureText;
-  final bool readOnly;
   final Function()? onTap;
 
   const CustomTextField({
@@ -12,7 +11,6 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     required this.labelText,
     this.obscureText = false,
-    this.readOnly = false,
     this.onTap,
   });
 
@@ -21,7 +19,6 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscureText,
-      readOnly: readOnly,
       decoration: InputDecoration(
         labelText: labelText,
         filled: true,
