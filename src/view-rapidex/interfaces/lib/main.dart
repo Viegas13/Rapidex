@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+
+import 'package:interfaces/home.dart';
+import 'package:interfaces/busca.dart';
+import 'package:interfaces/perfil.dart';
+import 'package:interfaces/carrinho.dart';
+=======
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
 import 'package:interfaces/View/IHome.dart';
 // import 'package:interfaces/View/ICadastroCliente.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +29,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),
+        '/carrinho': (context) => CarrinhoPage(),
+
+
       },
     );
   }
