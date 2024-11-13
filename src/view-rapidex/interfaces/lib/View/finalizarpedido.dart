@@ -6,7 +6,7 @@ class FinalizarPedidoPage extends StatefulWidget {
   final double frete;
   final double subtotal;
 
-  FinalizarPedidoPage({
+  const FinalizarPedidoPage({super.key, 
     required this.produtos,
     required this.frete,
     required this.subtotal,
@@ -34,9 +34,9 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text("Finalizar Pedido"),
+        title: const Text("Finalizar Pedido"),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -47,40 +47,40 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            const Text(
               "Resumo do Pedido",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Mostra os produtos com quantidade maior que 0
             ...produtosFiltrados.map((produto) {
               return Text(
                 "${produto['nome']} - Quantidade: ${produto['quantidade']} - Total: R\$ ${(produto['quantidade'] * produto['preco']).toStringAsFixed(2)}",
               );
-            }).toList(),
+            }),
 
-            SizedBox(height: 20),
-            Divider(),
+            const SizedBox(height: 20),
+            const Divider(),
             Text(
               "Frete: R\$ ${widget.frete.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
               "Subtotal: R\$ ${widget.subtotal.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
               "Total: R\$ ${total.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Campo de seleção do endereço
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: "Endereço"),
-              items: [
+              decoration: const InputDecoration(labelText: "Endereço"),
+              items: const [
                 DropdownMenuItem(
                   value: "Endereço 1",
                   child: Text("Endereço 1"),
@@ -102,12 +102,12 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
               value: enderecoSelecionado,
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Campo de seleção do método de pagamento
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: "Método de Pagamento"),
-              items: [
+              decoration: const InputDecoration(labelText: "Método de Pagamento"),
+              items: const [
                 DropdownMenuItem(
                   value: "Pix",
                   child: Text("Pix"),
@@ -137,24 +137,24 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Adicionar Cartão"),
-                      content: Text(
+                      title: const Text("Adicionar Cartão"),
+                      content: const Text(
                           "Aqui você pode adicionar um novo cartão de crédito."),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: Text("Fechar"),
+                          child: const Text("Fechar"),
                         ),
                       ],
                     ),
                   );
                 },
-                child: Text("Adicionar Cartão"),
+                child: const Text("Adicionar Cartão"),
               ),
 
-            Spacer(),
+            const Spacer(),
 
             ElevatedButton(
               onPressed: () {
@@ -164,8 +164,8 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Pedido Finalizado"),
-                      content: Text("Seu pedido foi realizado com sucesso!"),
+                      title: const Text("Pedido Finalizado"),
+                      content: const Text("Seu pedido foi realizado com sucesso!"),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -173,24 +173,24 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
                             Navigator.pop(
                                 context); // Retorna para a tela anterior
                           },
-                          child: Text("OK"),
+                          child: const Text("OK"),
                         ),
                       ],
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                         content: Text(
                             "Selecione um endereço e um método de pagamento.")),
                   );
                 }
               },
-              child: Text("Confirmar Pedido"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
+              child: Text("Confirmar Pedido"),
             ),
           ],
         ),

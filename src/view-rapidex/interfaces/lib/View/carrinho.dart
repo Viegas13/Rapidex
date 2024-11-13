@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'finalizarpedido.dart';
 
 class CarrinhoPage extends StatefulWidget {
+  const CarrinhoPage({super.key});
+
   @override
   _CarrinhoPageState createState() => _CarrinhoPageState();
 }
@@ -30,9 +32,9 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text("Carrinho"),
+        title: const Text("Carrinho"),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -47,9 +49,9 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                 itemCount: quantities.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      leading: Icon(Icons.image),
+                      leading: const Icon(Icons.image),
                       title: Text("Produto ${index + 1}"),
                       subtitle: Text("Quantidade: ${quantities[index]}"),
                       trailing: Row(
@@ -57,7 +59,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                         children: [
                           Text("R\$ ${prices[index].toStringAsFixed(2)}"),
                           IconButton(
-                            icon: Icon(Icons.add),
+                            icon: const Icon(Icons.add),
                             onPressed: () {
                               setState(() {
                                 quantities[index]++;
@@ -66,7 +68,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.remove),
+                            icon: const Icon(Icons.remove),
                             onPressed: () {
                               setState(() {
                                 if (quantities[index] > 0) {
@@ -83,16 +85,16 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                 },
               ),
             ),
-            Divider(),
+            const Divider(),
             Text(
               "Frete: R\$ ${shipping.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
               "Subtotal: R\$ ${subtotal.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -127,11 +129,12 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                   ),
                 );
               },
-              child: Text("Finalizar"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
+              child: Text("Finalizar"),
             ),
           ],
         ),
