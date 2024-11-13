@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
+import 'package:interfaces/View/ILogin.dart';
 import 'package:interfaces/View/IPerfil.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _getSelectedScreen() {
     switch (_selectedIndex) {
       case 1:
-        return const BuscaScreen(); // Tela de busca
+        return const LoginGeralScreen(); // Tela de busca
       case 2:
         return const PerfilScreen(); // Tela de perfil
       default:
