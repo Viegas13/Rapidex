@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
-import 'package:interfaces/View/IHome.dart';
-// import 'package:interfaces/View/ICadastroCliente.dart';
+import 'package:interfaces/View/ICadastroCliente.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const HomeScreen(),
+      home: const CadastroClienteScreen(),
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),

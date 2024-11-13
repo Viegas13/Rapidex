@@ -16,7 +16,6 @@ class DatePickerField extends StatelessWidget {
     return CustomTextField(
       controller: controller,
       labelText: 'Data de Nascimento',
-      readOnly: true,
       onTap: onTap,
     );
   }
