@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
+import 'package:interfaces/View/IAdicionarProduto.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,6 +56,16 @@ class _HomeScreenState extends State<HomeScreen> {
               restaurantCard('Restaurante 1', 'Desconto de 20%', '4.5'),
               restaurantCard('Restaurante 2', 'Entrega grátis', '4.2'),
               restaurantCard('Restaurante 3', 'Novo', '4.8'),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AdicionarProdutoScreen()),
+                  );
+                },
+                child: const Text('Cadastrar Produto'),
+              ),
             ],
           ),
         ),
@@ -103,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Perfil',
-          ),
+          )
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.orange,
