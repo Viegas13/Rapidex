@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Para usar TextInputFormatter
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final bool obscureText;
-  final bool readOnly;
   final Function()? onTap;
   final List<TextInputFormatter>? inputFormatters; // Novo parâmetro
 
@@ -14,9 +13,8 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     required this.labelText,
     this.obscureText = false,
-    this.readOnly = false,
     this.onTap,
-    this.inputFormatters, // Aceitar inputFormatters
+    this.inputFormatters,
   });
 
   @override
@@ -24,7 +22,6 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscureText,
-      readOnly: readOnly,
       decoration: InputDecoration(
         labelText: labelText,
         filled: true,

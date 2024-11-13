@@ -7,7 +7,6 @@ import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/widgets/DatePicker.dart';
-// import '../banco_de_dados/DAO/ClienteDAO.dart';
 
 class CadastroClienteScreen extends StatefulWidget {
   const CadastroClienteScreen({super.key});
@@ -31,24 +30,22 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   @override
   void initState() {
     super.initState();
-    // Parâmetros da conexão do banco de dados
-    PostgreSQLConnection connection = PostgreSQLConnection(
-      'localhost',
-      49798,
-      'rapidex',
-      username: '123456',
-      password: '123456',
-    );
-    conexaoDB = ConexaoDB(connection: connection);
+    // Inicializa o objeto ConexaoDB
+    conexaoDB = ConexaoDB();
     clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
 
-    // Usa a classe de conexão pra ligar com o pgAdmin
-    conexaoDB.openConnection();
+    // Inicia a conexão com o banco de dados
+    conexaoDB.initConnection().then((_) {
+      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
+      print('Conexão estabelecida no initState.');
+    }).catchError((error) {
+      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
   }
 
   @override
   void dispose() {
-    conexaoDB.closeConnection();
     nomeController.dispose();
     cpfController.dispose();
     telefoneController.dispose();
@@ -76,17 +73,21 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       return;
     }
 
-    Map<String, dynamic> cliente = {
-      'nome': nomeController.text,
-      'cpf': cpf,
-      'senha': senhaController.text,
-      'email': email,
-      'telefone': telefoneController.text,
-      'datanascimento': dataNascimentoController.text,
-    };
-
+    // Criar uma nova instância de ConexaoDB e ClienteDAO
+    // (Aqui você já pode utilizar a conexão que foi iniciada no initState)
     try {
+      // Usando a conexão já iniciada na classe ConexaoDB
+      Map<String, dynamic> cliente = {
+        'nome': nomeController.text,
+        'cpf': cpf,
+        'senha': senhaController.text,
+        'email': email,
+        'telefone': telefoneController.text,
+        'datanascimento': dataNascimentoController.text,
+      };
+
       await clienteDAO.cadastrarCliente(cliente);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
@@ -94,6 +95,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao cadastrar cliente')),
       );
+      print('Erro ao cadastrar cliente: $e');
     }
   }
 
@@ -105,12 +107,10 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    if (pickedDate != null) {
-      setState(() {
-        dataNascimentoController.text =
-            DateFormat('dd/MM/yyyy').format(pickedDate);
-      });
-    }
+    setState(() {
+      dataNascimentoController.text =
+          DateFormat('dd/MM/yyyy').format(pickedDate!);
+    });
   }
 
   @override
