@@ -20,6 +20,8 @@ bool validar_cpf(String cpf) {
   for (int i = 0; i < 9; i++) {
     sum2 += int.parse(cpf[i]) * (11 - i);
   }
+  sum2+= digit1 * 2;
+
   int digit2 = (sum2 % 11 < 2) ? 0 : 11 - (sum2 % 11);
 
   // Verifica se os dígitos verificadores calculados são iguais aos informados
