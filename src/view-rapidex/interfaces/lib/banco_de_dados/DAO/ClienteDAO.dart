@@ -17,7 +17,7 @@ class ClienteDAO {
       // Realiza a inserção do cliente
       await conexaoDB.connection.query(
         '''
-        INSERT INTO clientes (cpf, nome, senha, email, telefone, datanascimento)
+        INSERT INTO cliente (cpf, nome, senha, email, telefone, datanascimento)
         VALUES (@cpf, @nome, @senha, @email, @telefone, @datanascimento)
         ''',
         substitutionValues: cliente,
