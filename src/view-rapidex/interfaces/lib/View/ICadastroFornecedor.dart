@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
@@ -137,4 +137,4 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       ),
     );
   }
-}
+} */

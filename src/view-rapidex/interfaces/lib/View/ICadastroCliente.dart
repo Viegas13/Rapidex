@@ -127,16 +127,19 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
             CustomTextField(
               controller: nomeController,
               labelText: 'Nome',
+              hintText: 'Insira seu nome',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: cpfController,
               labelText: 'CPF',
+              hintText: 'Insira seu CPF',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: telefoneController,
               labelText: 'Telefone',
+              hintText: 'Insira seu telefone',
             ),
             const SizedBox(height: 16),
             DatePickerField(
@@ -147,11 +150,13 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
             CustomTextField(
               controller: emailController,
               labelText: 'E-mail',
+              hintText: 'Insira seu e=mail',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: senhaController,
               labelText: 'Senha',
+              hintText:  'Insira sua senha',
               obscureText: true,
             ),
             const SizedBox(height: 32),
