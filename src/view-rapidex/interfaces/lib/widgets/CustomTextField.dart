@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -8,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final Function()? onTap;
   final bool readOnly;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -18,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.obscureText = false,
     this.onTap,
+    this.inputFormatters,
   });
 
   @override
@@ -35,6 +38,7 @@ class CustomTextField extends StatelessWidget {
         suffixIcon: onTap != null ? const Icon(Icons.calendar_today) : null,
       ),
       onTap: onTap,
+      inputFormatters: inputFormatters,
     );
   }
 }

@@ -192,3 +192,4 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     );
   }
 } 
+
