@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   postgres: ^2.3.2
+  http: ^1.1.0
+  mask_text_input_formatter: ^2.1.0
   
 
 

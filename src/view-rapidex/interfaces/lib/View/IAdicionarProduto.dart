@@ -101,14 +101,14 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     labelText: 'Validade',
                     hintText: 'Inserir validade do produto',
                     onTap: () => _selectDate(context),
-                    readOnly: true,
+                    readOnly: true, 
                   ),
                   const SizedBox(height: 10),
                   CustomTextField(
                     controller: precoController,
                     labelText: 'Preço',
                     hintText: 'Inserir preço do produto',
-                    keyboardType: TextInputType.number,
+                    // keyboardType: TextInputType.number, --> deixei comentado pra discutir primeiro como vamos definir o tipo do texto
                   ),
                   const SizedBox(height: 10),
                   ImageLabelField(
@@ -191,4 +191,5 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       ),
     );
   }
-}
+} 
+
