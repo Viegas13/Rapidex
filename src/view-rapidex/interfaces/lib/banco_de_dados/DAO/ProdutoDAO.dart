@@ -16,14 +16,14 @@ class ProdutoDAO {
       // Realiza a inserção do produto
       await conexaoDB.connection.query(
         '''
-        INSERT INTO cliente (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade)
-        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito)
+        INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor, restrito, quantidade)
+        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade)
         ''',
         substitutionValues: produto,
       );
       print('Produto cadastrado com sucesso!');
     } catch (e) {
-      print('Erro ao cadastrar cliente: $e');
+      print('Erro ao cadastrar produto: $e');
       rethrow; 
     }
   }

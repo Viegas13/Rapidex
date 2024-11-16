@@ -63,6 +63,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
         'descricao': descricaoController.text,
         'fornecedor': '353654234583',
         'restrito': restritoPorIdade.toString(),
+        'quantidade': quantidadeController.text,
       };
 
       await produtoDAO.cadastrarProduto(produto);
