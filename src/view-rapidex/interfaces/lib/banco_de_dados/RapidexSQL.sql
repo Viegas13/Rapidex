@@ -49,7 +49,8 @@ CREATE TABLE Produto (
     imagem VARCHAR(255),
     descricao VARCHAR(255),
     fornecedor_cnpj BIGINT,
-    restritoPorIdade VARCHAR(10)
+    restritoPorIdade VARCHAR(10),
+    quantidade INT
 	--FOREIGN KEY () REFERENCES Endereco()
 );
 
