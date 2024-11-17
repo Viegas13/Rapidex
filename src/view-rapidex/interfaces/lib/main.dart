@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/ICadastroCliente.dart';
 import 'package:interfaces/View/IHome.dart';
-import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/carrinho.dart';
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
+import 'package:interfaces/View/ICadastroCliente.dart';
 
 void main() {
   runApp(const MyApp());

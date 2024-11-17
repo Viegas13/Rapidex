@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/IHome.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -83,13 +82,8 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
-
-      // Redirecionar para HomeScreen após sucesso
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
     } catch (e) {
+      // Verifique se o erro é devido ao CPF duplicado
       if (e.toString().contains('duplicate key') || e.toString().contains('cpf')) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Esse CPF já está cadastrado')),

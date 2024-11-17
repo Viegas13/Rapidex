@@ -1,196 +1,187 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/ProdutosCompra.dart';
+import 'CadastroCartao.dart';
+import '../banco_de_dados/DBHelper/ConexaoDB.dart';
+import '../banco_de_dados/DAO/CartaoDAO.dart';
+import '../Controller/PedidoController.dart';
 
 class FinalizarPedidoPage extends StatefulWidget {
-  // Recebe os dados do carrinho como parâmetros
   final List<Map<String, dynamic>> produtos;
-  final double frete;
-  final double subtotal;
 
-  const FinalizarPedidoPage({super.key, 
-    required this.produtos,
-    required this.frete,
-    required this.subtotal,
-  });
+  const FinalizarPedidoPage({Key? key, required this.produtos}) : super(key: key);
 
   @override
   _FinalizarPedidoPageState createState() => _FinalizarPedidoPageState();
 }
 
 class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
-  // Valores dos dropdowns
-  String? enderecoSelecionado;
-  String? metodoPagamentoSelecionado;
+  final PedidoController pedidoController = PedidoController();
+  String? formaPagamento;
+  String? cartaoSelecionado;
+  late ConexaoDB conexaoDB;
+  late CartaoDAO cartaoDAO;
+  List<Map<String, dynamic>> cartoes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    conexaoDB = ConexaoDB();
+    cartaoDAO = CartaoDAO(conexaoDB: conexaoDB);
+
+    conexaoDB.initConnection().then((_) {
+      carregarCartoes();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
+    });
+  }
+
+  Future<void> carregarCartoes() async {
+    try {
+      String cpfCliente = '02083037669'; // Substitua pelo CPF do cliente logado
+      cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
+      if (cartoes.isNotEmpty) {
+        cartaoSelecionado = cartoes[0]['numero'].toString();
+      }
+      setState(() {});
+    } catch (e) {
+      print('Erro ao carregar cartões: $e');
+    }
+  }
+
+  Widget selecionarCartao() {
+    if (cartoes.isEmpty) {
+      return const Text('Nenhum cartão cadastrado.');
+    }
+
+    return DropdownButton<String>(
+      value: cartaoSelecionado,
+      onChanged: (String? novoCartao) {
+        setState(() {
+          cartaoSelecionado = novoCartao!;
+        });
+      },
+      items: cartoes.map((cartao) {
+        return DropdownMenuItem<String>(
+          value: cartao['numero'].toString(),
+          child: Text(
+            '${cartao['nomeTitular']} - ${cartao['bandeira']}',
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> finalizarPedido() async {
+    if (formaPagamento == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione uma forma de pagamento.')),
+      );
+      return;
+    }
+
+    if (formaPagamento == 'Cartão' && cartaoSelecionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione um cartão cadastrado.')),
+      );
+      return;
+    }
+
+    try {
+      pedidoController.processarPedido(widget.produtos.cast<ProdutosCompra>());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pedido finalizado com sucesso!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao finalizar o pedido.')),
+      );
+      print('Erro ao finalizar o pedido: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Filtra apenas produtos com quantidade maior que 0
-    List<Map<String, dynamic>> produtosFiltrados =
-        widget.produtos.where((produto) {
-      return produto['quantidade'] > 0;
-    }).toList();
-
-    double total = widget.subtotal + widget.frete;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: const Text("Finalizar Pedido"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: const Text('Finalizar Pedido'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Resumo do Pedido",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              'Produtos no Pedido:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
-
-            // Mostra os produtos com quantidade maior que 0
-            ...produtosFiltrados.map((produto) {
+            const SizedBox(height: 8),
+            ...widget.produtos.map((produto) {
               return Text(
                 "${produto['nome']} - Quantidade: ${produto['quantidade']} - Total: R\$ ${(produto['quantidade'] * produto['preco']).toStringAsFixed(2)}",
               );
             }),
-
-            const SizedBox(height: 20),
-            const Divider(),
-            Text(
-              "Frete: R\$ ${widget.frete.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            const SizedBox(height: 16),
+            const Text(
+              'Forma de Pagamento:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              "Subtotal: R\$ ${widget.subtotal.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Total: R\$ ${total.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Campo de seleção do endereço
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Endereço"),
-              items: const [
-                DropdownMenuItem(
-                  value: "Endereço 1",
-                  child: Text("Endereço 1"),
-                ),
-                DropdownMenuItem(
-                  value: "Endereço 2",
-                  child: Text("Endereço 2"),
-                ),
-                DropdownMenuItem(
-                  value: "Endereço 3",
-                  child: Text("Endereço 3"),
-                ),
-              ],
+            const SizedBox(height: 8),
+            DropdownButton<String>(
+              hint: const Text('Selecione a forma de pagamento'),
+              value: formaPagamento,
               onChanged: (value) {
                 setState(() {
-                  enderecoSelecionado = value;
+                  formaPagamento = value;
+                  if (formaPagamento != 'Cartão') {
+                    cartaoSelecionado = null;
+                  }
                 });
               },
-              value: enderecoSelecionado,
+              items: ['Dinheiro', 'Cartão']
+                  .map((forma) => DropdownMenuItem(
+                        value: forma,
+                        child: Text(forma),
+                      ))
+                  .toList(),
             ),
-
-            const SizedBox(height: 20),
-
-            // Campo de seleção do método de pagamento
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Método de Pagamento"),
-              items: const [
-                DropdownMenuItem(
-                  value: "Pix",
-                  child: Text("Pix"),
-                ),
-                DropdownMenuItem(
-                  value: "Cartão",
-                  child: Text("Cartão"),
-                ),
-                DropdownMenuItem(
-                  value: "Dinheiro",
-                  child: Text("Dinheiro"),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  metodoPagamentoSelecionado = value;
-                });
-              },
-              value: metodoPagamentoSelecionado,
-            ),
-
-            // Botão para adicionar cartão (mostrado somente se a opção "Cartão" for selecionada)
-            if (metodoPagamentoSelecionado == "Cartão")
+            if (formaPagamento == 'Cartão') ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Selecione um Cartão:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              selecionarCartao(),
               TextButton(
-                onPressed: () {
-                  // Lógica para adicionar cartão
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Adicionar Cartão"),
-                      content: const Text(
-                          "Aqui você pode adicionar um novo cartão de crédito."),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Fechar"),
-                        ),
-                      ],
-                    ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CadastroCartaoScreen()),
                   );
+                  carregarCartoes();
                 },
-                child: const Text("Adicionar Cartão"),
+                child: const Text('Cadastrar Novo Cartão'),
               ),
-
-            const Spacer(),
-
-            ElevatedButton(
-              onPressed: () {
-                // Lógica para finalizar o pedido
-                if (enderecoSelecionado != null &&
-                    metodoPagamentoSelecionado != null) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Pedido Finalizado"),
-                      content: const Text("Seu pedido foi realizado com sucesso!"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context); // Fecha o diálogo
-                            Navigator.pop(
-                                context); // Retorna para a tela anterior
-                          },
-                          child: const Text("OK"),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            "Selecione um endereço e um método de pagamento.")),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+            ],
+            const SizedBox(height: 24),
+            Center(
+              child: ElevatedButton(
+                onPressed: finalizarPedido,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Finalizar Pedido',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-              child: const Text("Confirmar Pedido"),
             ),
           ],
         ),

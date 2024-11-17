@@ -1,43 +1,43 @@
 class Cliente {
-  final String cpf;
   final String nome;
-  final String senha;
-  final String email;
+  final String cpf;
   final String telefone;
-  final DateTime? dataNascimento;
+  final String email;
+  final String senha;
+  final DateTime dataNascimento;
 
   Cliente({
-    required this.cpf,
     required this.nome,
-    required this.senha,
-    required this.email,
+    required this.cpf,
     required this.telefone,
-    this.dataNascimento,
+    required this.email,
+    required this.senha,
+    required this.dataNascimento,
   });
 
-  // Método para criar o objeto Cliente a partir de um mapa de dados
+  // Método de fábrica para criar um Cliente a partir de um Map
   factory Cliente.fromMap(Map<String, dynamic> map) {
     return Cliente(
-      cpf: map['cpf'] ?? '', // Garantir que o CPF é uma String
-      nome: map['nome'] ?? '',
-      senha: map['senha'] ?? '',
-      email: map['email'] ?? '',
-      telefone: map['telefone'] ?? '',
-      dataNascimento: map['datanascimento'] != null
-          ? DateTime.tryParse(map['datanascimento'].toString()) // Garantir que a data está em DateTime
-          : null,
+      nome: map['nome'],
+      cpf: map['cpf'],
+      telefone: map['telefone'],
+      email: map['email'],
+      senha: map['senha'],
+      dataNascimento: map['datanascimento'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['datanascimento'])
+          : DateTime.parse(map['datanascimento']),
     );
   }
 
-  // Método para mapear o objeto Cliente de volta para um mapa de dados
+  // Método para mapear o Cliente para um formato que o banco de dados entenda
   Map<String, dynamic> toMap() {
     return {
-      'cpf': cpf,
       'nome': nome,
-      'senha': senha,
-      'email': email,
+      'cpf': cpf,
       'telefone': telefone,
-      'datanascimento': dataNascimento?.toIso8601String(),
+      'email': email,
+      'senha': senha,
+      'datanascimento': dataNascimento.toIso8601String(),
     };
   }
 }

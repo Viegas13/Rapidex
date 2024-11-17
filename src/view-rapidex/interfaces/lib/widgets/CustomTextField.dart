@@ -10,7 +10,6 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
-  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -22,7 +21,6 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.onTap,
     this.inputFormatters,
-    this.onChanged,
   });
 
   @override
@@ -41,7 +39,6 @@ class CustomTextField extends StatelessWidget {
       ),
       onTap: onTap,
       inputFormatters: inputFormatters,
-      onChanged: onChanged,
     );
   }
 }

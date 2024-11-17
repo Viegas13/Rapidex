@@ -19,22 +19,4 @@ class CepService {
     }
     return null;
   }
-  static Future<String?> buscarCepPorEndereco(
-      String rua, String bairro, String cidade) async {
-    final url = Uri.parse(
-        'https://viacep.com.br/ws/$cidade/$bairro/$rua/json/');
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data is List && data.isNotEmpty) {
-          return data[0]['cep'];
-        }
-      }
-    } catch (e) {
-      print('Erro ao buscar CEP pelo endereço: $e');
-    }
-    return null;
-  }
 }

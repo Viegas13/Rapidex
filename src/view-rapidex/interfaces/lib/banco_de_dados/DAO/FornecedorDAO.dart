@@ -16,8 +16,8 @@ class FornecedorDAO {
       // Realiza a inserção do fornecedor
       await conexaoDB.connection.query(
         '''
-        INSERT INTO fornecedor (cnpj, nome, email, senha, telefone)
-        VALUES (@cnpj, @nome, @email, @senha, @telefone)
+        INSERT INTO fornecedores (cnpj, nome, senha, email, telefone)
+        VALUES (@cnpj, @nome, @senha, @email, @telefone)
         ''',
         substitutionValues: fornecedor,
       );
