@@ -3,7 +3,12 @@ import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:interfaces/widgets/DropdownTextField.dart';
+
 import 'package:intl/intl.dart'; // Importando o pacote para formatação de data
+
+import 'package:intl/intl.dart';
+import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
+
 
 class PerfilClienteScreen extends StatefulWidget {
   final String cpf;
@@ -24,6 +29,8 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
   final TextEditingController cartaoController = TextEditingController();
 
   late ClienteDAO clienteDAO;
+  late EnderecoDAO enderecoDAO;
+  List<String> enderecosFormatados = ['Carregando...'];
 
   @override
   void initState() {
@@ -32,7 +39,13 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
       buscarCliente();
+
+      buscarEnderecos();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
+
     });
   }
 
@@ -97,6 +110,25 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       print('Erro ao excluir conta: $e');
     }
   }
+  Future<void> buscarEnderecos() async {
+    try {
+      final enderecos = await enderecoDAO.listarEnderecos(widget.cpf);
+      setState(() {
+        enderecosFormatados = enderecos.map((endereco) {
+          final complemento = endereco['complemento']?.isNotEmpty == true
+              ? ', ${endereco['complemento']}'
+              : '';
+          final referencia = endereco['referencia']?.isNotEmpty == true
+              ? ' (${endereco['referencia']})'
+              : '';
+          return '${endereco['rua']} ${endereco['numero']}, ${endereco['bairro']} $complemento $referencia'
+              .trim();
+        }).toList();
+      });
+    } catch (e) {
+      print('Erro ao buscar endereços: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +154,67 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   CustomReadOnlyTextField(labelText: 'Data de nascimento', controller: dataNascimentoController),
                   CustomReadOnlyTextField(labelText: 'CPF', controller: cpfController),
                   CustomReadOnlyTextField(labelText: 'Telefone', controller: telefoneController),
+
                   DropdownTextField(labelText: 'Endereço', controller: enderecoController),
                   CustomReadOnlyTextField(labelText: 'E-mail', controller: emailController),
                   DropdownTextField(labelText: 'Cartões', controller: cartaoController),
+
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cadastrar Novo Endereço',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownTextField(
+                    labelText: 'Endereço',
+                    controller: enderecoController,
+                    items: enderecosFormatados.isNotEmpty &&
+                            enderecosFormatados[0] != 'Carregando...'
+                        ? enderecosFormatados
+                        : ['Nenhum endereço disponível'],
+                    onItemSelected: (selectedValue) {
+                      setState(() {
+                        enderecoController.text = selectedValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Adicionar Novo Método de Pagamento',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownTextField(labelText: 'Cartões', controller: cartaoController, items: ["Visa"],),
+                  const SizedBox(height: 16),
+
                 ],
               ),
             ),

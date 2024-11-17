@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),
         '/carrinho': (context) => const CarrinhoPage(),
+        '/perfil_cliente': (context) => const PerfilClienteScreen(cpf: "13774195684"),
       },
     );
   }

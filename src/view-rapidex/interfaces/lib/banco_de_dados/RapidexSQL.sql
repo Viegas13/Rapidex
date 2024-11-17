@@ -10,7 +10,7 @@ CREATE TABLE Cliente(
     nome VARCHAR(255),
     senha VARCHAR(255),
     email VARCHAR(255),
-    telefone BIGINT,
+    telefone VARCHAR(255),
     dataNascimento DATE
 );
 
