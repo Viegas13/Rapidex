@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ICadastroEndereco.dart';
+import 'package:interfaces/View/IEditarPerfilCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
@@ -44,58 +45,21 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
+
+          // Verifique se dataNascimento não é null e formate corretamente
           dataNascimentoController.text = cliente.dataNascimento != null
-              ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento)
-              : 'Não informado';
-          cpfController.text = cliente.cpf;
-          telefoneController.text = cliente.telefone;
+              ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
+              : 'Não informado'; // Garantindo que seja uma string
+
+          // Converta CPF e outros campos numéricos para String
+          cpfController.text = cliente.cpf.toString(); // Convertendo CPF para string
+          telefoneController.text = cliente.telefone.toString(); // Convertendo telefone para string
           emailController.text = cliente.email;
         });
       }
     } catch (e) {
       print('Erro ao buscar cliente: $e');
     }
-  }
-
-  void _adicionarNovoMetodoPagamento() {
-    // Lógica para adicionar novo método de pagamento
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final TextEditingController novoCartaoController = TextEditingController();
-
-        return AlertDialog(
-          title: const Text('Adicionar Novo Método de Pagamento'),
-          content: TextField(
-            controller: novoCartaoController,
-            decoration: const InputDecoration(
-              labelText: 'Novo Método de Pagamento',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  cartaoController.text = novoCartaoController.text;
-                });
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Método de pagamento adicionado!')),
-                );
-              },
-              child: const Text('Salvar'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -146,7 +110,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   DropdownTextField(labelText: 'Endereço', controller: enderecoController),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _adicionarNovoMetodoPagamento,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco()) /*aqui deve viu o CadastroMetodoPagamento*/,
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
@@ -165,7 +134,15 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // Redireciona para a tela de edição de perfil
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditarPerfilClienteScreen(cpf: widget.cpf), // Passando CPF
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
