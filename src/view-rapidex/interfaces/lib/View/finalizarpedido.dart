@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/Cartao.dart';
 import 'package:interfaces/DTO/ProdutosCompra.dart';
 import 'CadastroCartao.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -20,7 +21,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   String? cartaoSelecionado;
   late ConexaoDB conexaoDB;
   late CartaoDAO cartaoDAO;
-  List<Map<String, dynamic>> cartoes = [];
+  late List<Cartao> cartoes = [];
 
   @override
   void initState() {
@@ -40,7 +41,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       String cpfCliente = '02083037669'; // Substitua pelo CPF do cliente logado
       cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
       if (cartoes.isNotEmpty) {
-        cartaoSelecionado = cartoes[0]['numero'].toString();
+        cartaoSelecionado = cartoes[0].bandeira;
       }
       setState(() {});
     } catch (e) {
@@ -62,9 +63,9 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       },
       items: cartoes.map((cartao) {
         return DropdownMenuItem<String>(
-          value: cartao['numero'].toString(),
+          value: cartao.numero.toString(),
           child: Text(
-            '${cartao['nomeTitular']} - ${cartao['bandeira']}',
+            '${cartao.nomeTitular} - ${cartao.bandeira}',
           ),
         );
       }).toList(),
@@ -87,7 +88,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
     }
 
     try {
-      pedidoController.processarPedido(widget.produtos.cast<ProdutosCompra>());
+      pedidoController.processarPedido(widget.produtos);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pedido finalizado com sucesso!')),
       );

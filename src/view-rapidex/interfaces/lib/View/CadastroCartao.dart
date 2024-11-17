@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/Cartao.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
 import '../banco_de_dados/DAO/CartaoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
@@ -56,15 +57,14 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
       return;
     }
     try {
-      Map<String, dynamic> cartao = {
-        'numero': int.parse(numeroController.text),
-        'cvv': int.parse(cvvController.text),
-        'validade': validadeController.text,
-        'nomeTitular': nomeTitularController.text,
-        'agencia': int.parse(agenciaController.text),
-        'bandeira': bandeiraController.text,
-        'cliente_cpf': clienteCpfController.text,
-      };
+       Cartao cartao = Cartao(
+        numero: numeroController.text,
+        nomeTitular: nomeTitularController.text,
+        bandeira: bandeiraController.text,
+        cpfCliente: clienteCpfController.text,
+        validade: validadeController.text,
+        codigoSeguranca: cvvController.text,
+      );
 
       await cartaoDAO.cadastrarCartao(cartao);
 
