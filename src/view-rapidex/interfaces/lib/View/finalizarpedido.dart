@@ -190,7 +190,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
                 backgroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
-              child: Text("Confirmar Pedido"),
+              child: const Text("Confirmar Pedido"),
             ),
           ],
         ),

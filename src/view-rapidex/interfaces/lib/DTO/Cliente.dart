@@ -15,6 +15,20 @@ class Cliente {
     required this.dataNascimento,
   });
 
+  // Método de fábrica para criar um Cliente a partir de um Map
+  factory Cliente.fromMap(Map<String, dynamic> map) {
+    return Cliente(
+      nome: map['nome'],
+      cpf: map['cpf'],
+      telefone: map['telefone'],
+      email: map['email'],
+      senha: map['senha'],
+      dataNascimento: map['datanascimento'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['datanascimento'])
+          : DateTime.parse(map['datanascimento']),
+    );
+  }
+
   // Método para mapear o Cliente para um formato que o banco de dados entenda
   Map<String, dynamic> toMap() {
     return {
