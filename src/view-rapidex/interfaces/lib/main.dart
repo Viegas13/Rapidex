@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const CadastroClienteScreen(),
+      home: const HomeScreen(),
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),
