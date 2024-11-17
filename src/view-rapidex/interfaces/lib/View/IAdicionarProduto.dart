@@ -86,7 +86,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate:
-          DateTime.now().add(Duration(days: 365 * 10)), // até 10 anos à frente
+          DateTime.now().add(const Duration(days: 365 * 10)), // até 10 anos à frente
     );
     if (pickedDate != null) {
       setState(() {
@@ -280,4 +280,4 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       ),
     );
   }
-}
+} 

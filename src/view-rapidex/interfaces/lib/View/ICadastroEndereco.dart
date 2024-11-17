@@ -37,19 +37,18 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
   @override
   void initState() {
     super.initState();
-    // Parâmetros da conexão do banco de dados
-    PostgreSQLConnection connection = PostgreSQLConnection(
-      'localhost',
-      49798,
-      'rapidex',
-      username: '123456',
-      password: '123456',
-    );
-    conexaoDB = ConexaoDB(connection: connection);
+    // Inicializa o objeto ConexaoDB
+    conexaoDB = ConexaoDB();
     enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
 
-    // Usa a classe de conexão pra ligar com o pgAdmin
-    conexaoDB.openConnection();
+    // Inicia a conexão com o banco de dados
+    conexaoDB.initConnection().then((_) {
+      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
+      print('Conexão estabelecida no initState.');
+    }).catchError((error) {
+      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
   }
 
   @override
@@ -133,33 +132,39 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
             CustomTextField(
               controller: _cepController,
               labelText: 'CEP',
+              hintText: 'Insira o CEP',
               inputFormatters: [_cepFormatter], // Aplicando a formatação
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _ruaController,
               labelText: 'Rua',
+              hintText: 'Insira a rua',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _bairroController,
               labelText: 'Bairro',
+              hintText: 'Insira o bairro',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _numeroController,
               labelText: 'Número',
+              hintText: 'Insira o número',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _complementoController,
               labelText: 'Complemento',
+              hintText: 'Insira o complemento',
               obscureText: true,
             ),
             const SizedBox(height: 32),
             CustomTextField(
               controller: _pontoReferenciaController,
               labelText: 'Ponto de Referência',
+              hintText: 'Insira o ponto de referência',
               obscureText: true,
             ),
             const SizedBox(height: 16),
