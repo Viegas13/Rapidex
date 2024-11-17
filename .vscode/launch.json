@@ -1,5 +1,4 @@
 {
-
     "version": "0.2.0",
     "configurations": [
         {
@@ -21,7 +20,14 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
-
+        },
+        {
+            "name": "interfaces (Flutter sdk gphone64 x86 64)",
+            "program": "lib/main.dart",
+            "cwd": "src\\view-rapidex\\interfaces",
+            "deviceId": "emulator-5554",
+            "request": "launch",
+            "type": "dart"
         }
     ]
 }
