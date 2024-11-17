@@ -6,7 +6,7 @@ class EnderecoDAO {
   EnderecoDAO({required this.conexaoDB});
 
   // Método para cadastrar um Endereco no banco de dados
-  Future<void> cadastrarEndereco(Map<String, dynamic> endereco) async {
+  Future<void> cadastrarEndereco(Map<String, dynamic> Endereco) async {
     try {
       // Garante que a conexão está aberta
       if (conexaoDB.connection.isClosed) {
@@ -16,12 +16,10 @@ class EnderecoDAO {
       // Realiza a inserção do Endereco
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Endereco (cliente_cpf, bairro, rua, numero, cep, complemento, referencia)
-        VALUES (@cliente_cpf, @bairro, @rua, @numero, @cep, @complemento, @referencia)
+        INSERT INTO Endereco (bairro, rua, numero, cep, complemento, referencia)
+        VALUES (@bairro, @rua, @numero, @cep, @complemento, @referencia)
         ''',
-        substitutionValues: {
-          ...endereco,
-        },
+        substitutionValues: Endereco,
       );
       print('Endereco cadastrado com sucesso!');
     } catch (e) {
@@ -29,6 +27,7 @@ class EnderecoDAO {
       rethrow;
     }
   }
+
 
   Future<List<Map<String, dynamic>>> listarEnderecos(String clienteCpf) async {
     try {
@@ -95,4 +94,5 @@ class EnderecoDAO {
       rethrow;
     }
   }
+
 }

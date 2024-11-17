@@ -10,8 +10,12 @@ class DropdownTextField extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.labelText,
+
+    this.onTap,
+
     required this.items,
     this.onItemSelected,
+
   }) : super(key: key);
 
   @override

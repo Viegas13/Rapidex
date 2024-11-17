@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
-import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
+import 'package:postgres/postgres.dart';
+
 class ICadastroFornecedor extends StatefulWidget {
   const ICadastroFornecedor({super.key});
 
@@ -24,18 +25,17 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
   @override
   void initState() {
     super.initState();
-    // Inicializa o objeto ConexaoDB
-    conexaoDB = ConexaoDB();
+    PostgreSQLConnection connection = PostgreSQLConnection(
+      'localhost',
+      49798,
+      'rapidex',
+      username: '123456',
+      password: '123456',
+    );
+    conexaoDB = ConexaoDB(connection: connection);
     fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
-    // Inicia a conexão com o banco de dados
-    conexaoDB.initConnection().then((_) {
-      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
-      print('Conexão estabelecida no initState.');
-    }).catchError((error) {
-      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
-      print('Erro ao estabelecer conexão no initState: $error');
-    });
+    conexaoDB.openConnection();
   }
 
   @override
@@ -58,19 +58,13 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       );
       return;
     }
-    if (!validar_CNPJ(cnpjController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CNPJ inválido')),
-      );
-      return;
-    }
 
     Map<String, dynamic> fornecedor = {
-      'cnpj': cnpjController.text,
       'nome': nomeController.text,
+      'cnpj': cnpjController.text,
+      'telefone': telefoneController.text,
       'email': email,
       'senha': senhaController.text,
-      'telefone': telefoneController.text,
     };
 
     try {
@@ -99,31 +93,26 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
             CustomTextField(
               controller: nomeController,
               labelText: 'Nome',
-              hintText: 'Insira seu nome',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: cnpjController,
               labelText: 'CNPJ',
-              hintText: 'Insira seu cnpj',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: telefoneController,
               labelText: 'Telefone',
-              hintText: 'Insira seu telefone',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: emailController,
               labelText: 'E-mail',
-              hintText: 'Insira seu e-mail',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: senhaController,
               labelText: 'Senha',
-              hintText: 'Insira sua senha',
               obscureText: true,
             ),
             const SizedBox(height: 24),
@@ -148,4 +137,4 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       ),
     );
   }
-} 
+} */

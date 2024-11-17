@@ -10,6 +10,7 @@
 analyzer:
   errors:
     must_be_immutable: ignore
+    unused_import: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

@@ -1,4 +1,5 @@
 import 'package:interfaces/DTO/Cliente.dart';
+
 import '../DBHelper/ConexaoDB.dart';
 
 class ClienteDAO {
@@ -6,7 +7,7 @@ class ClienteDAO {
 
   ClienteDAO({required this.conexaoDB});
 
-  // Método para cadastrar um cliente
+  // Method to register a new client in the database
   Future<void> cadastrarCliente(Map<String, dynamic> cliente) async {
     try {
       if (conexaoDB.connection.isClosed) {
@@ -48,13 +49,14 @@ class ClienteDAO {
     }
   }
 
-  // Método para deletar cliente
   Future<void> deletarCliente(String cpf) async {
     try {
+      // Ensure the connection is open
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
+      // Execute delete query
       await conexaoDB.connection.query(
         '''
         DELETE FROM cliente WHERE cpf = @cpf
@@ -67,26 +69,4 @@ class ClienteDAO {
       rethrow;
     }
   }
-
-  Future<void> atualizarCliente(Map<String, dynamic> cliente) async {
-  try {
-    if (conexaoDB.connection.isClosed) {
-      await conexaoDB.openConnection();
-    }
-
-    await conexaoDB.connection.query(
-      '''
-      UPDATE cliente 
-      SET nome = @nome, datanascimento = @datanascimento, telefone = @telefone, email = @email 
-      WHERE cpf = @cpf
-      ''',
-      substitutionValues: cliente,
-    );
-    print('Cliente atualizado com sucesso!');
-  } catch (e) {
-    print('Erro ao atualizar cliente: $e');
-    rethrow;
-  }
-}
-
 }

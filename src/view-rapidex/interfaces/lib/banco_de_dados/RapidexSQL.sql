@@ -2,7 +2,6 @@ CREATE TABLE Fornecedor (
     CNPJ VARCHAR(255) PRIMARY KEY,
     nome VARCHAR(255),
     email VARCHAR(255),
-    senha VARCHAR(255),
     telefone BIGINT
 );
 
@@ -35,7 +34,6 @@ CREATE TABLE Endereco (
     numero INT,
     CEP BIGINT,
     complemento VARCHAR(255),
-    referencia VARCHAR(255),
     PRIMARY KEY (cliente_cpf, CEP),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF),
     FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ),
@@ -51,8 +49,7 @@ CREATE TABLE Produto (
     imagem VARCHAR(255),
     descricao VARCHAR(255),
     fornecedor_cnpj BIGINT,
-    restritoPorIdade VARCHAR(10),
-    quantidade INT
+    restritoPorIdade VARCHAR(10)
 	--FOREIGN KEY () REFERENCES Endereco()
 );
 
