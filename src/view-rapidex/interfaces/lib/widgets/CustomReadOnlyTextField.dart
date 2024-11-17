@@ -5,10 +5,10 @@ class CustomReadOnlyTextField extends StatelessWidget {
   final String labelText;
 
   const CustomReadOnlyTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.labelText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

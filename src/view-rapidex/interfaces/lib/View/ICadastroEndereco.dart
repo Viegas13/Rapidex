@@ -7,7 +7,7 @@ import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart'; // Importando o pacote
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: CadastroEndereco(),
   ));
 }

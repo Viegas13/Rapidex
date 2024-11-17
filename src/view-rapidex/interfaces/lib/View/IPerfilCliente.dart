@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/ICadastroEndereco.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:interfaces/widgets/DropdownTextField.dart';
-import 'package:intl/intl.dart'; // Importando o pacote para formatação de data
+import 'package:intl/intl.dart';
 
 class PerfilClienteScreen extends StatefulWidget {
   final String cpf;
 
-  const PerfilClienteScreen({Key? key, required this.cpf}) : super(key: key);
+  const PerfilClienteScreen({super.key, required this.cpf});
 
   @override
   _PerfilClienteScreenState createState() => _PerfilClienteScreenState();
@@ -28,11 +29,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicializando a conexão antes de usá-la
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
       buscarCliente();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
     });
   }
 
@@ -42,28 +44,36 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
-          // Convertendo a data de nascimento para string com formato desejado
           dataNascimentoController.text = cliente.dataNascimento != null
               ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento)
-              : ''; 
+              : 'Não informado';
           cpfController.text = cliente.cpf;
           telefoneController.text = cliente.telefone;
           emailController.text = cliente.email;
         });
       }
     } catch (e) {
-      print('Erro ao carregar dados do cliente: $e');
+      print('Erro ao buscar cliente: $e');
     }
   }
 
-  void _showDeleteConfirmationDialog() {
+  void _adicionarNovoMetodoPagamento() {
+    // Lógica para adicionar novo método de pagamento
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final TextEditingController novoCartaoController = TextEditingController();
+
         return AlertDialog(
-          title: const Text('Excluir Conta'),
-          content: const Text('Tem certeza de que deseja excluir sua conta? Esta ação é irreversível.'),
-          actions: <Widget>[
+          title: const Text('Adicionar Novo Método de Pagamento'),
+          content: TextField(
+            controller: novoCartaoController,
+            decoration: const InputDecoration(
+              labelText: 'Novo Método de Pagamento',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -72,10 +82,15 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
             ),
             TextButton(
               onPressed: () {
+                setState(() {
+                  cartaoController.text = novoCartaoController.text;
+                });
                 Navigator.of(context).pop();
-                _deleteAccount();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Método de pagamento adicionado!')),
+                );
               },
-              child: const Text('Excluir'),
+              child: const Text('Salvar'),
             ),
           ],
         );
@@ -83,27 +98,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     );
   }
 
-  Future<void> _deleteAccount() async {
-    try {
-      await clienteDAO.deletarCliente(cpfController.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Conta excluída com sucesso!')),
-      );
-      Navigator.of(context).pop(); // Go back after deletion
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao excluir conta')),
-      );
-      print('Erro ao excluir conta: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: const Text('Dados pessoais'),
+        title: const Text('Dados Pessoais'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -119,20 +119,53 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
               child: ListView(
                 children: [
                   CustomReadOnlyTextField(labelText: 'Nome', controller: nomeController),
-                  CustomReadOnlyTextField(labelText: 'Data de nascimento', controller: dataNascimentoController),
+                  CustomReadOnlyTextField(
+                      labelText: 'Data de Nascimento', controller: dataNascimentoController),
                   CustomReadOnlyTextField(labelText: 'CPF', controller: cpfController),
                   CustomReadOnlyTextField(labelText: 'Telefone', controller: telefoneController),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cadastrar Novo Endereço',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   DropdownTextField(labelText: 'Endereço', controller: enderecoController),
-                  CustomReadOnlyTextField(labelText: 'E-mail', controller: emailController),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _adicionarNovoMetodoPagamento,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Adicionar Novo Método de Pagamento',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   DropdownTextField(labelText: 'Cartões', controller: cartaoController),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                // Implement editing functionality here if needed
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -140,11 +173,11 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Editar informações', style: TextStyle(color: Colors.black)),
+              child: const Text('Editar Informações', style: TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: _showDeleteConfirmationDialog,
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -152,53 +185,11 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Excluir conta', style: TextStyle(color: Colors.white)),
+              child: const Text('Excluir Conta', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-class Cliente {
-  final String nome;
-  final String cpf;
-  final String telefone;
-  final String email;
-  final String senha;
-  final DateTime dataNascimento;
-
-  Cliente({
-    required this.nome,
-    required this.cpf,
-    required this.telefone,
-    required this.email,
-    required this.senha,
-    required this.dataNascimento,
-  });
-
-  // Método de fábrica para criar um Cliente a partir de um Map
-  factory Cliente.fromMap(Map<String, dynamic> map) {
-    return Cliente(
-      nome: map['nome'],
-      cpf: map['cpf'],
-      telefone: map['telefone'],
-      email: map['email'],
-      senha: map['senha'],
-      dataNascimento: DateTime.parse(map['datanascimento']),
-    );
-  }
-
-  // Método para mapear o Cliente para um formato que o banco de dados entenda
-  Map<String, dynamic> toMap() {
-    return {
-      'nome': nome,
-      'cpf': cpf,
-      'telefone': telefone,
-      'email': email,
-      'senha': senha,
-      'datanascimento': dataNascimento.toIso8601String(),
-    };
   }
 }

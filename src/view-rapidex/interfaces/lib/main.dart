@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const PerfilClienteScreen(cpf: '70275182606',),
+      home: const CadastroClienteScreen(),
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),

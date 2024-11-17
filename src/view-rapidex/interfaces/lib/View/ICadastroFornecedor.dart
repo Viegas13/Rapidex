@@ -3,7 +3,6 @@ import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
-import 'package:postgres/postgres.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
 class ICadastroFornecedor extends StatefulWidget {
   const ICadastroFornecedor({super.key});
