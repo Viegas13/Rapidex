@@ -30,22 +30,38 @@ class EnderecoDAO {
     }
   }
 
-  Future<List<Map<String, dynamic>>> listarEnderecos() async {
+  Future<List<Map<String, dynamic>>> listarEnderecos(String clienteCpf) async {
     try {
       // Garante que a conexão está aberta
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
-      // Executa a consulta para listar os endereços
-      final List<Map<String, Map<String, dynamic>>> results =
-          await conexaoDB.connection.mappedResultsQuery('''
-        SELECT cliente_cpf, bairro, rua, numero, cep, complemento, referencia 
-        FROM Endereco
-        ''');
+      // Consulta os endereços associados ao CPF do cliente
+      final results = await conexaoDB.connection.query(
+        '''
+      SELECT rua, numero, bairro, cep, complemento, referencia
+      FROM Endereco
+      WHERE cliente_cpf = @cliente_cpf
+      ''',
+        substitutionValues: {
+          'cliente_cpf': clienteCpf,
+        },
+      );
 
-      // Transforma os resultados em uma lista de mapas simples
-      return results.map((row) => row['endereco'] ?? {}).toList();
+      print('Resultados encontrados: $results');
+
+      // Mapeia os resultados para uma lista de mapas
+      return results.map((row) {
+        return {
+          'rua': row[0],
+          'numero': row[1],
+          'bairro': row[2],
+          'cep': row[3],
+          'complemento': row[4],
+          'referencia': row[5],
+        };
+      }).toList();
     } catch (e) {
       print('Erro ao listar endereços: $e');
       rethrow;
