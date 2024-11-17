@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/widgets/ImageLabelField.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 
 class AdicionarProdutoScreen extends StatefulWidget {
   const AdicionarProdutoScreen({super.key});
@@ -11,11 +13,33 @@ class AdicionarProdutoScreen extends StatefulWidget {
 }
 
 class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
+  late ConexaoDB conexaoDB;
+  late ProdutoDAO produtoDAO;
+
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
   final TextEditingController precoController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
+  int quantidade = 1;
+  final TextEditingController quantidadeController = TextEditingController(text: '1');
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa o objeto ConexaoDB
+    conexaoDB = ConexaoDB();
+    produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+
+    // Inicia a conexão com o banco de dados
+    conexaoDB.initConnection().then((_) {
+      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
+      print('Conexão estabelecida no initState.');
+    }).catchError((error) {
+      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
+  }
 
   @override
   void dispose() {
@@ -26,21 +50,33 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     super.dispose();
   }
 
-  Future<void> cadastrarProduto() async {
-    // Validação básica dos campos
-    if (nomeController.text.isEmpty ||
-        precoController.text.isEmpty ||
-        validadeController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos obrigatórios')),
-      );
-      return;
-    }
+ Future<void> cadastrarProduto() async {
+    // Criar uma nova instância de ConexaoDB e ProdutoDAO
+    // (Aqui você já pode utilizar a conexão que foi iniciada no initState)
+    try {
+      // Usando a conexão já iniciada na classe ConexaoDB
+      Map<String, dynamic> produto = {
+        'nome': nomeController.text,
+        'validade': validadeController.text,
+        'preco': precoController.text,
+        'imagem': precoController.text,
+        'descricao': descricaoController.text,
+        'fornecedor': '353654234583',
+        'restrito': restritoPorIdade.toString(),
+        'quantidade': quantidadeController.text,
+      };
 
-    // Ação de cadastro do produto (substitua pelo código real de cadastro)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Produto cadastrado com sucesso!')),
-    );
+      await produtoDAO.cadastrarProduto(produto);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao cadastrar produto')),
+      );
+      print('Erro ao cadastrar produto: $e');
+    }
   }
 
   // Função para selecionar a validade do produto
@@ -101,14 +137,13 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     labelText: 'Validade',
                     hintText: 'Inserir validade do produto',
                     onTap: () => _selectDate(context),
-                    readOnly: true, 
+                    readOnly: true,
                   ),
                   const SizedBox(height: 10),
                   CustomTextField(
                     controller: precoController,
                     labelText: 'Preço',
                     hintText: 'Inserir preço do produto',
-                    // keyboardType: TextInputType.number, --> deixei comentado pra discutir primeiro como vamos definir o tipo do texto
                   ),
                   const SizedBox(height: 10),
                   ImageLabelField(
@@ -164,6 +199,60 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Quantidade',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (quantidade > 1) {
+                                  quantidade--;
+                                  quantidadeController.text = quantidade.toString();
+                                }
+                              });
+                            },
+                            icon: const Icon(Icons.remove),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            child: TextField(
+                              controller: quantidadeController,
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  quantidade = int.tryParse(value) ?? 1;
+                                  if (quantidade < 1) quantidade = 1;
+                                  quantidadeController.text = quantidade.toString();
+                                });
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                quantidade++;
+                                quantidadeController.text = quantidade.toString();
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -174,8 +263,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                       ),
                       onPressed: cadastrarProduto,
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 12.0, horizontal: 24.0),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
                         child: Text(
                           'Cadastrar Produto',
                           style: TextStyle(color: Colors.white),
