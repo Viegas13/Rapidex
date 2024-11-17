@@ -4,16 +4,11 @@ import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:postgres/postgres.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart'; // Importando o pacote
-
-void main() {
-  runApp(MaterialApp(
-    home: CadastroEndereco(),
-  ));
-}
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class CadastroEndereco extends StatefulWidget {
-  const CadastroEndereco({super.key});
+  final String cpf;
+  const CadastroEndereco({super.key, required this.cpf});
 
   @override
   State<CadastroEndereco> createState() => _CadastroEnderecoState();
@@ -30,26 +25,25 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
   final TextEditingController _pontoReferenciaController =
       TextEditingController();
 
-  // Definindo a máscara para o CEP (#####-###)
   final _cepFormatter = MaskTextInputFormatter(
       mask: '#####-###', filter: {'#': RegExp(r'[0-9]')});
 
   @override
   void initState() {
     super.initState();
-    // Parâmetros da conexão do banco de dados
-    PostgreSQLConnection connection = PostgreSQLConnection(
-      'localhost',
-      49798,
-      'rapidex',
-      username: '123456',
-      password: '123456',
-    );
-    conexaoDB = ConexaoDB(connection: connection);
+    conexaoDB = ConexaoDB();
     enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
 
-    // Usa a classe de conexão pra ligar com o pgAdmin
-    conexaoDB.openConnection();
+    conexaoDB.initConnection().then((_) {
+      print('Conexão estabelecida no initState.');
+    }).catchError((error) {
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
+
+    // Adiciona listeners para os campos de rua, bairro e número
+    _ruaController.addListener(_syncCepWithAddress);
+    _bairroController.addListener(_syncCepWithAddress);
+    _numeroController.addListener(_syncCepWithAddress);
   }
 
   @override
@@ -65,57 +59,97 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
   }
 
   Future<void> cadastrarEndereco() async {
-    final String cep = _cepController.text;
+    final String cep = _cepController.text.replaceAll('-', '');
     final String numero = _numeroController.text;
+    final String rua = _ruaController.text;
+    final String bairro = _bairroController.text;
 
+    List<String> erros = [];
+
+    if (cep.isEmpty || cep.length != 8) {
+      erros.add('Digite um CEP válido com 8 dígitos.');
+    }
+    if (rua.isEmpty) {
+      erros.add('Rua é obrigatória.');
+    }
+    if (bairro.isEmpty) {
+      erros.add('Bairro é obrigatório.');
+    }
     if (numero.isEmpty) {
+      erros.add('Número é obrigatório.');
+    }
+
+    if (erros.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Número é obrigatório')),
+        SnackBar(
+          content: Text(erros.join('\n')),
+          duration: const Duration(seconds: 3),
+        ),
       );
       return;
     }
 
-    final Map<String, dynamic> endereco = {
-      'cep': cep,
-      'rua': _ruaController.text,
-      'numero': numero,
-      'bairro': _bairroController.text,
-      'complemento': _complementoController.text,
-      'referencia': _pontoReferenciaController.text,
-    };
-
     try {
+      final Map<String, dynamic> endereco = {
+        'cliente_cpf': widget.cpf.toString(), // Passa o CPF do cliente
+        'cep': cep,
+        'rua': rua,
+        'numero': numero,
+        'bairro': bairro,
+        'complemento': _complementoController.text,
+        'referencia': _pontoReferenciaController.text,
+      };
+
       await enderecoDAO.cadastrarEndereco(endereco);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Endereço cadastrado com sucesso!')),
       );
+
+      // Navega de volta para IPerfilCliente após o cadastro
+      Navigator.pushReplacementNamed(context, '/perfil_cliente');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao cadastrar endereço: ${e.toString()}')),
       );
+      print('Erro ao cadastrar cliente: $e');
     }
   }
 
-  void _buscarEndereco() async {
-    final cep = _cepController.text;
-    if (cep.isEmpty || cep.length != 9) {
-      // 9 é o tamanho com a formatação
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Digite um CEP válido com 8 dígitos!')),
-      );
-      return;
-    }
+  Future<void> _buscarEndereco() async {
+    final cep = _cepController.text.replaceAll('-', '');
+    if (cep.isEmpty || cep.length != 8) return;
 
     final endereco = await CepService.buscarEnderecoPorCep(cep);
     if (endereco != null) {
       setState(() {
         _ruaController.text = endereco['logradouro'] ?? '';
         _bairroController.text = endereco['bairro'] ?? '';
+        _numeroController.text = '';
       });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CEP não encontrado!')),
-      );
+    }
+  }
+
+  Future<void> _buscarCepPorEndereco() async {
+    final rua = _ruaController.text;
+    final bairro = _bairroController.text;
+    final numero = _numeroController.text;
+
+    if (rua.isEmpty || bairro.isEmpty || numero.isEmpty) return;
+
+    final cep = await CepService.buscarCepPorEndereco(rua, bairro, numero);
+    if (cep != null) {
+      setState(() {
+        _cepController.text = cep;
+      });
+    }
+  }
+
+  void _syncCepWithAddress() {
+    if (_ruaController.text.isNotEmpty &&
+        _bairroController.text.isNotEmpty &&
+        _numeroController.text.isNotEmpty) {
+      _buscarCepPorEndereco();
     }
   }
 
@@ -133,34 +167,39 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
             CustomTextField(
               controller: _cepController,
               labelText: 'CEP',
-              inputFormatters: [_cepFormatter], // Aplicando a formatação
+              hintText: 'Insira seu CEP',
+              inputFormatters: [_cepFormatter],
+              onChanged: (_) => _buscarEndereco(),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _ruaController,
+              hintText: 'Insira sua Rua',
               labelText: 'Rua',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _bairroController,
               labelText: 'Bairro',
+              hintText: 'Insira seu Bairro',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _numeroController,
+              hintText: 'Insira o número',
               labelText: 'Número',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _complementoController,
+              hintText: 'Insira seu complemento',
               labelText: 'Complemento',
-              obscureText: true,
             ),
             const SizedBox(height: 32),
             CustomTextField(
               controller: _pontoReferenciaController,
+              hintText: 'Opcional',
               labelText: 'Ponto de Referência',
-              obscureText: true,
             ),
             const SizedBox(height: 16),
             ElevatedButton(

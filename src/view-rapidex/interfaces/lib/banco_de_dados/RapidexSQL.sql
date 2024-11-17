@@ -11,7 +11,7 @@ CREATE TABLE Cliente(
     nome VARCHAR(255),
     senha VARCHAR(255),
     email VARCHAR(255),
-    telefone BIGINT,
+    telefone VARCHAR(255),
     dataNascimento DATE
 );
 
@@ -35,6 +35,7 @@ CREATE TABLE Endereco (
     numero INT,
     CEP BIGINT,
     complemento VARCHAR(255),
+    referencia VARCHAR(255),
     PRIMARY KEY (cliente_cpf, CEP),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF),
     FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ),

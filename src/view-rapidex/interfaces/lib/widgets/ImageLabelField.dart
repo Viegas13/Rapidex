@@ -6,11 +6,11 @@ class ImageLabelField extends StatelessWidget {
   final VoidCallback onAttachPressed;
 
   const ImageLabelField({
-    Key? key,
+    super.key,
     required this.label,
     required this.hint,
     required this.onAttachPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

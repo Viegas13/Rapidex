@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IHome.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:intl/intl.dart';
-import 'package:postgres/postgres.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
@@ -22,24 +22,19 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
-  final TextEditingController dataNascimentoController =
-      TextEditingController();
+  final TextEditingController dataNascimentoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
     clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
 
-    // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
-      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
       print('Conexão estabelecida no initState.');
     }).catchError((error) {
-      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
@@ -73,10 +68,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       return;
     }
 
-    // Criar uma nova instância de ConexaoDB e ClienteDAO
-    // (Aqui você já pode utilizar a conexão que foi iniciada no initState)
     try {
-      // Usando a conexão já iniciada na classe ConexaoDB
       Map<String, dynamic> cliente = {
         'nome': nomeController.text,
         'cpf': cpf,
@@ -91,15 +83,26 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar cliente')),
+
+      // Redirecionar para HomeScreen após sucesso
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
+    } catch (e) {
+      if (e.toString().contains('duplicate key') || e.toString().contains('cpf')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Esse CPF já está cadastrado')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao cadastrar cliente')),
+        );
+      }
       print('Erro ao cadastrar cliente: $e');
     }
   }
 
-  // Função para selecionar data
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -108,8 +111,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       lastDate: DateTime.now(),
     );
     setState(() {
-      dataNascimentoController.text =
-          DateFormat('dd/MM/yyyy').format(pickedDate!);
+      dataNascimentoController.text = DateFormat('dd/MM/yyyy').format(pickedDate!);
     });
   }
 
@@ -150,13 +152,13 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
             CustomTextField(
               controller: emailController,
               labelText: 'E-mail',
-              hintText: 'Insira seu e=mail',
+              hintText: 'Insira seu e-mail',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: senhaController,
               labelText: 'Senha',
-              hintText:  'Insira sua senha',
+              hintText: 'Insira sua senha',
               obscureText: true,
             ),
             const SizedBox(height: 32),
@@ -164,14 +166,12 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
               onPressed: cadastrarCliente,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Cadastrar',
-                  style: TextStyle(color: Colors.black)),
+              child: const Text('Cadastrar', style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
