@@ -134,7 +134,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
-              child: Text("Finalizar"),
+              child: const Text("Finalizar"),
             ),
           ],
         ),
