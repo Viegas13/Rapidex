@@ -92,7 +92,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco()),
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '70275182606')),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -113,7 +113,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco()) /*aqui deve viu o CadastroMetodoPagamento*/,
+                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '70275182606')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
                       );
                     },
                     style: ElevatedButton.styleFrom(
