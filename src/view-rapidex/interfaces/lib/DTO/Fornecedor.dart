@@ -4,27 +4,28 @@ class Fornecedor {
   final String email;
   final String senha;
   final String telefone;
-  
 
   Fornecedor({
-    required this.nome,
+
     required this.cnpj,
+    required this.nome,
     required this.telefone,
     required this.email,
     required this.senha,
   });
 
+  // Método para criar o objeto Fornecedor a partir de um mapa de dados
   factory Fornecedor.fromMap(Map<String, dynamic> map) {
     return Fornecedor(
-      cnpj: map['cnpj'] ?? '', // Garantir que o CPF é uma String
+      cnpj: map['cnpj'] ?? '',
       nome: map['nome'] ?? '',
-      senha: map['senha'] ?? '',
       email: map['email'] ?? '',
+      senha: map['senha'] ?? '',
       telefone: map['telefone'] ?? '',
     );
   }
 
-  // Método para mapear o Fornecedor para um formato que o banco de dados entenda
+
   Map<String, dynamic> toMap() {
     return {
       'cnpj': cnpj,
@@ -32,7 +33,6 @@ class Fornecedor {
       'email': email,
       'senha': senha,
       'telefone': telefone,
-      
     };
   }
 }
