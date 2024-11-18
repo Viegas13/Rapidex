@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Fornecedor.dart';
 import 'package:interfaces/View/ICadastroFornecedor.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/View/perfil_fornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -54,7 +55,7 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
       print("opa");
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => perfil_fornecedorScreen()),
+        MaterialPageRoute(builder: (context) => HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
       );
     }
     else {
