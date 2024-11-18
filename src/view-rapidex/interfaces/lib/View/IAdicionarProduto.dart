@@ -61,7 +61,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
         'preco': precoController.text,
         'imagem': precoController.text,
         'descricao': descricaoController.text,
-        'fornecedor': '353654234583',
+        'fornecedor': '11111111111111',
         'restrito': restritoPorIdade.toString(),
         'quantidade': quantidadeController.text,
       };

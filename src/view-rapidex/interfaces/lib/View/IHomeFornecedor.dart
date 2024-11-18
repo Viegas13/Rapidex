@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/editar_perfil_fornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
+import 'package:interfaces/View/perfil_fornecedor.dart';
+import 'package:interfaces/View/IAdicionarProduto.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
   final String cnpjFornecedor;
@@ -55,7 +57,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const EditarPerfilFornecedorScreen(),
+                builder: (context) => const perfil_fornecedorScreen(),
               ),
             );
           },
@@ -115,7 +117,11 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: ElevatedButton(
               onPressed: () {
-                // Adicionar funcionalidade para cadastrar produtos
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdicionarProdutoScreen()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,

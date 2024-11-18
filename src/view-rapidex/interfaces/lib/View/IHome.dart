@@ -64,16 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
               restaurantCard('Restaurante 1', 'Desconto de 20%', '4.5'),
               restaurantCard('Restaurante 2', 'Entrega grátis', '4.2'),
               restaurantCard('Restaurante 3', 'Novo', '4.8'),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AdicionarProdutoScreen()),
-                  );
-                },
-                child: const Text('Cadastrar Produto'),
-              ),
             ],
           ),
         ),

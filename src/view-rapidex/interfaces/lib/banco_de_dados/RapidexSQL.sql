@@ -44,7 +44,7 @@ CREATE TABLE Endereco (
 
 
 CREATE TABLE Produto (
-    nome VARCHAR(255) PRIMARY KEY,
+    nome VARCHAR(255),
     validade VARCHAR(10),
     preco FLOAT,
     imagem VARCHAR(255),
