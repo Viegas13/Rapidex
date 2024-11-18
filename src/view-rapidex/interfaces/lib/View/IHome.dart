@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfil.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _getSelectedScreen() {
     switch (_selectedIndex) {
       case 1:
-        return const BuscaScreen(); // Tela de busca
+        return const LoginGeralScreen(); // Tela de busca
       case 2:
         return const PerfilScreen(); // Tela de perfil
       default:
