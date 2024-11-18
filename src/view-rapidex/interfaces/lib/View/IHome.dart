@@ -4,6 +4,8 @@ import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfil.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/View/ICadastroFornecedor.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
         return const LoginGeralScreen(); // Tela de busca
       case 2:
         return const PerfilScreen(); // Tela de perfil
+      case 3:
+        return const PerfilFornecedorScreen(cnpj: "11111111111111");
+      case 4:
+        return const ICadastroFornecedor();
       default:
         return _buildHomeContent(); // Conteúdo da tela inicial
     }
@@ -117,6 +123,14 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Perfil',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Cadastro',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Perfil Forn.',
           )
         ],
         currentIndex: _selectedIndex,
