@@ -18,7 +18,8 @@ class EditarPerfilClienteScreen extends StatefulWidget {
 
 class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
   final TextEditingController nomeController = TextEditingController();
-  final TextEditingController dataNascimentoController = TextEditingController();
+  final TextEditingController dataNascimentoController =
+      TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
@@ -37,58 +38,56 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
   }
 
   Future<void> buscarCliente() async {
-  try {
-    final cliente = await clienteDAO.buscarCliente(widget.cpf);
-    if (cliente != null) {
-      setState(() {
-        nomeController.text = cliente.nome;
-        dataNascimentoController.text =
-            cliente.dataNascimento != null
-                ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
-                : 'Não informado';
+    try {
+      final cliente = await clienteDAO.buscarCliente(widget.cpf);
+      if (cliente != null) {
+        setState(() {
+          nomeController.text = cliente.nome;
+          dataNascimentoController.text = cliente.dataNascimento != null
+              ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
+              : 'Não informado';
 
-        // Converter o telefone de int para String
-        telefoneController.text = cliente.telefone.toString();
+          // Converter o telefone de int para String
+          telefoneController.text = cliente.telefone.toString();
 
-        emailController.text = cliente.email;
-      });
+          emailController.text = cliente.email;
+        });
+      }
+    } catch (e) {
+      print('Erro ao buscar cliente: $e');
     }
-  } catch (e) {
-    print('Erro ao buscar cliente: $e');
   }
-}
 
   Future<void> salvarAlteracoes() async {
-  try {
-    // Buscar o cliente para obter a senha atual antes de atualizar os outros dados
-    final cliente = await clienteDAO.buscarCliente(widget.cpf);
+    try {
+      final cliente = await clienteDAO.buscarCliente(widget.cpf);
 
-    // Caso o cliente exista, atualiza os campos (excluindo a senha, que permanece inalterada)
-    if (cliente != null) {
-      final clienteAtualizado = Cliente(
-        cpf: widget.cpf,
-        nome: nomeController.text,
-        senha: cliente.senha, // Manter a senha atual
-        email: emailController.text,
-        telefone: telefoneController.text,
-        dataNascimento: dataNascimentoController.text.isNotEmpty
-            ? DateFormat('dd/MM/yyyy').parse(dataNascimentoController.text)
-            : null,
-      );
+      if (cliente != null) {
+        final clienteAtualizado = Cliente(
+          cpf: widget.cpf,
+          nome: nomeController.text,
+          senha: cliente.senha, // Manter a senha atual
+          email: emailController.text,
+          telefone: telefoneController.text,
+          dataNascimento: dataNascimentoController.text.isNotEmpty
+              ? DateFormat('dd/MM/yyyy').parse(dataNascimentoController.text)
+              : null,
+        );
 
-      // Atualizar no banco de dados
-      await clienteDAO.atualizarCliente(clienteAtualizado.toMap());
+        await clienteDAO.atualizarCliente(clienteAtualizado.toMap());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informações atualizadas com sucesso!')),
-      );
-      Navigator.pop(context); // Voltar para a tela anterior
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Informações atualizadas com sucesso!')),
+        );
+
+        // Passa um valor para a tela anterior para indicar que os dados foram atualizados
+        Navigator.pop(context,
+            true); // Passando `true` para indicar que as alterações foram feitas
+      }
+    } catch (e) {
+      print('Erro ao salvar alterações: $e');
     }
-  } catch (e) {
-    print('Erro ao salvar alterações: $e');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,11 +124,10 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
                     firstDate: DateTime(1900),
                     lastDate: DateTime.now(),
                   );
-                  if (pickedDate != null) {
-                    setState(() {
-                      dataNascimentoController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-                    });
-                  }
+                  setState(() {
+                    dataNascimentoController.text =
+                        DateFormat('dd/MM/yyyy').format(pickedDate!);
+                  });
                 },
               ),
               const SizedBox(height: 16),
@@ -153,12 +151,14 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
                 onPressed: salvarAlteracoes,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Salvar Alterações', style: TextStyle(color: Colors.black)),
+                child: const Text('Salvar Alterações',
+                    style: TextStyle(color: Colors.black)),
               ),
             ],
           ),

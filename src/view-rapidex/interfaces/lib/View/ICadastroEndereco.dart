@@ -105,6 +105,9 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Endereço cadastrado com sucesso!')),
       );
+
+      // Navega de volta para IPerfilCliente após o cadastro
+      Navigator.pushReplacementNamed(context, '/perfil_cliente');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao cadastrar endereço: ${e.toString()}')),

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfil.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/View/ICadastroFornecedor.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,9 +28,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _getSelectedScreen() {
     switch (_selectedIndex) {
       case 1:
-        return const BuscaScreen(); // Tela de busca
+        return const LoginGeralScreen(); // Tela de busca
       case 2:
         return const PerfilScreen(); // Tela de perfil
+      case 3:
+        return const PerfilFornecedorScreen(cnpj: "11111111111111");
+      case 4:
+        return const ICadastroFornecedor();
       default:
         return _buildHomeContent(); // Conteúdo da tela inicial
     }
@@ -56,16 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
               restaurantCard('Restaurante 1', 'Desconto de 20%', '4.5'),
               restaurantCard('Restaurante 2', 'Entrega grátis', '4.2'),
               restaurantCard('Restaurante 3', 'Novo', '4.8'),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdicionarProdutoScreen()),
-                  );
-                },
-                child: const Text('Cadastrar Produto'),
-              ),
             ],
           ),
         ),
@@ -115,6 +113,14 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Perfil',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Cadastro',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Perfil Forn.',
           )
         ],
         currentIndex: _selectedIndex,
@@ -155,3 +161,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+// HomeFornecedorScreen(cnpjFornecedor: "13774195684")
