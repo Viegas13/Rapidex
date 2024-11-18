@@ -1,4 +1,5 @@
 import '../DBHelper/ConexaoDB.dart';
+import 'package:interfaces/DTO/Fornecedor.dart';
 
 class FornecedorDAO {
   final ConexaoDB conexaoDB;
@@ -29,12 +30,30 @@ class FornecedorDAO {
   }
 
 
+  Future<Fornecedor?> BuscarFornecedorParaLogin(String email, String senha) async {
+
+      var result = await conexaoDB.connection.query(
+        'SELECT * FROM fornecedor WHERE email = @email AND senha = @senha',
+        substitutionValues: {'email': email.toString(), 'senha': senha.toString()},
+      );
+      
+      if (result.isNotEmpty) {
+        return Fornecedor.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro na busca: $e');
+      rethrow;
+    }
+  }
+
+
   Future<Map<String, dynamic>?> buscarFornecedor(String cnpj) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
-
       print("abriu conexão");
 
       var result = await conexaoDB.connection.query(

@@ -6,6 +6,7 @@ class Fornecedor {
   final String telefone;
 
   Fornecedor({
+
     required this.cnpj,
     required this.nome,
     required this.telefone,
@@ -24,7 +25,7 @@ class Fornecedor {
     );
   }
 
-  // Método para mapear o objeto Fornecedor de volta para um mapa de dados
+
   Map<String, dynamic> toMap() {
     return {
       'cnpj': cnpj,
