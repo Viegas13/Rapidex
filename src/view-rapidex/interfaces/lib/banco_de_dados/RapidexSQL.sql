@@ -33,7 +33,7 @@ CREATE TABLE Endereco (
     bairro VARCHAR(255),
     rua VARCHAR(255),
     numero INT,
-    CEP BIGINT,
+    CEP VARCHAR(255),
     complemento VARCHAR(255),
     referencia VARCHAR(255),
     PRIMARY KEY (cliente_cpf, CEP),

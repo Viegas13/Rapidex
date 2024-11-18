@@ -6,7 +6,7 @@ import 'package:interfaces/View/IPerfilCliente.dart';
 
 //import 'package:interfaces/View/ICarrinho.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
-import 'package:interfaces/View/carrinho.dart';
+import 'package:interfaces/View/Icarrinho.dart';
 
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
@@ -25,13 +25,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const HomeScreen(),
+      home: const CadastroClienteScreen(),
       routes: {
         '/busca': (context) => const BuscaScreen(),
         '/perfil': (context) => const PerfilScreen(),
         '/carrinho': (context) => const CarrinhoPage(),
-        '/perfil_cliente': (context) => const PerfilClienteScreen(cpf: "13774195684"),
-        '/perfil_fornecedor': (context) => const PerfilFornecedorScreen(cnpj: "11111111111111"),
+        '/perfil_cliente': (context) =>
+            const PerfilClienteScreen(cpf: "70275182606"),
+        '/perfil_fornecedor': (context) =>
+            const PerfilFornecedorScreen(cnpj: "11111111111111"),
       },
     );
   }

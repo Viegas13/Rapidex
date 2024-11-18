@@ -22,7 +22,8 @@ class PerfilScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => PerfilClienteScreen(cpf: '11122233344'), 
+                        builder: (context) =>
+                            PerfilClienteScreen(cpf: '70275182606'),
                       ),
                     );
                   },
