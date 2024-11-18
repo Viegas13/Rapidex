@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ICadastroCliente.dart';
+import 'package:interfaces/View/ICadastroFornecedor.dart';
 import 'package:interfaces/View/IHome.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/carrinho.dart';
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/perfil': (context) => const PerfilScreen(),
         '/carrinho': (context) => const CarrinhoPage(),
         '/perfil_cliente': (context) => const PerfilClienteScreen(cpf: "13774195684"),
+        '/perfil_fornecedor': (context) => const PerfilFornecedorScreen(cnpj: "11111111111111"),
       },
     );
   }
