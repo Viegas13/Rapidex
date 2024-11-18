@@ -20,7 +20,8 @@ class PerfilClienteScreen extends StatefulWidget {
 
 class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
   final TextEditingController nomeController = TextEditingController();
-  final TextEditingController dataNascimentoController = TextEditingController();
+  final TextEditingController dataNascimentoController =
+      TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController enderecoController = TextEditingController();
@@ -58,8 +59,10 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
               : 'Não informado'; // Garantindo que seja uma string
 
           // Converta CPF e outros campos numéricos para String
-          cpfController.text = cliente.cpf.toString(); // Convertendo CPF para string
-          telefoneController.text = cliente.telefone.toString(); // Convertendo telefone para string
+          cpfController.text =
+              cliente.cpf.toString(); // Convertendo CPF para string
+          telefoneController.text =
+              cliente.telefone.toString(); // Convertendo telefone para string
           emailController.text = cliente.email;
         });
       }
@@ -100,7 +103,6 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
         context,
         MaterialPageRoute(builder: (context) => LoginGeralScreen()),
       );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao excluir conta')),
@@ -115,7 +117,8 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar Exclusão'),
-          content: const Text('Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
+          content: const Text(
+              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -157,17 +160,23 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  CustomReadOnlyTextField(labelText: 'Nome', controller: nomeController),
                   CustomReadOnlyTextField(
-                      labelText: 'Data de Nascimento', controller: dataNascimentoController),
-                  CustomReadOnlyTextField(labelText: 'CPF', controller: cpfController),
-                  CustomReadOnlyTextField(labelText: 'Telefone', controller: telefoneController),
+                      labelText: 'Nome', controller: nomeController),
+                  CustomReadOnlyTextField(
+                      labelText: 'Data de Nascimento',
+                      controller: dataNascimentoController),
+                  CustomReadOnlyTextField(
+                      labelText: 'CPF', controller: cpfController),
+                  CustomReadOnlyTextField(
+                      labelText: 'Telefone', controller: telefoneController),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')),
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const CadastroEndereco(cpf: '70275182606')),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -200,7 +209,10 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
+                        MaterialPageRoute(
+                            builder: (context) => const CadastroEndereco(
+                                cpf:
+                                    '70275182606')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -215,7 +227,11 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  DropdownTextField(labelText: 'Cartões', controller: cartaoController, items: ["Visa"],),
+                  DropdownTextField(
+                    labelText: 'Cartões',
+                    controller: cartaoController,
+                    items: ["Visa"],
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -226,30 +242,35 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditarPerfilClienteScreen(cpf: widget.cpf), // Passando CPF
+                    builder: (context) => EditarPerfilClienteScreen(
+                        cpf: widget.cpf), // Passando CPF
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Editar Informações', style: TextStyle(color: Colors.black)),
+              child: const Text('Editar Informações',
+                  style: TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: mostrarDialogoConfirmacao,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Excluir Conta', style: TextStyle(color: Colors.white)),
+              child: const Text('Excluir Conta',
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
