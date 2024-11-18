@@ -60,10 +60,8 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
 
   Future<void> salvarAlteracoes() async {
     try {
-      // Buscar o cliente para obter a senha atual antes de atualizar os outros dados
       final cliente = await clienteDAO.buscarCliente(widget.cpf);
 
-      // Caso o cliente exista, atualiza os campos (excluindo a senha, que permanece inalterada)
       if (cliente != null) {
         final clienteAtualizado = Cliente(
           cpf: widget.cpf,
@@ -76,13 +74,15 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
               : null,
         );
 
-        // Atualizar no banco de dados
         await clienteDAO.atualizarCliente(clienteAtualizado.toMap());
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Informações atualizadas com sucesso!')),
         );
-        Navigator.pop(context); // Voltar para a tela anterior
+
+        // Passa um valor para a tela anterior para indicar que os dados foram atualizados
+        Navigator.pop(context,
+            true); // Passando `true` para indicar que as alterações foram feitas
       }
     } catch (e) {
       print('Erro ao salvar alterações: $e');
