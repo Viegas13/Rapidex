@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:interfaces/View/IBusca.dart';
 import 'package:interfaces/View/IPerfil.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const AdicionarProdutoScreen()),
+                        builder: (context) => AdicionarProdutoScreen()),
                   );
                 },
                 child: const Text('Cadastrar Produto'),
@@ -155,3 +156,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+// HomeFornecedorScreen(cnpjFornecedor: "13774195684")
