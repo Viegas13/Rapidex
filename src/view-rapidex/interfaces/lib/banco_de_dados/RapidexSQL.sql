@@ -3,7 +3,7 @@ CREATE TABLE Fornecedor (
     nome VARCHAR(255),
     email VARCHAR(255),
     senha VARCHAR(255),
-    telefone BIGINT
+    telefone VARCHAR(255)
 );
 
 CREATE TABLE Cliente(
@@ -44,8 +44,7 @@ CREATE TABLE Endereco (
 
 
 CREATE TABLE Produto (
-    id BIGINT PRIMARY KEY,
-    nome VARCHAR(255),
+    nome VARCHAR(255) PRIMARY KEY,
     validade VARCHAR(10),
     preco FLOAT,
     imagem VARCHAR(255),
