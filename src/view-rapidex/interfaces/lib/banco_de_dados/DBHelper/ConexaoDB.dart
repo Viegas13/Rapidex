@@ -13,7 +13,7 @@ class ConexaoDB {
       5432, // Porta do PostgreSQL
       'rapidex', // Nome do banco de dados
       username: 'postgres', // Nome de usuário do PostgreSQL
-      password: '123456', // Senha do banco de dados
+      password: 'postgres', // Senha do banco de dados
     );
     await openConnection();
   }
