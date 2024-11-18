@@ -52,17 +52,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
-
-          // Verifique se dataNascimento não é null e formate corretamente
           dataNascimentoController.text = cliente.dataNascimento != null
               ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
-              : 'Não informado'; // Garantindo que seja uma string
+              : 'Não informado';
 
-          // Converta CPF e outros campos numéricos para String
-          cpfController.text =
-              cliente.cpf.toString(); // Convertendo CPF para string
-          telefoneController.text =
-              cliente.telefone.toString(); // Convertendo telefone para string
+          cpfController.text = cliente.cpf.toString();
+          telefoneController.text = cliente.telefone.toString();
           emailController.text = cliente.email;
         });
       }
@@ -97,11 +92,9 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta excluída com sucesso!')),
       );
-      //Navigator.of(context).popUntil((route) => route.isFirst); // Retorna à tela inicial
-
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginGeralScreen()),
+        MaterialPageRoute(builder: (context) => const LoginGeralScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -169,14 +162,17 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                       labelText: 'CPF', controller: cpfController),
                   CustomReadOnlyTextField(
                       labelText: 'Telefone', controller: telefoneController),
+                  CustomReadOnlyTextField(
+                      labelText: 'E-mail', controller: emailController),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const CadastroEndereco(cpf: '70275182606')),
+                          builder: (context) =>
+                              const CadastroEndereco(cpf: '70275182606'),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -210,9 +206,9 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CadastroEndereco(
-                                cpf:
-                                    '70275182606')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
+                          builder: (context) =>
+                              const CadastroEndereco(cpf: '70275182606'),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -230,22 +226,25 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   DropdownTextField(
                     labelText: 'Cartões',
                     controller: cartaoController,
-                    items: ["Visa"],
+                    items: const ["Visa"],
                   ),
                   const SizedBox(height: 16),
                 ],
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                // Redireciona para a tela de edição de perfil
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditarPerfilClienteScreen(
-                        cpf: widget.cpf), // Passando CPF
+                    builder: (context) =>
+                        EditarPerfilClienteScreen(cpf: widget.cpf),
                   ),
                 );
+
+                if (result == true) {
+                  buscarCliente(); // Recarrega as informações após edição
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
