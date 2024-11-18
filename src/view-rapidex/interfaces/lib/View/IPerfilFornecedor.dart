@@ -31,7 +31,8 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
 
   Future<void> carregarDadosFornecedor() async {
     try {
-      final fornecedorMap = await fornecedorDAO.buscarFornecedor(widget.cnpj);
+      print("chegou na busca");
+      final fornecedorMap = await fornecedorDAO.buscarFornecedor("11111111111111"); //widget.cnpj
       if (fornecedorMap != null) {
         setState(() {
           fornecedor = Fornecedor.fromMap(fornecedorMap);

@@ -35,10 +35,14 @@ class FornecedorDAO {
         await conexaoDB.openConnection();
       }
 
+      print("abriu conexão");
+
       var result = await conexaoDB.connection.query(
         'SELECT * FROM fornecedor WHERE cnpj = @cnpj',
         substitutionValues: {'cnpj': cnpj},
       );
+
+      print("fez query");
 
       return result.isNotEmpty ? result[0].toColumnMap() : null;
     } catch (e) {

@@ -4,7 +4,7 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
-import 'IHomeFornecedor.dart';
+//import 'IHomeFornecedor.dart';
 class ICadastroFornecedor extends StatefulWidget {
   const ICadastroFornecedor({super.key});
 
@@ -79,10 +79,10 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
-      Navigator.pushReplacement(
+      /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeFornecedorScreen(cnpj: "12345678912")),
-      );
+      );*/
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao cadastrar fornecedor')),
