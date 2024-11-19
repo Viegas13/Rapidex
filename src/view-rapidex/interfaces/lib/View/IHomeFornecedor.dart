@@ -28,9 +28,9 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     try {
       // Chame sua função para listar os produtos
       final produtosList =
-          await produtoDAO.listarProdutos(widget.cnpjFornecedor);
+          await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
       setState(() {
-        produtos = produtosList;
+        produtos = produtosList.cast<Map<String, dynamic>>();
         isLoading = false;
       });
     } catch (e) {
