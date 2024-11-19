@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ICadastroEndereco.dart';
 import 'package:interfaces/View/IEditarPerfilCliente.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -142,7 +143,10 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+            );
           },
         ),
       ),

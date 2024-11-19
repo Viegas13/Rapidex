@@ -16,25 +16,24 @@ class Produto {
     required this.descricao,
     required this.fornecedorCnpj,
     required this.restrito,
-    required this.quantidade
+    required this.quantidade,
   });
 
   factory Produto.fromMap(Map<String, dynamic> map) {
     return Produto(
       nome: map['nome'] ?? '',
       validade: map['validade'] != null
-          ? DateTime.tryParse(map['datanascimento'].toString()) // Garantir que a data está em DateTime
+          ? DateTime.tryParse(map['validade'].toString())
           : null,
-      preco: map['preco'] ?? '',
+      preco: double.tryParse(map['preco'].toString()) ?? 0.0,
       imagem: map['imagem'] ?? '',
       descricao: map['descricao'] ?? '',
-      fornecedorCnpj: map['fornecedorCnpj'] ?? '',
-      restrito: map['restrito'] ?? '',
-      quantidade: map['quantidade'] ?? '',
+      fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
+      restrito: map['restritoPorIdade'] == true || map['restritoPorIdade'].toString() == 'true',
+      quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }
 
-  // Método para mapear o Produto para um formato que o banco de dados entenda
   Map<String, dynamic> toMap() {
     return {
       'nome': nome,
@@ -42,8 +41,8 @@ class Produto {
       'preco': preco,
       'imagem': imagem,
       'descricao': descricao,
-      'fornecedor': fornecedorCnpj,
-      'restrito' : restrito.toString(),
+      'fornecedor_cnpj': fornecedorCnpj,
+      'restritoPorIdade': restrito.toString(),
       'quantidade': quantidade,
     };
   }
