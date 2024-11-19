@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 
-class ProductItem extends StatelessWidget {
+class Item extends StatelessWidget {
   final String nome;
-  final String imagem;
+  //final String imagem; retirar o comentário depois de corrigir a lógica da imagem
   final double preco;
 
-  const ProductItem({
+  const Item({
     super.key,
     required this.nome,
-    required this.imagem,
+    //required this.imagem, retirar o comentário depois de corrigir a lógica da imagem
     required this.preco,
   });
 
@@ -35,8 +35,11 @@ class ProductItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Imagem do produto
-          Expanded(
+
+          /*retirar o comentário depois de corrigir a lógica da imagem
+
+          // Imagem do produto 
+            Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
               child: Image.network(
@@ -45,7 +48,7 @@ class ProductItem extends StatelessWidget {
                 width: double.infinity,
               ),
             ),
-          ),
+          ),*/
           // Nome e preço
           Padding(
             padding: const EdgeInsets.all(8.0),
