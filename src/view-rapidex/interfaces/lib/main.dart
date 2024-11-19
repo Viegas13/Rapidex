@@ -3,6 +3,7 @@ import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/ICadastroCliente.dart';
 import 'package:interfaces/View/ICadastroFornecedor.dart';
 import 'package:interfaces/View/IHomeCliente.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/Icarrinho.dart';

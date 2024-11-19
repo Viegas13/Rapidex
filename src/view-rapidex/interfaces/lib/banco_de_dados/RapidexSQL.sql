@@ -20,7 +20,7 @@ CREATE TABLE Entregador(
     nome VARCHAR(255),
     senha VARCHAR(255),
     email VARCHAR(255),
-    telefone BIGINT,
+    telefone VARCHAR(255),
     dataNascimento DATE,
     veiculo VARCHAR(255)
 );
@@ -48,7 +48,7 @@ CREATE TABLE Produto (
     preco FLOAT,
     imagem VARCHAR(255),
     descricao VARCHAR(255),
-    fornecedor_cnpj BIGINT,
+    fornecedor_cnpj VARCHAR(255),
     restritoPorIdade VARCHAR(10),
     quantidade INT
     --FOREIGN KEY () REFERENCES Endereco()
@@ -73,7 +73,7 @@ CREATE TABLE Entrega (
     entregador_cpf VARCHAR(255),
     pendente BOOLEAN,
     endereco_cliente_cpf VARCHAR(255),
-    endereco_CEP BIGINT,
+    endereco_CEP VARCHAR(255),
     frete FLOAT,
     FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
     FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,

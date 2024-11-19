@@ -6,6 +6,13 @@ class ProdutoDAO {
 
   ProdutoDAO({required this.conexaoDB});
 
+   Future<void> verificarConexao() async {
+    if (conexaoDB.connection.isClosed) {
+      print("Conexão fechada. Reabrindo...");
+      await conexaoDB.openConnection();
+    }
+  }
+
   // Método para cadastrar um produto no banco de dados
   Future<void> cadastrarProduto(Map<String, dynamic> produto) async {
     try {
@@ -113,7 +120,8 @@ class ProdutoDAO {
     }
   }
 
-  Future<List<Map<String, dynamic>>> listarProdutos(String cnpjFornecedor) async {
+  Future<List<Map<String, dynamic>>> listarProdutos(
+      String cnpjFornecedor) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -145,28 +153,26 @@ class ProdutoDAO {
   }
 
   Future<List<Produto>> listarProdutosComDetalhes(String cnpjFornecedor) async {
-  try {
-    // Certifique-se de abrir a conexão
-    await conexaoDB.openConnection();
+    try {
+      await verificarConexao(); // Garante que a conexão está aberta
 
-    final results = await conexaoDB.connection.query(
-      '''
-      SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
-      FROM produto
-      WHERE fornecedor_cnpj = @fornecedor_cnpj
-      ''',
-      substitutionValues: {
-        'fornecedor_cnpj': cnpjFornecedor,
-      },
-    );
+      final results = await conexaoDB.connection.query(
+        '''
+        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        FROM produto
+        WHERE fornecedor_cnpj = @fornecedor_cnpj
+        ''',
+        substitutionValues: {
+          'fornecedor_cnpj': cnpjFornecedor,
+        },
+      );
 
-    return results.map((row) {
-      return Produto.fromMap(row.toColumnMap());
-    }).toList();
-  } catch (e) {
-    print('Erro ao listar produtos: $e');
-    rethrow;
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
   }
-}
-
 }
