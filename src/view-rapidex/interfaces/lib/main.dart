@@ -18,11 +18,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Rapidex',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
-      home: const HomeClienteScreen(),
-    );
+        title: 'Rapidex',
+        theme: ThemeData(
+          primarySwatch: Colors.orange,
+        ),
+        home: const LoginGeralScreen(),
+        routes: {
+          '/carrinho': (context) => const CarrinhoPage(),
+          '/perfil_cliente': (context) =>
+              const PerfilClienteScreen(cpf: "70275182606"),
+          '/perfil_fornecedor': (context) =>
+              const PerfilFornecedorScreen(cnpj: "11111111111111"),
+        });
   }
 }
