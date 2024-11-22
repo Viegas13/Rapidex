@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ICadastroEndereco.dart';
 import 'package:interfaces/View/IEditarPerfilCliente.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
@@ -19,7 +21,8 @@ class PerfilClienteScreen extends StatefulWidget {
 
 class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
   final TextEditingController nomeController = TextEditingController();
-  final TextEditingController dataNascimentoController = TextEditingController();
+  final TextEditingController dataNascimentoController =
+      TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController enderecoController = TextEditingController();
@@ -50,15 +53,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
-
-          // Verifique se dataNascimento não é null e formate corretamente
           dataNascimentoController.text = cliente.dataNascimento != null
               ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
-              : 'Não informado'; // Garantindo que seja uma string
+              : 'Não informado';
 
-          // Converta CPF e outros campos numéricos para String
-          cpfController.text = cliente.cpf.toString(); // Convertendo CPF para string
-          telefoneController.text = cliente.telefone.toString(); // Convertendo telefone para string
+          cpfController.text = cliente.cpf.toString();
+          telefoneController.text = cliente.telefone.toString();
           emailController.text = cliente.email;
         });
       }
@@ -66,6 +66,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
       print('Erro ao buscar cliente: $e');
     }
   }
+
   Future<void> buscarEnderecos() async {
     try {
       final enderecos = await enderecoDAO.listarEnderecos(widget.cpf);
@@ -86,6 +87,53 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     }
   }
 
+  Future<void> excluirConta() async {
+    try {
+      await clienteDAO.deletarCliente(widget.cpf);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta excluída com sucesso!')),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginGeralScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir conta')),
+      );
+      print('Erro ao excluir conta: $e');
+    }
+  }
+
+  void mostrarDialogoConfirmacao() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: const Text(
+              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+                excluirConta(); // Exclui a conta
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +143,10 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+            );
           },
         ),
       ),
@@ -106,17 +157,26 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  CustomReadOnlyTextField(labelText: 'Nome', controller: nomeController),
                   CustomReadOnlyTextField(
-                      labelText: 'Data de Nascimento', controller: dataNascimentoController),
-                  CustomReadOnlyTextField(labelText: 'CPF', controller: cpfController),
-                  CustomReadOnlyTextField(labelText: 'Telefone', controller: telefoneController),
+                      labelText: 'Nome', controller: nomeController),
+                  CustomReadOnlyTextField(
+                      labelText: 'Data de Nascimento',
+                      controller: dataNascimentoController),
+                  CustomReadOnlyTextField(
+                      labelText: 'CPF', controller: cpfController),
+                  CustomReadOnlyTextField(
+                      labelText: 'Telefone', controller: telefoneController),
+                  CustomReadOnlyTextField(
+                      labelText: 'E-mail', controller: emailController),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')),
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const CadastroEndereco(cpf: '70275182606'),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -149,7 +209,10 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CadastroEndereco(cpf: '13774195684')) /*aqui deve viu o CadastroMetodoPagamento, só deixei esse pra preencher*/,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const CadastroEndereco(cpf: '70275182606'),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -164,41 +227,53 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  DropdownTextField(labelText: 'Cartões', controller: cartaoController, items: ["Visa"],),
+                  DropdownTextField(
+                    labelText: 'Cartões',
+                    controller: cartaoController,
+                    items: const ["Visa"],
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                // Redireciona para a tela de edição de perfil
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditarPerfilClienteScreen(cpf: widget.cpf), // Passando CPF
+                    builder: (context) =>
+                        EditarPerfilClienteScreen(cpf: widget.cpf),
                   ),
                 );
+
+                if (result == true) {
+                  buscarCliente(); // Recarrega as informações após edição
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Editar Informações', style: TextStyle(color: Colors.black)),
+              child: const Text('Editar Informações',
+                  style: TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: mostrarDialogoConfirmacao,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Excluir Conta', style: TextStyle(color: Colors.white)),
+              child: const Text('Excluir Conta',
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

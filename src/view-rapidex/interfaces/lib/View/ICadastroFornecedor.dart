@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
+//import 'IHomeFornecedor.dart';
 class ICadastroFornecedor extends StatefulWidget {
   const ICadastroFornecedor({super.key});
 
@@ -77,6 +79,10 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       await fornecedorDAO.cadastrarFornecedor(fornecedor);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

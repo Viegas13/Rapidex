@@ -69,24 +69,46 @@ class ClienteDAO {
   }
 
   Future<void> atualizarCliente(Map<String, dynamic> cliente) async {
-  try {
-    if (conexaoDB.connection.isClosed) {
-      await conexaoDB.openConnection();
-    }
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
 
-    await conexaoDB.connection.query(
-      '''
-      UPDATE cliente 
-      SET nome = @nome, datanascimento = @datanascimento, telefone = @telefone, email = @email 
-      WHERE cpf = @cpf
-      ''',
-      substitutionValues: cliente,
-    );
-    print('Cliente atualizado com sucesso!');
-  } catch (e) {
-    print('Erro ao atualizar cliente: $e');
-    rethrow;
+      await conexaoDB.connection.query(
+        '''
+        UPDATE cliente 
+        SET nome = @nome, datanascimento = @datanascimento, telefone = @telefone, email = @email 
+        WHERE cpf = @cpf
+        ''',
+        substitutionValues: cliente,
+      );
+      print('Cliente atualizado com sucesso!');
+    } catch (e) {
+      print('Erro ao atualizar cliente: $e');
+      rethrow;
+    }
   }
-}
+
+  Future<Cliente?> BuscarClienteParaLogin(String email, String senha) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      var result = await conexaoDB.connection.query(
+        'SELECT * FROM cliente WHERE email = @email AND senha = @senha',
+        substitutionValues: {'email': email, 'senha': senha},
+      );
+      
+      if (result.isNotEmpty) {
+        return Cliente.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro na busca: $e');
+      rethrow;
+    }
+  }
 
 }
