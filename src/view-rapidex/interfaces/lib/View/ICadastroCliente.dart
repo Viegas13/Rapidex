@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/IHome.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -22,7 +22,8 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
-  final TextEditingController dataNascimentoController = TextEditingController();
+  final TextEditingController dataNascimentoController =
+      TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
@@ -87,10 +88,11 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       // Redirecionar para HomeScreen após sucesso
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
       );
     } catch (e) {
-      if (e.toString().contains('duplicate key') || e.toString().contains('cpf')) {
+      if (e.toString().contains('duplicate key') ||
+          e.toString().contains('cpf')) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Esse CPF já está cadastrado')),
         );
@@ -111,7 +113,8 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       lastDate: DateTime.now(),
     );
     setState(() {
-      dataNascimentoController.text = DateFormat('dd/MM/yyyy').format(pickedDate!);
+      dataNascimentoController.text =
+          DateFormat('dd/MM/yyyy').format(pickedDate!);
     });
   }
 
@@ -166,12 +169,14 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
               onPressed: cadastrarCliente,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Cadastrar', style: TextStyle(color: Colors.black)),
+              child: const Text('Cadastrar',
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),

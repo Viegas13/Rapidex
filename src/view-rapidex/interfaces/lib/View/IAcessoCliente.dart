@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Cliente.dart';
 import 'package:interfaces/View/ICadastroCliente.dart';
-import 'package:interfaces/View/IHome.dart';
-import 'package:interfaces/View/IPerfil.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -53,7 +52,7 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
     if (clienteLogado != null) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => HomeClienteScreen()),
       );
     }
     else {

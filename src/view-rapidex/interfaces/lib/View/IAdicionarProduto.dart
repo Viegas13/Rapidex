@@ -22,7 +22,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
   int quantidade = 1;
-  final TextEditingController quantidadeController = TextEditingController(text: '1');
+  final TextEditingController quantidadeController =
+      TextEditingController(text: '1');
 
   @override
   void initState() {
@@ -50,7 +51,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     super.dispose();
   }
 
- Future<void> cadastrarProduto() async {
+  Future<void> cadastrarProduto() async {
     // Criar uma nova instância de ConexaoDB e ProdutoDAO
     // (Aqui você já pode utilizar a conexão que foi iniciada no initState)
     try {
@@ -85,14 +86,12 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate:
-          DateTime.now().add(const Duration(days: 365 * 10)), // até 10 anos à frente
+      lastDate: DateTime.now()
+          .add(const Duration(days: 365 * 10)), // até 10 anos à frente
     );
-    if (pickedDate != null) {
-      setState(() {
-        validadeController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-      });
-    }
+    setState(() {
+      validadeController.text = DateFormat('dd/MM/yyyy').format(pickedDate!);
+    });
   }
 
   @override
@@ -204,7 +203,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     children: [
                       const Text(
                         'Quantidade',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -215,7 +215,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                               setState(() {
                                 if (quantidade > 1) {
                                   quantidade--;
-                                  quantidadeController.text = quantidade.toString();
+                                  quantidadeController.text =
+                                      quantidade.toString();
                                 }
                               });
                             },
@@ -234,7 +235,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                                 setState(() {
                                   quantidade = int.tryParse(value) ?? 1;
                                   if (quantidade < 1) quantidade = 1;
-                                  quantidadeController.text = quantidade.toString();
+                                  quantidadeController.text =
+                                      quantidade.toString();
                                 });
                               },
                             ),
@@ -243,7 +245,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                             onPressed: () {
                               setState(() {
                                 quantidade++;
-                                quantidadeController.text = quantidade.toString();
+                                quantidadeController.text =
+                                    quantidade.toString();
                               });
                             },
                             icon: const Icon(Icons.add),
@@ -263,8 +266,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                       ),
                       onPressed: cadastrarProduto,
                       child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 24.0),
                         child: Text(
                           'Cadastrar Produto',
                           style: TextStyle(color: Colors.white),
@@ -280,4 +283,4 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       ),
     );
   }
-} 
+}

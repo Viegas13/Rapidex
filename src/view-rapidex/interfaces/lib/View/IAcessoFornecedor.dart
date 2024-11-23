@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Fornecedor.dart';
 import 'package:interfaces/View/ICadastroFornecedor.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
-import 'package:interfaces/View/perfil_fornecedor.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
@@ -16,13 +16,12 @@ class AcessoFornecedorScreen extends StatefulWidget {
 }
 
 class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
-
   late ConexaoDB conexaoDB;
   late FornecedorDAO fornecedorDAO;
 
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController(); // olhar questão de criptografia
-
+  final TextEditingController senhaController =
+      TextEditingController(); // olhar questão de criptografia
 
   @override
   void initState() {
@@ -49,16 +48,18 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
     String email = emailController.text;
     String senha = senhaController.text;
 
-    Fornecedor? fornecedorLogado = await fornecedorDAO.BuscarFornecedorParaLogin(email, senha);
+    Fornecedor? fornecedorLogado =
+        await fornecedorDAO.BuscarFornecedorParaLogin(email, senha);
 
     if (fornecedorLogado != null) {
       print("opa");
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
+        MaterialPageRoute(
+            builder: (context) =>
+                HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
       );
-    }
-    else {
+    } else {
       print("FORNECEDOR NULL!!!!!!!!!!!");
     }
   }
@@ -158,7 +159,8 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ICadastroFornecedor()),
+                            MaterialPageRoute(
+                                builder: (context) => ICadastroFornecedor()),
                           );
                         },
                         child: Text(

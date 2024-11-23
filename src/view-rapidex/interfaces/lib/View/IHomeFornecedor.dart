@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/editar_perfil_fornecedor.dart';
+import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
-import 'package:interfaces/View/perfil_fornecedor.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
@@ -27,9 +27,10 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> _fetchProdutos() async {
     try {
       // Chame sua função para listar os produtos
-      final produtosList = await produtoDAO.listarProdutos(widget.cnpjFornecedor);
+      final produtosList =
+          await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
       setState(() {
-        produtos = produtosList;
+        produtos = produtosList.cast<Map<String, dynamic>>();
         isLoading = false;
       });
     } catch (e) {
@@ -57,7 +58,9 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const perfil_fornecedorScreen(),
+                builder: (context) => const PerfilFornecedorScreen(
+                  cnpj: '11111111111111',
+                ),
               ),
             );
           },
@@ -120,7 +123,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AdicionarProdutoScreen()),
+                      builder: (context) => AdicionarProdutoScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(

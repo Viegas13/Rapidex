@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'IEditarPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -32,7 +33,8 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
   Future<void> carregarDadosFornecedor() async {
     try {
       print("chegou na busca");
-      final fornecedorMap = await fornecedorDAO.buscarFornecedor("11111111111111"); //widget.cnpj
+      final fornecedorMap =
+          await fornecedorDAO.buscarFornecedor("11111111111111"); //widget.cnpj
       if (fornecedorMap != null) {
         setState(() {
           fornecedor = Fornecedor.fromMap(fornecedorMap);
@@ -41,6 +43,55 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     } catch (e) {
       print('Erro ao carregar dados do fornecedor: $e');
     }
+  }
+
+  Future<void> excluirConta() async {
+    try {
+      await fornecedorDAO.deletarFornecedor(widget.cnpj);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta excluída com sucesso!')),
+      );
+      //Navigator.of(context).popUntil((route) => route.isFirst); // Retorna à tela inicial
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginGeralScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir conta')),
+      );
+      print('Erro ao excluir conta: $e');
+    }
+  }
+
+  void mostrarDialogoConfirmacao() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: const Text(
+              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+                excluirConta(); // Exclui a conta
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -80,7 +131,8 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EditarPerfilFornecedorScreen(
+                              builder: (context) =>
+                                  EditarPerfilFornecedorScreen(
                                 cnpj: fornecedor!.cnpj,
                               ),
                             ),
@@ -90,7 +142,8 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromRGBO(244, 140, 44, 1),
+                          backgroundColor:
+                              const Color.fromRGBO(244, 140, 44, 1),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 32, vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -101,6 +154,22 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                           'Editar',
                           style: TextStyle(color: Colors.black),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: mostrarDialogoConfirmacao,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Excluir Conta',
+                            style: TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],
