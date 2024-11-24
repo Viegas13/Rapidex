@@ -7,6 +7,7 @@ import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/View/IPerfilEntregador.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +30,8 @@ class MyApp extends StatelessWidget {
               const PerfilClienteScreen(cpf: "70275182606"),
           '/perfil_fornecedor': (context) =>
               const PerfilFornecedorScreen(cnpj: "11111111111111"),
+          '/perfil_entregador': (context) =>
+              const PerfilEntregadorScreen(cpf: "13774195684"),
         });
   }
 }
