@@ -2,7 +2,7 @@ class Produto {
   final String nome;
   final DateTime? validade;
   final double preco;
-  final List<int> imagem;
+  final String imagem;
   final String descricao;
   final String fornecedorCnpj;
   final bool restrito;
@@ -29,7 +29,8 @@ class Produto {
       imagem: map['imagem'] ?? '',
       descricao: map['descricao'] ?? '',
       fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
-      restrito: map['restritoPorIdade'] == true || map['restritoPorIdade'].toString() == 'true',
+      restrito: map['restritoPorIdade'] == true ||
+          map['restritoPorIdade'].toString() == 'true',
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }
