@@ -46,7 +46,7 @@ CREATE TABLE Produto (
     nome VARCHAR(255),
     validade VARCHAR(10),
     preco FLOAT,
-    imagem VARCHAR(255),
+    imagem bytea,
     descricao VARCHAR(255),
     fornecedor_cnpj VARCHAR(255),
     restritoPorIdade VARCHAR(10),
