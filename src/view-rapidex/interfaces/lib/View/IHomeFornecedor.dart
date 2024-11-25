@@ -39,7 +39,8 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
-      final resultado = await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
+      final resultado =
+          await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
 
       setState(() {
         produtos = resultado;
@@ -75,12 +76,14 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
         backgroundColor: Colors.orange,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.account_circle, color: Colors.grey, size: 40.0),
+          icon:
+              const Icon(Icons.account_circle, color: Colors.grey, size: 40.0),
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const PerfilFornecedorScreen(cnpj: '11111111111111'),
+                builder: (context) =>
+                    const PerfilFornecedorScreen(cnpj: '11111111111111'),
               ),
             );
           },
@@ -106,18 +109,20 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
               itemBuilder: (context, index) {
                 final produto = produtos[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: ListTile(
-                    leading: produto.imagem != null
+                    /*leading: produto.imagem != null
                         ? Image.memory(
                             Uint8List.fromList(produto.imagem!),
                             width: 50,
                             height: 50,
                             fit: BoxFit.cover,
                           )
-                        : const Icon(Icons.image_not_supported, size: 50),
+                        : const Icon(Icons.image_not_supported, size: 50),*/
                     title: Text(produto.nome),
-                    subtitle: Text('Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
+                    subtitle: Text(
+                        'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

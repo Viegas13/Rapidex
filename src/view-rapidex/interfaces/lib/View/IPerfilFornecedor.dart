@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
+import 'package:interfaces/widgets/ConfirmarExclusao.dart';
 import 'IEditarPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -63,35 +64,6 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
       );
       print('Erro ao excluir conta: $e');
     }
-  }
-
-  void mostrarDialogoConfirmacao() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Exclusão'),
-          content: const Text(
-              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-                excluirConta(); // Exclui a conta
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Excluir'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -159,7 +131,10 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                     const SizedBox(height: 8),
                     Center(
                       child: ElevatedButton(
-                        onPressed: mostrarDialogoConfirmacao,
+                        onPressed: () async {
+                          confirmarExclusao(context);
+                          excluirConta();
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: const EdgeInsets.symmetric(

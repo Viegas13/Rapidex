@@ -4,6 +4,7 @@ import 'package:interfaces/View/IHomeEntregador.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/widgets/ConfirmarExclusao.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:intl/intl.dart';
 
@@ -77,35 +78,6 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
     }
   }
 
-  void mostrarDialogoConfirmacao() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Exclusão'),
-          content: const Text(
-              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-                excluirConta(); // Exclui a conta
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Excluir'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +89,8 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeEntregadorScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const HomeEntregadorScreen()),
             );
           },
         ),
@@ -141,8 +114,6 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
                   CustomReadOnlyTextField(
                       labelText: 'E-mail', controller: emailController),
                   const SizedBox(height: 16),
-                  
-                  
                 ],
               ),
             ),
@@ -173,7 +144,10 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: mostrarDialogoConfirmacao,
+              onPressed: () async {
+                confirmarExclusao(context);
+                excluirConta();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 padding:
