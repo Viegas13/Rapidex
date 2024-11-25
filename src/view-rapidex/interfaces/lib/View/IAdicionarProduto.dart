@@ -67,41 +67,39 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   }
 
   Future<void> cadastrarProduto() async {
-  try {
-    // Verifica se há uma imagem selecionada e a converte para bytes
-    Uint8List? imagemBytes;
-    if (imagemSelecionada != null) {
-      imagemBytes = imagemSelecionada!;
+    try {
+      // Verifica se há uma imagem selecionada e a converte para bytes
+      Uint8List? imagemBytes;
+      if (imagemSelecionada != null) {
+        imagemBytes = imagemSelecionada!;
+      }
+
+      // Monta o produto como um mapa
+      Map<String, dynamic> produto = {
+        'nome': nomeController.text,
+        'validade': validadeController.text,
+        'preco': precoController.text,
+        'imagem': imagemBytes, // Passa os bytes da imagem
+        'descricao': descricaoController.text,
+        'fornecedor': '11111111111111',
+        'restrito': restritoPorIdade ? 'true' : 'false',
+        'quantidade': quantidadeController.text,
+      };
+
+      // Chama o DAO para salvar no banco
+      await produtoDAO.cadastrarProduto(produto);
+      // Exibe uma mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+      );
+    } catch (e) {
+      // Exibe uma mensagem de erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao cadastrar produto')),
+      );
+      print('Erro ao cadastrar produto: $e');
     }
-
-    // Monta o produto como um mapa
-    Map<String, dynamic> produto = {
-      'nome': nomeController.text,
-      'validade': validadeController.text,
-      'preco': precoController.text,
-      'imagem': imagemBytes, // Passa os bytes da imagem
-      'descricao': descricaoController.text,
-      'fornecedor': '11111111111111',
-      'restrito': restritoPorIdade ? 'true' : 'false',
-      'quantidade': quantidadeController.text,
-    };
-
-    // Chama o DAO para salvar no banco
-    await produtoDAO.cadastrarProduto(produto);
-
-    // Exibe uma mensagem de sucesso
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-    );
-  } catch (e) {
-    // Exibe uma mensagem de erro
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Erro ao cadastrar produto')),
-    );
-    print('Erro ao cadastrar produto: $e');
   }
-}
-
 
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
