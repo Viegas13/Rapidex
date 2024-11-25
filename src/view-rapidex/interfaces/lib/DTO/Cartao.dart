@@ -1,41 +1,45 @@
 class Cartao {
-  final String numero;
+  final int numero;
+  final int cvv;
+  final DateTime validade;
   final String nomeTitular;
+  final int agencia;
   final String bandeira;
-  final String cpfCliente;
-  final String validade;
-  final String codigoSeguranca;
+  final String clienteCpf;
 
   Cartao({
     required this.numero,
-    required this.nomeTitular,
-    required this.bandeira,
-    required this.cpfCliente,
+    required this.cvv,
     required this.validade,
-    required this.codigoSeguranca,
+    required this.nomeTitular,
+    required this.agencia,
+    required this.bandeira,
+    required this.clienteCpf,
   });
 
   // Método para converter um objeto Cartao em um mapa (útil para inserções no banco de dados)
   Map<String, dynamic> toMap() {
     return {
       'numero': numero,
-      'nomeTitular': nomeTitular,
-      'bandeira': bandeira,
-      'cpfCliente': cpfCliente,
+      'cvv': cvv,
       'validade': validade,
-      'codigoSeguranca': codigoSeguranca,
+      'nomeTitular': nomeTitular,
+      'agencia': agencia,
+      'bandeira': bandeira,
+      'cliente_cpf': clienteCpf,
     };
   }
 
   // Método para criar um objeto Cartao a partir de um mapa (útil para consultas no banco de dados)
   factory Cartao.fromMap(Map<String, dynamic> map) {
     return Cartao(
-      numero: map['numero'] as String,
+      numero: map['numero'] as int,
+      cvv: map['cvv'] as int,
+      validade: map['validade'] as DateTime,
       nomeTitular: map['nomeTitular'] as String,
+      agencia: map['agencia'] as int,
       bandeira: map['bandeira'] as String,
-      cpfCliente: map['cpfCliente'] as String,
-      validade: map['validade'] as String,
-      codigoSeguranca: map['codigoSeguranca'] as String,
+      clienteCpf: map['cliente_cpf'] as String,
     );
   }
 }
