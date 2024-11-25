@@ -40,7 +40,8 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
-      final resultado = await produtoDAO.listarProdutosComDetalhes('11111111111111'); // Fornecedor fictício
+      final resultado = await produtoDAO
+          .listarProdutosComDetalhes('11111111111111'); // Fornecedor fictício
 
       print('Produtos carregados: ${resultado.length}');
       setState(() {
@@ -56,24 +57,32 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     }
   }
 
+  bool verificarCategoria(String descricao, String chave) {
+    final regex = RegExp(chave, caseSensitive: false);
+    return regex.hasMatch(descricao);
+  }
+
   void _filtrarProdutos() {
     setState(() {
       // Limpa as categorias antes de preenchê-las
       produtosPorCategoria["Hortifruit"] = [];
       produtosPorCategoria["Açougue"] = [];
       produtosPorCategoria["Embutidos"] = [];
-      produtosPorCategoria["Outros"] = [];  // Categoria padrão
+      produtosPorCategoria["Outros"] = []; // Categoria padrão
 
       // Filtra os produtos em cada categoria com base na descrição
       for (var produto in produtos) {
-        if (produto.descricao.toLowerCase().contains("hortifruit")) {
+        if (verificarCategoria(produto.descricao, "hortifruit|fruta|legume|verdura")) {
           produtosPorCategoria["Hortifruit"]?.add(produto);
-        } else if (produto.descricao.toLowerCase().contains("açougue")) {
+        } else if (verificarCategoria(produto.descricao, "carne|açogue")) {
           produtosPorCategoria["Açougue"]?.add(produto);
-        } else if (produto.descricao.toLowerCase().contains("embutido")) {
+        } else if (verificarCategoria(
+            produto.descricao, "linguiça|embutido|salsicha")) {
           produtosPorCategoria["Embutidos"]?.add(produto);
         } else {
-          produtosPorCategoria["Outros"]?.add(produto); // Produtos sem categoria
+          print("chegou");
+          produtosPorCategoria["Outros"]
+              ?.add(produto); // Produtos sem categoria
         }
       }
     });
@@ -151,7 +160,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                     ),
                     child: const Center(
                       child: Text(
-                        "Promoções + Destaques",
+                        "50% de desconto na primeira compra",
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
@@ -164,7 +173,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                     ),
                     child: const Center(
                       child: Text(
-                        "Novidades!",
+                        "Novidades em breve!",
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
@@ -188,6 +197,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                             _buildCategoria("Hortifruit"),
                             _buildCategoria("Açougue"),
                             _buildCategoria("Embutidos"),
+                            _buildCategoria("Outros")
                           ],
                         ),
             ),
@@ -209,7 +219,8 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   titulo,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 8),
