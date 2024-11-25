@@ -2,7 +2,7 @@ class Produto {
   final String nome;
   final DateTime? validade;
   final double preco;
-  final String imagem;
+  final List<int> imagem;
   final String descricao;
   final String fornecedorCnpj;
   final bool restrito;
