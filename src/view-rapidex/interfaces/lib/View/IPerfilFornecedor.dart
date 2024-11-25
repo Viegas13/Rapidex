@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/widgets/ConfirmarExclusao.dart';
+import 'package:interfaces/widgets/ConfirmarLogout.dart';
 import 'IEditarPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -129,23 +130,42 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          confirmarExclusao(context, excluirContaFornecedor);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Excluir Conta',
-                            style: TextStyle(color: Colors.white)),
-                      ),
+                    Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Alinha os botões de forma igualitária
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarLogout(context); // Passa o contexto como parâmetro
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                  ),
+                  child: const Text('Sair da conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarExclusao(context, excluirContaFornecedor);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Excluir Conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
                   ],
                 ),
               ),

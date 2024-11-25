@@ -58,7 +58,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   }
 
   bool verificarCategoria(String descricao, String chave) {
-    final regex = RegExp("r $chave", caseSensitive: false);
+    final regex = RegExp(chave, caseSensitive: false);
     return regex.hasMatch(descricao);
   }
 
@@ -72,10 +72,9 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
       // Filtra os produtos em cada categoria com base na descrição
       for (var produto in produtos) {
-        if (verificarCategoria(
-            produto.descricao, "hortifruit|fruta|legume|natural|verdura")) {
+        if (verificarCategoria(produto.descricao, "hortifruit|fruta|legume|verdura")) {
           produtosPorCategoria["Hortifruit"]?.add(produto);
-        } else if (verificarCategoria(produto.descricao, "açogue|carne")) {
+        } else if (verificarCategoria(produto.descricao, "carne|açogue")) {
           produtosPorCategoria["Açougue"]?.add(produto);
         } else if (verificarCategoria(
             produto.descricao, "linguiça|embutido|salsicha")) {

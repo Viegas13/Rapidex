@@ -5,6 +5,7 @@ import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/ConfirmarExclusao.dart';
+import 'package:interfaces/widgets/ConfirmarLogout.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:intl/intl.dart';
 
@@ -143,20 +144,41 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
                   style: TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () async {
-                confirmarExclusao(context, excluirContaEntregador);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Alinha os botões de forma igualitária
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarLogout(context); // Passa o contexto como parâmetro
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Sair da conta',
+                      style: TextStyle(color: Colors.white)),
                 ),
-              ),
-              child: const Text('Excluir Conta',
-                  style: TextStyle(color: Colors.white)),
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarExclusao(context, excluirContaEntregador);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Excluir Conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ],
         ),
