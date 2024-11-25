@@ -34,6 +34,7 @@ dependencies:
   http: ^1.1.0
   mask_text_input_formatter: ^2.1.0
   image_picker: ^0.8.7
+  flutter_email_sender: ^6.0.3
 
   
 

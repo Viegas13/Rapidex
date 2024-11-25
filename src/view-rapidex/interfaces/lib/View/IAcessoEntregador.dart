@@ -20,7 +20,8 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
   late EntregadorDAO entregadorDAO;
 
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController(); // olhar questão de criptografia
+  final TextEditingController senhaController =
+      TextEditingController(); // olhar questão de criptografia
 
   @override
   void initState() {
@@ -47,15 +48,15 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
     String email = emailController.text;
     String senha = senhaController.text;
 
-    Entregador? entregadorLogado = await entregadorDAO.BuscarEntregadorParaLogin(email, senha);
+    Entregador? entregadorLogado =
+        await entregadorDAO.BuscarEntregadorParaLogin(email, senha);
 
     if (entregadorLogado != null) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomeEntregadorScreen()),
       );
-    }
-    else {
+    } else {
       print("Entregador NULL!!!!!!!!!!!");
     }
   }
@@ -70,6 +71,19 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
           children: [
             Column(
               children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back, // Ícone de seta
+                      color: Colors.black,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
                 Icon(
                   Icons.local_shipping,
                   size: 100,
@@ -155,7 +169,9 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CadastroEntregadorScreen()),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    CadastroEntregadorScreen()),
                           );
                         },
                         child: Text(

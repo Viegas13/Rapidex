@@ -72,6 +72,19 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back, // Ícone de seta
+                  color: Colors.black,
+                  size: 30,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
             Column(
               children: [
                 Icon(

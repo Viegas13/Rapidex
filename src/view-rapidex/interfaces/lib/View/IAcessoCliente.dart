@@ -5,6 +5,7 @@ import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/emailController.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:postgres/postgres.dart';
 
@@ -20,7 +21,8 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
   late ClienteDAO clienteDAO;
 
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController(); // olhar questão de criptografia
+  final TextEditingController senhaController =
+      TextEditingController(); // olhar questão de criptografia
 
   @override
   void initState() {
@@ -47,15 +49,15 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
     String email = emailController.text;
     String senha = senhaController.text;
 
-    Cliente? clienteLogado = await clienteDAO.BuscarClienteParaLogin(email, senha);
+    Cliente? clienteLogado =
+        await clienteDAO.BuscarClienteParaLogin(email, senha);
 
     if (clienteLogado != null) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomeClienteScreen()),
       );
-    }
-    else {
+    } else {
       print("CLIENTE NULL!!!!!!!!!!!");
     }
   }
@@ -68,6 +70,19 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back, // Ícone de seta
+                  color: Colors.black,
+                  size: 30,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
             Column(
               children: [
                 Icon(
@@ -141,7 +156,13 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          // Ação para "Esqueci minha senha"
+                          Emailcontroller emailControllerEnvio =
+                              Emailcontroller();
+
+                          emailControllerEnvio.enviarEmail(
+                              "Recuperação de senha",
+                              "Sua nova senha eh tal",
+                              emailController.text);
                         },
                         child: Text(
                           "Esqueci minha senha",
@@ -155,7 +176,8 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CadastroClienteScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => CadastroClienteScreen()),
                           );
                         },
                         child: Text(
