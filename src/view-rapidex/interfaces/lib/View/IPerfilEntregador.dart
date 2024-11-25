@@ -1,95 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/ICadastroEndereco.dart';
-import 'package:interfaces/View/IEditarPerfilCliente.dart';
-import 'package:interfaces/View/IHomeCliente.dart';
+import 'package:interfaces/View/IEditarPerfilEntregador.dart';
+import 'package:interfaces/View/IHomeEntregador.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
-import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
-import 'package:interfaces/widgets/DropdownTextField.dart';
 import 'package:intl/intl.dart';
-import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 
-class PerfilClienteScreen extends StatefulWidget {
+class PerfilEntregadorScreen extends StatefulWidget {
   final String cpf;
 
-  const PerfilClienteScreen({super.key, required this.cpf});
+  const PerfilEntregadorScreen({super.key, required this.cpf});
 
   @override
-  _PerfilClienteScreenState createState() => _PerfilClienteScreenState();
+  _PerfilEntregadorScreenState createState() => _PerfilEntregadorScreenState();
 }
 
-class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
+class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController dataNascimentoController =
       TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
-  final TextEditingController enderecoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController cartaoController = TextEditingController();
 
-  late ClienteDAO clienteDAO;
-  late EnderecoDAO enderecoDAO;
-  List<String> enderecosFormatados = ['Carregando...'];
+  late EntregadorDAO entregadorDAO;
 
   @override
   void initState() {
     super.initState();
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
-      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
-      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
-      buscarCliente();
-      buscarEnderecos();
+      entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
+      buscarEntregador();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
 
-  Future<void> buscarCliente() async {
+  Future<void> buscarEntregador() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
-      if (cliente != null) {
+      final entregador = await entregadorDAO.buscarEntregador(widget.cpf);
+      if (entregador != null) {
         setState(() {
-          nomeController.text = cliente.nome;
-          dataNascimentoController.text = cliente.dataNascimento != null
-              ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
+          nomeController.text = entregador.nome;
+          dataNascimentoController.text = entregador.dataNascimento != null
+              ? DateFormat('dd/MM/yyyy').format(entregador.dataNascimento!)
               : 'Não informado';
 
-          cpfController.text = cliente.cpf.toString();
-          telefoneController.text = cliente.telefone.toString();
-          emailController.text = cliente.email;
+          cpfController.text = entregador.cpf.toString();
+          telefoneController.text = entregador.telefone.toString();
+          emailController.text = entregador.email;
         });
       }
     } catch (e) {
-      print('Erro ao buscar cliente: $e');
-    }
-  }
-
-  Future<void> buscarEnderecos() async {
-    try {
-      final enderecos = await enderecoDAO.listarEnderecos(widget.cpf);
-      setState(() {
-        enderecosFormatados = enderecos.map((endereco) {
-          final complemento = endereco['complemento']?.isNotEmpty == true
-              ? ', ${endereco['complemento']}'
-              : '';
-          final referencia = endereco['referencia']?.isNotEmpty == true
-              ? ' (${endereco['referencia']})'
-              : '';
-          return '${endereco['rua']} ${endereco['numero']}, ${endereco['bairro']} $complemento $referencia'
-              .trim();
-        }).toList();
-      });
-    } catch (e) {
-      print('Erro ao buscar endereços: $e');
+      print('Erro ao buscar Entregador: $e');
     }
   }
 
   Future<void> excluirConta() async {
     try {
-      await clienteDAO.deletarCliente(widget.cpf);
+      await entregadorDAO.deletarEntregador(widget.cpf);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta excluída com sucesso!')),
       );
@@ -145,7 +117,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+              MaterialPageRoute(builder: (context) => const HomeEntregadorScreen()),
             );
           },
         ),
@@ -169,70 +141,8 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   CustomReadOnlyTextField(
                       labelText: 'E-mail', controller: emailController),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Cadastrar Novo Endereço',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownTextField(
-                    labelText: 'Endereço',
-                    controller: enderecoController,
-                    items: enderecosFormatados.isNotEmpty &&
-                            enderecosFormatados[0] != 'Carregando...'
-                        ? enderecosFormatados
-                        : ['Nenhum endereço disponível'],
-                    onItemSelected: (selectedValue) {
-                      setState(() {
-                        enderecoController.text = selectedValue;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Adicionar Novo Método de Pagamento',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownTextField(
-                    labelText: 'Cartões',
-                    controller: cartaoController,
-                    items: const ["Visa"],
-                  ),
-                  const SizedBox(height: 16),
+                  
+                  
                 ],
               ),
             ),
@@ -242,12 +152,12 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        EditarPerfilClienteScreen(cpf: widget.cpf),
+                        EditarPerfilEntregadorScreen(cpf: widget.cpf),
                   ),
                 );
 
                 if (result == true) {
-                  buscarCliente(); // Recarrega as informações após edição
+                  buscarEntregador(); // Recarrega as informações após edição
                 }
               },
               style: ElevatedButton.styleFrom(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/IHomeCliente.dart';
-import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/View/IHomeEntregador.dart';
+import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
@@ -8,16 +8,16 @@ import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/widgets/DatePicker.dart';
 
-class CadastroClienteScreen extends StatefulWidget {
-  const CadastroClienteScreen({super.key});
+class CadastroEntregadorScreen extends StatefulWidget {
+  const CadastroEntregadorScreen({super.key});
 
   @override
-  _CadastroClienteScreenState createState() => _CadastroClienteScreenState();
+  _CadastroEntregadorScreenState createState() => _CadastroEntregadorScreenState();
 }
 
-class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
+class _CadastroEntregadorScreenState extends State<CadastroEntregadorScreen> {
   late ConexaoDB conexaoDB;
-  late ClienteDAO clienteDAO;
+  late EntregadorDAO entregadorDAO;
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
@@ -31,7 +31,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
-    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+    entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
@@ -51,7 +51,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
     super.dispose();
   }
 
-  Future<void> cadastrarCliente() async {
+  Future<void> cadastrarEntregador() async {
     String email = emailController.text;
     String cpf = cpfController.text;
 
@@ -70,7 +70,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
     }
 
     try {
-      Map<String, dynamic> cliente = {
+      Map<String, dynamic> Entregador = {
         'nome': nomeController.text,
         'cpf': cpf,
         'senha': senhaController.text,
@@ -79,7 +79,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
         'datanascimento': dataNascimentoController.text,
       };
 
-      await clienteDAO.cadastrarCliente(cliente);
+      await entregadorDAO.cadastrarEntregador(Entregador);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
@@ -88,7 +88,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
       // Redirecionar para HomeScreen após sucesso
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+        MaterialPageRoute(builder: (context) => const HomeEntregadorScreen()),
       );
     } catch (e) {
       if (e.toString().contains('duplicate key') ||
@@ -98,10 +98,10 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao cadastrar cliente')),
+          const SnackBar(content: Text('Erro ao cadastrar Entregador')),
         );
       }
-      print('Erro ao cadastrar cliente: $e');
+      print('Erro ao cadastrar Entregador: $e');
     }
   }
 
@@ -123,7 +123,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: const Text('Cadastro de Cliente'),
+        title: const Text('Cadastro de Entregador'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -166,7 +166,7 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: cadastrarCliente,
+              onPressed: cadastrarEntregador,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
@@ -79,10 +80,10 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
-      /*Navigator.pushReplacement(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeFornecedorScreen(cnpj: "12345678912")),
-      );*/
+        MaterialPageRoute(builder: (context) => HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao cadastrar fornecedor')),

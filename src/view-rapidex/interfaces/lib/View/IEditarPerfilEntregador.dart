@@ -1,72 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
-import 'package:interfaces/DTO/Cliente.dart';
+import 'package:interfaces/DTO/Entregador.dart';
 
-class EditarPerfilClienteScreen extends StatefulWidget {
+class EditarPerfilEntregadorScreen extends StatefulWidget {
   final String cpf;
 
-  const EditarPerfilClienteScreen({super.key, required this.cpf});
+  const EditarPerfilEntregadorScreen({super.key, required this.cpf});
 
   @override
-  _EditarPerfilClienteScreenState createState() =>
-      _EditarPerfilClienteScreenState();
+  _EditarPerfilEntregadorScreenState createState() =>
+      _EditarPerfilEntregadorScreenState();
 }
 
-class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
+class _EditarPerfilEntregadorScreenState extends State<EditarPerfilEntregadorScreen> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController dataNascimentoController =
       TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  late ClienteDAO clienteDAO;
+  late EntregadorDAO entregadorDAO;
 
   @override
   void initState() {
     super.initState();
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
-      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
-      buscarCliente();
+      entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
+      buscarEntregador();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
 
-  Future<void> buscarCliente() async {
+  Future<void> buscarEntregador() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
-      if (cliente != null) {
+      final entregador = await entregadorDAO.buscarEntregador(widget.cpf);
+      if (entregador != null) {
         setState(() {
-          nomeController.text = cliente.nome;
-          dataNascimentoController.text = cliente.dataNascimento != null
-              ? DateFormat('dd/MM/yyyy').format(cliente.dataNascimento!)
+          nomeController.text = entregador.nome;
+          dataNascimentoController.text = entregador.dataNascimento != null
+              ? DateFormat('dd/MM/yyyy').format(entregador.dataNascimento!)
               : 'Não informado';
 
           // Converter o telefone de int para String
-          telefoneController.text = cliente.telefone.toString();
+          telefoneController.text = entregador.telefone.toString();
 
-          emailController.text = cliente.email;
+          emailController.text = entregador.email;
         });
       }
     } catch (e) {
-      print('Erro ao buscar cliente: $e');
+      print('Erro ao buscar Entregador: $e');
     }
   }
 
   Future<void> salvarAlteracoes() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
+      final entregador = await entregadorDAO.buscarEntregador(widget.cpf);
 
-      if (cliente != null) {
-        final clienteAtualizado = Cliente(
+      if (entregador != null) {
+        final entregadorAtualizado = Entregador(
           cpf: widget.cpf,
           nome: nomeController.text,
-          senha: cliente.senha, // Manter a senha atual
+          senha: entregador.senha, // Manter a senha atual
           email: emailController.text,
           telefone: telefoneController.text,
           dataNascimento: dataNascimentoController.text.isNotEmpty
@@ -74,7 +74,7 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
               : null,
         );
 
-        await clienteDAO.atualizarCliente(clienteAtualizado.toMap());
+        await entregadorDAO.atualizarEntregador(entregadorAtualizado.toMap());
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Informações atualizadas com sucesso!')),

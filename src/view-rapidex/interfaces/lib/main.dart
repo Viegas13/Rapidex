@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/ICadastroCliente.dart';
 import 'package:interfaces/View/ICadastroFornecedor.dart';
-import 'package:interfaces/View/IHome.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
+import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
-
-//import 'package:interfaces/View/ICarrinho.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
-import 'package:interfaces/View/carrinho.dart';
-
-import 'package:interfaces/View/IBusca.dart';
-import 'package:interfaces/View/IPerfil.dart';
+import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/View/IPerfilEntregador.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,18 +19,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Rapidex',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
-      home: const HomeScreen(),
-      routes: {
-        '/busca': (context) => const BuscaScreen(),
-        '/perfil': (context) => const PerfilScreen(),
-        '/carrinho': (context) => const CarrinhoPage(),
-        '/perfil_cliente': (context) => const PerfilClienteScreen(cpf: "13774195684"),
-        '/perfil_fornecedor': (context) => const PerfilFornecedorScreen(cnpj: "11111111111111"),
-      },
-    );
+        title: 'Rapidex',
+        theme: ThemeData(
+          primarySwatch: Colors.orange,
+        ),
+        home: const LoginGeralScreen(),
+        routes: {
+          '/carrinho': (context) => const CarrinhoPage(),
+          '/perfil_cliente': (context) =>
+              const PerfilClienteScreen(cpf: "70275182606"),
+          '/perfil_fornecedor': (context) =>
+              const PerfilFornecedorScreen(cnpj: "11111111111111"),
+          '/perfil_entregador': (context) =>
+              const PerfilEntregadorScreen(cpf: "13774195684"),
+        });
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/widgets/ImageLabelField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -15,6 +17,7 @@ class AdicionarProdutoScreen extends StatefulWidget {
 class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
+  Uint8List? imagemSelecionada;
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
@@ -22,7 +25,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
   int quantidade = 1;
-  final TextEditingController quantidadeController = TextEditingController(text: '1');
+  final TextEditingController quantidadeController =
+      TextEditingController(text: '1');
 
   @override
   void initState() {
@@ -50,34 +54,54 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     super.dispose();
   }
 
- Future<void> cadastrarProduto() async {
-    // Criar uma nova instância de ConexaoDB e ProdutoDAO
-    // (Aqui você já pode utilizar a conexão que foi iniciada no initState)
-    try {
-      // Usando a conexão já iniciada na classe ConexaoDB
-      Map<String, dynamic> produto = {
-        'nome': nomeController.text,
-        'validade': validadeController.text,
-        'preco': precoController.text,
-        'imagem': precoController.text,
-        'descricao': descricaoController.text,
-        'fornecedor': '353654234583',
-        'restrito': restritoPorIdade.toString(),
-        'quantidade': quantidadeController.text,
-      };
+  Future<void> selecionarImagem() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
 
-      await produtoDAO.cadastrarProduto(produto);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar produto')),
-      );
-      print('Erro ao cadastrar produto: $e');
+    if (imagem != null) {
+      final Uint8List imageBytes = await imagem.readAsBytes();
+      setState(() {
+        imagemSelecionada = imageBytes;
+      });
     }
   }
+
+  Future<void> cadastrarProduto() async {
+  try {
+    // Verifica se há uma imagem selecionada e a converte para bytes
+    Uint8List? imagemBytes;
+    if (imagemSelecionada != null) {
+      imagemBytes = imagemSelecionada!;
+    }
+
+    // Monta o produto como um mapa
+    Map<String, dynamic> produto = {
+      'nome': nomeController.text,
+      'validade': validadeController.text,
+      'preco': precoController.text,
+      'imagem': imagemBytes, // Passa os bytes da imagem
+      'descricao': descricaoController.text,
+      'fornecedor': '11111111111111',
+      'restrito': restritoPorIdade ? 'true' : 'false',
+      'quantidade': quantidadeController.text,
+    };
+
+    // Chama o DAO para salvar no banco
+    await produtoDAO.cadastrarProduto(produto);
+
+    // Exibe uma mensagem de sucesso
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+    );
+  } catch (e) {
+    // Exibe uma mensagem de erro
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Erro ao cadastrar produto')),
+    );
+    print('Erro ao cadastrar produto: $e');
+  }
+}
+
 
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
@@ -85,14 +109,12 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate:
-          DateTime.now().add(const Duration(days: 365 * 10)), // até 10 anos à frente
+      lastDate: DateTime.now()
+          .add(const Duration(days: 365 * 10)), // até 10 anos à frente
     );
-    if (pickedDate != null) {
-      setState(() {
-        validadeController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-      });
-    }
+    setState(() {
+      validadeController.text = DateFormat('dd/MM/yyyy').format(pickedDate!);
+    });
   }
 
   @override
@@ -146,13 +168,29 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     hintText: 'Inserir preço do produto',
                   ),
                   const SizedBox(height: 10),
-                  ImageLabelField(
-                    label: 'Imagem',
-                    hint: 'Anexar imagem do produto',
-                    onAttachPressed: () {
-                      // Ação de anexar imagem
-                    },
+                  GestureDetector(
+                    onTap: selecionarImagem,
+                    child: Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: imagemSelecionada != null
+                          ? Image.memory(
+                              imagemSelecionada!,
+                              fit: BoxFit.cover,
+                            )
+                          : const Center(
+                              child: Text(
+                                'Anexar imagem do produto',
+                                style: TextStyle(color: Colors.black45),
+                              ),
+                            ),
+                    ),
                   ),
+                  const SizedBox(height: 10),
                   const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
@@ -204,7 +242,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                     children: [
                       const Text(
                         'Quantidade',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -215,7 +254,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                               setState(() {
                                 if (quantidade > 1) {
                                   quantidade--;
-                                  quantidadeController.text = quantidade.toString();
+                                  quantidadeController.text =
+                                      quantidade.toString();
                                 }
                               });
                             },
@@ -234,7 +274,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                                 setState(() {
                                   quantidade = int.tryParse(value) ?? 1;
                                   if (quantidade < 1) quantidade = 1;
-                                  quantidadeController.text = quantidade.toString();
+                                  quantidadeController.text =
+                                      quantidade.toString();
                                 });
                               },
                             ),
@@ -243,7 +284,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                             onPressed: () {
                               setState(() {
                                 quantidade++;
-                                quantidadeController.text = quantidade.toString();
+                                quantidadeController.text =
+                                    quantidade.toString();
                               });
                             },
                             icon: const Icon(Icons.add),
@@ -263,8 +305,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                       ),
                       onPressed: cadastrarProduto,
                       child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 24.0),
                         child: Text(
                           'Cadastrar Produto',
                           style: TextStyle(color: Colors.white),
@@ -280,4 +322,4 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       ),
     );
   }
-} 
+}

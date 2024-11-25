@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/DTO/Cliente.dart';
-import 'package:interfaces/View/ICadastroFornecedor.dart';
-import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/DTO/Entregador.dart';
+import 'package:interfaces/View/ICadastroEntregador.dart';
+import 'package:interfaces/View/IHomeEntregador.dart';
+import 'package:interfaces/View/IPerfilEntregador.dart';
+import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:postgres/postgres.dart';
@@ -14,20 +16,18 @@ class AcessoEntregadorScreen extends StatefulWidget {
 }
 
 class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
-
   late ConexaoDB conexaoDB;
-  late FornecedorDAO fornecedorDAO;
+  late EntregadorDAO entregadorDAO;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController(); // olhar questão de criptografia
-
 
   @override
   void initState() {
     super.initState();
 
     conexaoDB = ConexaoDB();
-    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
+    entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
@@ -36,29 +36,29 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
     });
   }
 
-  /*@override
+  @override
   void dispose() {
     emailController.dispose();
     senhaController.dispose();
     super.dispose();
   }
 
-  Future<void> logarFornecedor() async {
+  Future<void> logarEntregador() async {
     String email = emailController.text;
     String senha = senhaController.text;
 
-    Cliente? fornecedorLogado = await fornecedorDAO.BuscarFornecedorParaLogin(email, senha);
+    Entregador? entregadorLogado = await entregadorDAO.BuscarEntregadorParaLogin(email, senha);
 
-    if (fornecedorLogado != null) {
+    if (entregadorLogado != null) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => PerfilClienteScreen(clienteLogado.cpf)), //MaterialPageRoute(builder: (context) => PerfilScreen()),
+        MaterialPageRoute(builder: (context) => HomeEntregadorScreen()),
       );
     }
     else {
-      print("CLIENTE NULL!!!!!!!!!!!");
+      print("Entregador NULL!!!!!!!!!!!");
     }
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,10 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CadastroEntregadorScreen()),
+                          );
                         },
                         child: Text(
                           "Cadastrar-se",
@@ -171,9 +174,7 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
             SizedBox(height: 20),
             // Botão Confirmar
             ElevatedButton(
-              onPressed: () {
-
-              },
+              onPressed: logarEntregador,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 shape: RoundedRectangleBorder(

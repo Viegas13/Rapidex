@@ -25,18 +25,19 @@ class FornecedorDAO {
       print('Fornecedor cadastrado com sucesso!');
     } catch (e) {
       print('Erro ao cadastrar fornecedor: $e');
-      rethrow;
+      rethrow; // Aqui rethrow está corretamente dentro do catch
     }
   }
 
-
-  Future<Fornecedor?> BuscarFornecedorParaLogin(String email, String senha) async {
-
+  // Buscar fornecedor para login
+  Future<Fornecedor?> BuscarFornecedorParaLogin(
+      String email, String senha) async {
+    try {
       var result = await conexaoDB.connection.query(
         'SELECT * FROM fornecedor WHERE email = @email AND senha = @senha',
-        substitutionValues: {'email': email.toString(), 'senha': senha.toString()},
+        substitutionValues: {'email': email, 'senha': senha},
       );
-      
+
       if (result.isNotEmpty) {
         return Fornecedor.fromMap(result[0].toColumnMap());
       } else {
@@ -44,11 +45,11 @@ class FornecedorDAO {
       }
     } catch (e) {
       print('Erro na busca: $e');
-      rethrow;
+      rethrow; // Aqui rethrow está dentro do catch
     }
   }
 
-
+  // Buscar fornecedor por CNPJ
   Future<Map<String, dynamic>?> buscarFornecedor(String cnpj) async {
     try {
       if (conexaoDB.connection.isClosed) {
@@ -66,7 +67,7 @@ class FornecedorDAO {
       return result.isNotEmpty ? result[0].toColumnMap() : null;
     } catch (e) {
       print('Erro ao buscar fornecedor: $e');
-      return null;
+      return null; // Não há rethrow necessário aqui, pois não estamos lidando com a propagação do erro
     }
   }
 
@@ -88,7 +89,7 @@ class FornecedorDAO {
       print('Fornecedor atualizado com sucesso!');
     } catch (e) {
       print('Erro ao atualizar fornecedor: $e');
-      rethrow;
+      rethrow; // rethrow dentro de catch, adequado
     }
   }
 
@@ -106,8 +107,7 @@ class FornecedorDAO {
       print('Fornecedor excluído com sucesso!');
     } catch (e) {
       print('Erro ao excluir fornecedor: $e');
-      rethrow;
+      rethrow; // rethrow dentro de catch, adequado
     }
   }
-
 }

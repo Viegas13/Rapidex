@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
 import 'IFinalizarpedido.dart';
 
 class CarrinhoPage extends StatefulWidget {
@@ -21,6 +22,15 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         title: const Text('Carrinho'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,7 +74,6 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
               );
             }),
             const Spacer(),
-            
             ElevatedButton(
               onPressed: () {
                 // Filtra os produtos com quantidade maior que 0 e envia para FinalizarPedido

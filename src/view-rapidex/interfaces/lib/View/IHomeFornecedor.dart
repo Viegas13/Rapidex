@@ -1,6 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:interfaces/View/editar_perfil_fornecedor.dart';
+import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
+import 'package:interfaces/View/IAdicionarProduto.dart';
+import 'package:interfaces/DTO/Produto.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
   final String cnpjFornecedor;
@@ -12,29 +17,53 @@ class HomeFornecedorScreen extends StatefulWidget {
 }
 
 class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
-  List<Map<String, dynamic>> produtos = [];
+  late ConexaoDB conexaoDB;
+  List<Produto> produtos = [];
   bool isLoading = true;
   late ProdutoDAO produtoDAO;
 
   @override
   void initState() {
     super.initState();
-    _fetchProdutos();
+    conexaoDB = ConexaoDB();
+    produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+
+    conexaoDB.initConnection().then((_) {
+      print('Conexão estabelecida no initState.');
+      carregarProdutos();
+    }).catchError((error) {
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
   }
 
-  Future<void> _fetchProdutos() async {
+  Future<void> carregarProdutos() async {
     try {
-      // Chame sua função para listar os produtos
-      final produtosList = await produtoDAO.listarProdutos(widget.cnpjFornecedor);
+      print('Carregando produtos do fornecedor...');
+      final resultado = await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
+
       setState(() {
-        produtos = produtosList;
+        produtos = resultado;
         isLoading = false;
       });
     } catch (e) {
-      print('Erro ao buscar produtos: $e');
+      print('Erro ao carregar produtos: $e');
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void excluirProduto(Produto produto) async {
+    try {
+      await produtoDAO.removerProduto(produto.nome);
+      setState(() {
+        produtos.remove(produto);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${produto.nome} excluído com sucesso.')),
+      );
+    } catch (e) {
+      print('Erro ao excluir produto: $e');
     }
   }
 
@@ -46,16 +75,12 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
         backgroundColor: Colors.orange,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.account_circle,
-            color: Colors.grey,
-            size: 40.0,
-          ),
+          icon: const Icon(Icons.account_circle, color: Colors.grey, size: 40.0),
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const EditarPerfilFornecedorScreen(),
+                builder: (context) => const PerfilFornecedorScreen(cnpj: '11111111111111'),
               ),
             );
           },
@@ -74,130 +99,56 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : ListView(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 10),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: produtos.length,
+              itemBuilder: (context, index) {
+                final produto = produtos[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: ListTile(
+                    leading: produto.imagem != null
+                        ? Image.memory(
+                            Uint8List.fromList(produto.imagem!),
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          )
+                        : const Icon(Icons.image_not_supported, size: 50),
+                    title: Text(produto.nome),
+                    subtitle: Text('Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildDynamicSection(
-                          title: "Produtos cadastrados",
-                          items: produtos
-                              .map((produto) =>
-                                  "${produto['nome']} (${produto['quantidade']})")
-                              .toList(),
-                          emptyMessage: "Nenhum produto cadastrado",
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            // Navegar para a tela de edição
+                          },
                         ),
-                        const SizedBox(height: 20),
-                        _buildDynamicSection(
-                          title: "Pedidos em andamento",
-                          items: [], // Aqui você pode adicionar a lógica dos pedidos
-                          emptyMessage: "Nenhum pedido em andamento",
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            excluirProduto(produto);
+                          },
                         ),
                       ],
                     ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: ElevatedButton(
-              onPressed: () {
-                // Adicionar funcionalidade para cadastrar produtos
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              ),
-              child: const Text(
-                "Cadastrar Produto",
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDynamicSection({
-    required String title,
-    required List<String> items,
-    required String emptyMessage,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 10),
-        if (items.isEmpty)
-          Text(
-            emptyMessage,
-            style: const TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
-              color: Colors.grey,
-            ),
-          )
-        else
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: items.map((item) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  padding: const EdgeInsets.all(10),
-                  width: 120,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        blurRadius: 5,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      item,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
                   ),
                 );
-              }).toList(),
+              },
             ),
-          ),
-      ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AdicionarProdutoScreen()),
+          );
+        },
+        backgroundColor: Colors.orange,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
