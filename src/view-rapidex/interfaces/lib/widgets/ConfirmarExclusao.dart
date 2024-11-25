@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IPerfilEntregador.dart';
+import 'package:interfaces/View/IPerfilCliente.dart';
+import 'package:interfaces/View/IPerfilFornecedor.dart';
 
-void confirmarExclusao(BuildContext context) {
+void confirmarExclusao(BuildContext context, Function excluirConta) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -18,6 +21,7 @@ void confirmarExclusao(BuildContext context) {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // Fecha o diálogo
+              excluirConta(); // Chama a função de exclusão passada
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

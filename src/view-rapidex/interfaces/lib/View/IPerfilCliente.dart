@@ -89,7 +89,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     }
   }
 
-  Future<void> excluirConta() async {
+  Future<void> excluirContaCliente() async {
     try {
       await clienteDAO.deletarCliente(widget.cpf);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -257,8 +257,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    confirmarExclusao(context);
-                    excluirConta();
+                    confirmarExclusao(context, excluirContaCliente);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,

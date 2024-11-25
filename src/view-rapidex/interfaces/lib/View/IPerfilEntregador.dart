@@ -60,7 +60,7 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
     }
   }
 
-  Future<void> excluirConta() async {
+  Future<void> excluirContaEntregador() async {
     try {
       await entregadorDAO.deletarEntregador(widget.cpf);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,8 +145,7 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () async {
-                confirmarExclusao(context);
-                excluirConta();
+                confirmarExclusao(context, excluirContaEntregador);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

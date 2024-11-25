@@ -46,7 +46,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     }
   }
 
-  Future<void> excluirConta() async {
+  Future<void> excluirContaFornecedor() async {
     try {
       await fornecedorDAO.deletarFornecedor(widget.cnpj);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -132,8 +132,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () async {
-                          confirmarExclusao(context);
-                          excluirConta();
+                          confirmarExclusao(context, excluirContaFornecedor);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
