@@ -20,7 +20,8 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   String? cartaoSelecionado;
   late ConexaoDB conexaoDB;
   late CartaoDAO cartaoDAO;
-  late List<Cartao> cartoes = [];
+  List<Cartao> cartoes = [];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -36,19 +37,34 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   }
 
   Future<void> carregarCartoes() async {
-    try {
-      String cpfCliente = '02083037669'; // Substitua pelo CPF do cliente logado
-      cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
-      if (cartoes.isNotEmpty) {
-        cartaoSelecionado = cartoes[0].bandeira;
-      }
-      setState(() {});
-    } catch (e) {
-      print('Erro ao carregar cartões: $e');
+  setState(() {
+    isLoading = true; // Exibe carregamento
+  });
+
+  try {
+    String cpfCliente = '351.935.576-00'; // Substitua pelo CPF do cliente logado
+    cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
+
+    if (cartoes.isNotEmpty) {
+      // Verifica se o número do cartão não é nulo antes de converter para string
+      cartaoSelecionado = cartoes[0].numero.toString();
+    } else {
+      cartaoSelecionado = null; // Nenhum cartão disponível
     }
+  } catch (e) {
+    print('Erro ao carregar cartões: $e');
+  } finally {
+    setState(() {
+      isLoading = false; // Finaliza carregamento
+    });
   }
+}
 
   Widget selecionarCartao() {
+    if (isLoading) {
+      return const CircularProgressIndicator(); // Indicador de carregamento
+    }
+
     if (cartoes.isEmpty) {
       return const Text('Nenhum cartão cadastrado.');
     }
@@ -57,15 +73,17 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       value: cartaoSelecionado,
       onChanged: (String? novoCartao) {
         setState(() {
-          cartaoSelecionado = novoCartao!;
+          cartaoSelecionado = novoCartao ?? '';
         });
       },
       items: cartoes.map((cartao) {
+        final numeroCartao = cartao.numero?.toString() ?? 'Indefinido';
+        final nomeTitular = cartao.nomeTitular ?? 'Sem Nome';
+        final bandeira = cartao.bandeira ?? 'Sem Bandeira';
+
         return DropdownMenuItem<String>(
-          value: cartao.numero.toString(),
-          child: Text(
-            '${cartao.nomeTitular} - ${cartao.bandeira}',
-          ),
+          value: numeroCartao,
+          child: Text('$nomeTitular - $bandeira'),
         );
       }).toList(),
     );
@@ -148,9 +166,18 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
             ),
             if (formaPagamento == 'Cartão') ...[
               const SizedBox(height: 16),
-              const Text(
-                'Selecione um Cartão:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Text(
+                    'Selecione um Cartão:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: carregarCartoes, // Botão de refresh
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               selecionarCartao(),

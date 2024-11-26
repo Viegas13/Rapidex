@@ -5,8 +5,10 @@ import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/widgets/ConfirmarExclusao.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:interfaces/widgets/DropdownTextField.dart';
+import 'package:interfaces/widgets/ConfirmarLogout.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 
@@ -87,7 +89,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     }
   }
 
-  Future<void> excluirConta() async {
+  Future<void> excluirContaCliente() async {
     try {
       await clienteDAO.deletarCliente(widget.cpf);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -105,35 +107,6 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
     }
   }
 
-  void mostrarDialogoConfirmacao() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Exclusão'),
-          content: const Text(
-              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-                excluirConta(); // Exclui a conta
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Excluir'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +118,8 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const HomeClienteScreen()),
             );
           },
         ),
@@ -262,18 +236,41 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   style: TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: mostrarDialogoConfirmacao,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Alinha os botões de forma igualitária
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarLogout(context); // Passa o contexto como parâmetro
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Sair da conta',
+                      style: TextStyle(color: Colors.white)),
                 ),
-              ),
-              child: const Text('Excluir Conta',
-                  style: TextStyle(color: Colors.white)),
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarExclusao(context, excluirContaCliente);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Excluir Conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ],
         ),
