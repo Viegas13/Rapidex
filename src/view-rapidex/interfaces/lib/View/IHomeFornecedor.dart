@@ -54,16 +54,18 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     }
   }
 
-  void excluirProduto(Produto produto) async {
+  Future<void> excluirProduto(Produto produto) async {
     try {
+      ProdutoDAO produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
       await produtoDAO.removerProduto(produto.nome);
-      setState(() {
-        produtos.remove(produto);
-      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${produto.nome} excluído com sucesso.')),
+        const SnackBar(content: Text('Produto excluído com sucesso!')),
       );
+
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir produto')),
+      );
       print('Erro ao excluir produto: $e');
     }
   }

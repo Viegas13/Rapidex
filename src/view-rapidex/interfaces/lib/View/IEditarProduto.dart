@@ -8,14 +8,14 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
 
-class AdicionarProdutoScreen extends StatefulWidget {
-  const AdicionarProdutoScreen({super.key});
+class EditarProdutoScreen extends StatefulWidget {
+  const EditarProdutoScreen({super.key});
 
   @override
-  _AdicionarProdutoScreenState createState() => _AdicionarProdutoScreenState();
+  _EditarProdutoScreenState createState() => _EditarProdutoScreenState();
 }
 
-class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
+class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
@@ -324,7 +324,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                           vertical: 12.0, horizontal: 24.0,
                         ),
                         child: Text(
-                          'Cadastrar Produto',
+                          'Editar Produto',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),

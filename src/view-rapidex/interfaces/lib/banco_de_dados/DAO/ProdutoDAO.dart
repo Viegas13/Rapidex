@@ -42,7 +42,7 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE idProduto = @id
+        DELETE FROM produto WHERE nome = @nome
         ''',
         substitutionValues: {'nome': nome},
       );
