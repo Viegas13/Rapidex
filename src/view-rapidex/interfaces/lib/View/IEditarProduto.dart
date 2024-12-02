@@ -335,7 +335,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
                           horizontal: 24.0,
                         ),
                         child: Text(
-                          'Editar Produto',
+                          'Salvar Alterações',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),

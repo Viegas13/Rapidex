@@ -62,7 +62,7 @@ class ProdutoDAO {
       await conexaoDB.connection.query(
         '''
         UPDATE produto 
-        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor = @fornecedor, restrito = @restrito, quantidade = @quantidade 
+        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor_cnpj = @fornecedor_cnpj, restritoPorIdade = @restritoPorIdade, quantidade = @quantidade 
         WHERE produto_id = @produto_id
         ''',
         substitutionValues: produto,
