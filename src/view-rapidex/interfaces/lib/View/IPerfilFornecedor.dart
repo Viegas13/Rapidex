@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
+import 'package:interfaces/widgets/ConfirmarExclusao.dart';
+import 'package:interfaces/widgets/ConfirmarLogout.dart';
 import 'IEditarPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -45,7 +47,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     }
   }
 
-  Future<void> excluirConta() async {
+  Future<void> excluirContaFornecedor() async {
     try {
       await fornecedorDAO.deletarFornecedor(widget.cnpj);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,35 +65,6 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
       );
       print('Erro ao excluir conta: $e');
     }
-  }
-
-  void mostrarDialogoConfirmacao() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Exclusão'),
-          content: const Text(
-              'Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-                excluirConta(); // Exclui a conta
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Excluir'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -157,21 +130,42 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: mostrarDialogoConfirmacao,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Excluir Conta',
-                            style: TextStyle(color: Colors.white)),
-                      ),
+                    Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceEvenly, // Alinha os botões de forma igualitária
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarLogout(context); // Passa o contexto como parâmetro
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                  ),
+                  child: const Text('Sair da conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    confirmarExclusao(context, excluirContaFornecedor);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Excluir Conta',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
                   ],
                 ),
               ),
