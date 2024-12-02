@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 class Produto {
   final String idProduto;
   final String nome;
@@ -25,8 +23,9 @@ class Produto {
 
   factory Produto.fromMap(Map<String, dynamic> map) {
     return Produto(
-      idProduto: map['idProduto'] ?? '',
-      nome: map['nome'] ?? '',
+      idProduto: map['idProduto'] ?? '', // Adapte o nome se necessário
+      nome:
+          map['nome_produto'] ?? '', // Ajuste para usar o alias `nome_produto`
       validade: map['validade'] != null
           ? DateTime.tryParse(map['validade'].toString())
           : null,
@@ -42,6 +41,7 @@ class Produto {
 
   Map<String, dynamic> toMap() {
     return {
+      'idProduto': idProduto,
       'nome': nome,
       'validade': validade?.toIso8601String(),
       'preco': preco,
