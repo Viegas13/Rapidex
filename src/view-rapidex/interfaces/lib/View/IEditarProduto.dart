@@ -7,9 +7,12 @@ import 'package:interfaces/widgets/ImageLabelField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/DTO/Produto.dart';
 
 class EditarProdutoScreen extends StatefulWidget {
-  const EditarProdutoScreen({super.key});
+  final int id;
+
+  EditarProdutoScreen({super.key, required this.id});
 
   @override
   _EditarProdutoScreenState createState() => _EditarProdutoScreenState();
@@ -26,33 +29,47 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
   int quantidade = 1;
-  final TextEditingController quantidadeController =
-      TextEditingController(text: '1');
+  TextEditingController quantidadeController = TextEditingController(text: '1');
 
   @override
   void initState() {
     super.initState();
     // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
-    produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-
     // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
-      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
-      print('Conexão estabelecida no initState.');
+      produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+      buscarProduto();
     }).catchError((error) {
-      // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
-      print('Erro ao estabelecer conexão no initState: $error');
+      print('Erro ao inicializar conexão: $error');
     });
   }
 
-  @override
-  void dispose() {
-    nomeController.dispose();
-    validadeController.dispose();
-    precoController.dispose();
-    descricaoController.dispose();
-    super.dispose();
+  Future<void> buscarProduto() async {
+    try {
+      final produto = await produtoDAO.buscarProduto(widget.id);
+
+      if (produto != null) {
+        setState(() {
+          nomeController.text = produto.nome;
+
+          validadeController.text = produto.validade != null
+              ? DateFormat('dd/MM/yyyy').format(produto.validade!)
+              : 'Não informado';
+
+          // Converter o telefone de int para String
+          precoController.text = produto.preco.toString();
+
+          // emailController.text = cliente.email; imagem
+          descricaoController.text = produto.descricao;
+          restritoPorIdade = produto.restrito;
+          quantidadeController =
+              TextEditingController(text: produto.quantidade.toString());
+        });
+      }
+    } catch (e) {
+      print('Erro ao buscar cliente: $e');
+    }
   }
 
   Future<void> selecionarImagem() async {
@@ -67,46 +84,39 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
     }
   }
 
-  Future<bool> cadastrarProduto() async {
+  Future<void> salvarAlteracoes() async {
     try {
-      // Verifica se há uma imagem selecionada e a converte para bytes
-      Uint8List? imagemBytes;
-      if (imagemSelecionada != null) {
-        imagemBytes = imagemSelecionada!;
+      final produto = await produtoDAO.buscarProduto(widget.id);
+
+      if (produto != null) {
+        final produtoAtualizado = Produto(
+          produto_id: widget.id,
+          nome: nomeController.text,
+          validade: validadeController.text.isNotEmpty
+              ? DateFormat('dd/MM/yyyy').parse(validadeController.text)
+              : null,
+          preco: 50.00,
+          imagem: imagemSelecionada,
+          descricao: descricaoController.text,
+          fornecedorCnpj: '11111111111111',
+          restrito: restritoPorIdade,
+          quantidade: 89,
+        );
+
+        await produtoDAO.atualizarProduto(produtoAtualizado.toMap());
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Informações atualizadas com sucesso!')),
+        );
+
+        // Passa um valor para a tela anterior para indicar que os dados foram atualizados
+        Navigator.pop(context,
+            true); // Passando `true` para indicar que as alterações foram feitas
       }
-
-      // Monta o produto como um mapa
-      Map<String, dynamic> produto = {
-        'nome': nomeController.text,
-        'validade': validadeController.text,
-        'preco': precoController.text,
-        'imagem': imagemBytes, // Passa os bytes da imagem
-        'descricao': descricaoController.text,
-        'fornecedor': '11111111111111',
-        'restrito': restritoPorIdade ? 'true' : 'false',
-        'quantidade': quantidadeController.text,
-      };
-
-      // Chama o DAO para salvar no banco
-      await produtoDAO.cadastrarProduto(produto);
-
-      // Exibe uma mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-      );
-
-      return true; // Retorna sucesso
     } catch (e) {
-      // Exibe uma mensagem de erro
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar produto')),
-      );
-      print('Erro ao cadastrar produto: $e');
-
-      return false; // Retorna falha
+      print('Erro ao salvar alterações: $e');
     }
   }
-
 
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
@@ -136,7 +146,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
           },
         ),
         title: const Text(
-          'Cadastrar produto',
+          'Editar produto',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -308,20 +318,11 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: () async {
-                        bool sucesso = await cadastrarProduto();
-                        if (sucesso) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeFornecedorScreen(cnpjFornecedor: '11111111111111'),
-                            ),
-                          );
-                        }
-                      },
+                      onPressed: salvarAlteracoes,
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
-                          vertical: 12.0, horizontal: 24.0,
+                          vertical: 12.0,
+                          horizontal: 24.0,
                         ),
                         child: Text(
                           'Editar Produto',
