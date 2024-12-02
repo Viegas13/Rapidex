@@ -22,8 +22,8 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade)
-        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade)
+        INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade) 
+        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade) RETURNING produto_id
         ''',
         substitutionValues: produto,
       );
@@ -62,8 +62,8 @@ class ProdutoDAO {
       await conexaoDB.connection.query(
         '''
         UPDATE produto 
-        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor = @fornecedor, restrito = @restrito, quantidade = @quantidade 
-        WHERE id = @id
+        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor_cnpj = @fornecedor_cnpj, restritoPorIdade = @restritoPorIdade, quantidade = @quantidade 
+        WHERE produto_id = @produto_id
         ''',
         substitutionValues: produto,
       );
@@ -105,31 +105,7 @@ class ProdutoDAO {
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
-        FROM produto
-        WHERE fornecedor_cnpj = @fornecedor_cnpj
-        ''',
-        substitutionValues: {
-          'fornecedor_cnpj': cnpjFornecedor,
-        },
-      );
-
-      return results.map((row) {
-        return Produto.fromMap(row.toColumnMap());
-      }).toList();
-    } catch (e) {
-      print('Erro ao listar produtos: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<Produto>> listarTodosProdutos() async {
-    try {
-      await verificarConexao();
-
-      final results = await conexaoDB.connection.query(
-        '''
-        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
         ''',
       );

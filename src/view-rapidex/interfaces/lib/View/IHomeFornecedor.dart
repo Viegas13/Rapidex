@@ -4,6 +4,7 @@ import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
+import 'package:interfaces/View/IEditarProduto.dart';
 import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 
@@ -120,6 +121,18 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
+                          leading: (produto.imagem != null &&
+                                  produto.imagem!.isNotEmpty)
+                              ? Image.memory(
+                                  produto.imagem!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons
+                                        .image_not_supported); // Ícone se a imagem for inválida
+                                  },
+                                )
+                              : Icon(Icons
+                                  .image), // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
                               'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
@@ -130,7 +143,13 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                 icon:
                                     const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
-                                  // Navegar para a tela de edição
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditarProdutoScreen(
+                                          id: produto.produto_id),
+                                    ),
+                                  );
                                 },
                               ),
                               IconButton(
