@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/DetalhesProdutoBottomSheet.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
@@ -39,11 +40,8 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
   Future<void> carregarProdutos() async {
     try {
-      print('Carregando produtos do fornecedor...');
       final resultado = await produtoDAO
           .listarProdutosComDetalhes('11111111111111'); // Fornecedor fictício
-
-      print('Produtos carregados: ${resultado.length}');
       setState(() {
         produtos = resultado;
         _filtrarProdutos(); // Filtra os produtos após o carregamento
@@ -64,25 +62,20 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
   void _filtrarProdutos() {
     setState(() {
-      // Limpa as categorias antes de preenchê-las
       produtosPorCategoria["Hortifruit"] = [];
       produtosPorCategoria["Açougue"] = [];
       produtosPorCategoria["Embutidos"] = [];
-      produtosPorCategoria["Outros"] = []; // Categoria padrão
+      produtosPorCategoria["Outros"] = [];
 
-      // Filtra os produtos em cada categoria com base na descrição
       for (var produto in produtos) {
         if (verificarCategoria(produto.descricao, "hortifruit|fruta|legume|verdura")) {
           produtosPorCategoria["Hortifruit"]?.add(produto);
         } else if (verificarCategoria(produto.descricao, "carne|açogue")) {
           produtosPorCategoria["Açougue"]?.add(produto);
-        } else if (verificarCategoria(
-            produto.descricao, "linguiça|embutido|salsicha")) {
+        } else if (verificarCategoria(produto.descricao, "linguiça|embutido|salsicha")) {
           produtosPorCategoria["Embutidos"]?.add(produto);
         } else {
-          print("chegou");
-          produtosPorCategoria["Outros"]
-              ?.add(produto); // Produtos sem categoria
+          produtosPorCategoria["Outros"]?.add(produto);
         }
       }
     });
@@ -95,7 +88,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Barra superior com perfil, "Meus pedidos" e carrinho
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -129,7 +121,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 ),
               ],
             ),
-            // Campo de busca
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TextField(
@@ -142,12 +133,11 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 ),
                 onChanged: (value) {
                   termoBusca = value;
-                  _filtrarProdutos(); // Refiltra os produtos após busca
+                  _filtrarProdutos();
                 },
               ),
             ),
             const SizedBox(height: 16),
-            // Promoções e destaques
             SizedBox(
               height: 150,
               child: PageView(
@@ -182,7 +172,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Listagem de produtos por categoria
             Expanded(
               child: isLoading
                   ? const Center(
@@ -233,10 +222,31 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                     final produto = produtosCategoria[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Item(
-                        nome: produto.nome,
-                        // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
-                        preco: produto.preco,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Filtrar produtos do mesmo fornecedor, removendo o selecionado
+                          final produtosFornecedor = produtos
+                              .where((p) =>
+                                  p.fornecedorCnpj == produto.fornecedorCnpj &&
+                                  p.nome != produto.nome)
+                              .toList();
+
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return DetalhesProdutoBottomSheet(
+                                produtoSelecionado: produto,
+                                produtosCategoria: produtosCategoria,
+                                produtosFornecedor: produtosFornecedor,
+                              );
+                            },
+                          );
+                        },
+                        child: Item(
+                          nome: produto.nome,
+                          preco: produto.preco,
+                        ),
                       ),
                     );
                   },

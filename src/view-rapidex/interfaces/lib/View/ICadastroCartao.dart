@@ -49,40 +49,69 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
     clienteCpfController.dispose();
     super.dispose();
   }
+  
+Future<void> cadastrarCartao() async {
+  String cpf = clienteCpfController.text;
 
-  Future<void> cadastrarCartao() async {
-    String cpf = clienteCpfController.text;
-    if (!validar_cpf(cpf)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CPF inválido')),
-      );
-      return;
-    }
-    try {
-      await conexaoDB.openConnection(); // Garante que a conexão está aberta
-
-      Cartao cartao = Cartao(
-        numero: numeroController.text,
-        nomeTitular: nomeTitularController.text,
-        bandeira: bandeiraController.text,
-        cpfCliente: clienteCpfController.text,
-        validade: validadeController.text,
-        codigoSeguranca: cvvController.text,
-      );
-
-      await cartaoDAO.cadastrarCartao(cartao);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cartão cadastrado com sucesso!')),
-      );
-      Navigator.pop(context); // Retorna para a tela anterior
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar cartão')),
-      );
-      print('Erro ao cadastrar cartão: $e');
-    }
+  // Validação do CPF
+  if (!validar_cpf(cpf)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('CPF inválido')),
+    );
+    return;
   }
+
+  // Conversão e validação da validade do cartão
+  String validadeTexto = validadeController.text; // Exemplo: "12/2030"
+  DateTime? validade;
+
+  try {
+    List<String> partes = validadeTexto.split('/');
+    if (partes.length == 2) {
+      int mes = int.parse(partes[0]);
+      int ano = int.parse(partes[1]);
+      validade = DateTime(ano, mes);
+    } else {
+      throw FormatException("Formato de validade inválido");
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data de validade inválida. Use MM/AAAA.')),
+    );
+    return; // Cancela o cadastro
+  }
+
+  try {
+    // Garante que a conexão esteja aberta
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
+    }
+
+    // Criação do objeto Cartão
+    Cartao cartao = Cartao(
+      numero: int.parse(numeroController.text),
+      cvv: int.parse(cvvController.text),
+      validade: validade, // Validade como DateTime
+      nomeTitular: nomeTitularController.text,
+      agencia: int.parse(agenciaController.text),
+      bandeira: bandeiraController.text,
+      clienteCpf: clienteCpfController.text,
+    );
+
+    // Cadastro do cartão no banco de dados
+    await cartaoDAO.cadastrarCartao(cartao);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cartão cadastrado com sucesso!')),
+    );
+    Navigator.pop(context); // Retorna para a tela anterior
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Erro ao cadastrar cartão')),
+    );
+    print('Erro ao cadastrar cartão: $e');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
