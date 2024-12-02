@@ -89,18 +89,28 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
       final produto = await produtoDAO.buscarProduto(widget.id);
 
       if (produto != null) {
+        double? preco = double.tryParse(precoController.text);
+        int? quantidade = int.tryParse(quantidadeController.text);
+
+        if (preco == null || quantidade == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Preço ou quantidade inválidos!')),
+          );
+          return;
+        }
+
         final produtoAtualizado = Produto(
           produto_id: widget.id,
           nome: nomeController.text,
           validade: validadeController.text.isNotEmpty
               ? DateFormat('dd/MM/yyyy').parse(validadeController.text)
               : null,
-          preco: 50.00,
+          preco: preco,
           imagem: imagemSelecionada,
           descricao: descricaoController.text,
           fornecedorCnpj: '11111111111111',
           restrito: restritoPorIdade,
-          quantidade: 89,
+          quantidade: quantidade,
         );
 
         await produtoDAO.atualizarProduto(produtoAtualizado.toMap());

@@ -63,7 +63,7 @@ class ProdutoDAO {
         '''
         UPDATE produto 
         SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor = @fornecedor, restrito = @restrito, quantidade = @quantidade 
-        WHERE produto_id = @id
+        WHERE produto_id = @produto_id
         ''',
         substitutionValues: produto,
       );
