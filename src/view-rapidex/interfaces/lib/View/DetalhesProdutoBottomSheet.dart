@@ -4,7 +4,8 @@ import '../DTO/Produto.dart';
 class DetalhesProdutoBottomSheet extends StatefulWidget {
   final Produto produtoSelecionado;
   final List<Produto> produtosCategoria;
-  final List<Produto> produtosFornecedor; // Lista de todos os produtos do fornecedor
+  final List<Produto>
+      produtosFornecedor; // Lista de todos os produtos do fornecedor
 
   const DetalhesProdutoBottomSheet({
     Key? key,

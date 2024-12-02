@@ -131,41 +131,42 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                     ),
                     const SizedBox(height: 8),
                     Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .spaceEvenly, // Alinha os botões de forma igualitária
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    confirmarLogout(context); // Passa o contexto como parâmetro
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceEvenly, // Alinha os botões de forma igualitária
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            confirmarLogout(
+                                context); // Passa o contexto como parâmetro
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Sair da conta',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            confirmarExclusao(context, excluirContaFornecedor);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Excluir Conta',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: const Text('Sair da conta',
-                      style: TextStyle(color: Colors.white)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    confirmarExclusao(context, excluirContaFornecedor);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Excluir Conta',
-                      style: TextStyle(color: Colors.white)),
-                ),
-              ],
-            ),
                   ],
                 ),
               ),

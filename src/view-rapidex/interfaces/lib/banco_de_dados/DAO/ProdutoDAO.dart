@@ -42,7 +42,7 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE nome = @nome
+        DELETE FROM produto WHERE idProduto = @id
         ''',
         substitutionValues: {'nome': nome},
       );
@@ -99,40 +99,41 @@ class ProdutoDAO {
     }
   }
 
-  Future<Produto?> buscarProduto(int produto_id) async {
+  Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
     try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
-      var result = await conexaoDB.connection.query(
-        'SELECT * FROM produto WHERE produto_id = @produto_id',
-        substitutionValues: {'produto_id': produto_id},
-      );
-
-      if (result.isNotEmpty) {
-        return Produto.fromMap(result[0].toColumnMap());
-      } else {
-        print(produto_id);
-        return null;
-      }
-    } catch (e) {
-      print('Erro ao buscar dados do cliente: $e');
-      return null;
-    }
-  }
-
-  Future<List<Produto>> listarProdutosComDetalhes(String cnpjFornecedor) async {
-    try {
-      await verificarConexao(); // Garante que a conexão está aberta
+      await verificarConexao();
 
       final results = await conexaoDB.connection.query(
         '''
         SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
-        WHERE fornecedor_cnpj = @fornecedor_cnpj
         ''',
+      );
+
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Produto>> buscarProdutosPorNome(String chave) async {
+    try {
+      await verificarConexao();
+
+      final results = await conexaoDB.connection.query(
+        '''
+  SELECT 
+    p.nome AS nome_produto, validade, preco, imagem, descricao, fornecedor_cnpj, 
+    restritoPorIdade, quantidade, f.nome AS nome_fornecedor
+  FROM produto p 
+    JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
+  WHERE p.nome = @chave OR f.nome = @chave;
+  ''',
         substitutionValues: {
-          'fornecedor_cnpj': cnpjFornecedor,
+          'chave': chave,
         },
       );
 
