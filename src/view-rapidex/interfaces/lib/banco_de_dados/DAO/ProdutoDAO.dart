@@ -6,7 +6,7 @@ class ProdutoDAO {
 
   ProdutoDAO({required this.conexaoDB});
 
-   Future<void> verificarConexao() async {
+  Future<void> verificarConexao() async {
     if (conexaoDB.connection.isClosed) {
       print("Conexão fechada. Reabrindo...");
       await conexaoDB.openConnection();
@@ -42,7 +42,7 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE nome = @nome
+        DELETE FROM produto WHERE idProduto = @id
         ''',
         substitutionValues: {'nome': nome},
       );
@@ -99,62 +99,9 @@ class ProdutoDAO {
     }
   }
 
-  Future<Produto?> buscarCliente(String cpf) async {
+  Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
     try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
-      var result = await conexaoDB.connection.query(
-        'SELECT * FROM cliente WHERE cpf = @cpf',
-        substitutionValues: {'cpf': cpf},
-      );
-
-      if (result.isNotEmpty) {
-        return Produto.fromMap(result[0].toColumnMap());
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Erro ao buscar dados do cliente: $e');
-      return null;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> listarProdutos(
-      String cnpjFornecedor) async {
-    try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
-
-      final results = await conexaoDB.connection.query(
-        '''
-        SELECT nome, quantidade
-        FROM produto
-        WHERE fornecedor_cnpj = @fornecedor_cnpj
-        ''',
-        substitutionValues: {
-          'fornecedor_cnpj': cnpjFornecedor,
-        },
-      );
-
-      print('Resultados encontrados: $results');
-
-      return results.map((row) {
-        return {
-          'nome': row[0],
-          'quantidade': row[1],
-        };
-      }).toList();
-    } catch (e) {
-      print('Erro ao listar produtos: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<Produto>> listarProdutosComDetalhes(String cnpjFornecedor) async {
-    try {
-      await verificarConexao(); // Garante que a conexão está aberta
+      await verificarConexao();
 
       final results = await conexaoDB.connection.query(
         '''
@@ -164,6 +111,51 @@ class ProdutoDAO {
         ''',
         substitutionValues: {
           'fornecedor_cnpj': cnpjFornecedor,
+        },
+      );
+
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Produto>> listarTodosProdutos() async {
+    try {
+      await verificarConexao();
+
+      final results = await conexaoDB.connection.query(
+        '''
+        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        FROM produto
+        ''',
+      );
+
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Produto>> buscarProdutosPorNome(String chave) async {
+    try {
+      await verificarConexao();
+
+      final results = await conexaoDB.connection.query(
+        '''
+        SELECT p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade, f.nome
+        FROM produto p 
+          JOIN fornecedor f on f.cnpj = p.fornecedor_cnpj
+            WHERE nome = @chave OR f.nome = @chave;
+        ''',
+        substitutionValues: {
+          'chave': chave,
         },
       );
 
