@@ -149,11 +149,13 @@ class ProdutoDAO {
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade, f.nome
-        FROM produto p 
-          JOIN fornecedor f on f.cnpj = p.fornecedor_cnpj
-            WHERE nome = @chave OR f.nome = @chave;
-        ''',
+  SELECT 
+    p.nome AS nome_produto, validade, preco, imagem, descricao, fornecedor_cnpj, 
+    restritoPorIdade, quantidade, f.nome AS nome_fornecedor
+  FROM produto p 
+    JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
+  WHERE p.nome = @chave OR f.nome = @chave;
+  ''',
         substitutionValues: {
           'chave': chave,
         },

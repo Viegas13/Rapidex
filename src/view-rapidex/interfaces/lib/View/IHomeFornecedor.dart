@@ -40,7 +40,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     try {
       print('Carregando produtos do fornecedor...');
       final resultado =
-          await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
+          await produtoDAO.listarProdutosFornecedor(widget.cnpjFornecedor);
 
       setState(() {
         produtos = resultado;
@@ -61,7 +61,6 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produto excluído com sucesso!')),
       );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao excluir produto')),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 
 class Item extends StatelessWidget {
   final String nome;
@@ -35,7 +35,6 @@ class Item extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           /*retirar o comentário depois de corrigir a lógica da imagem
 
           // Imagem do produto 
@@ -56,7 +55,8 @@ class Item extends StatelessWidget {
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
