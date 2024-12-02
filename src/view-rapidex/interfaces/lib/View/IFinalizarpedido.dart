@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Cartao.dart';
+import '../banco_de_dados/DAO/PedidoDAO.dart';
 import 'ICadastroCartao.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
 import '../banco_de_dados/DAO/CartaoDAO.dart';
+
 import '../controller/PedidoController.dart';
+import 'package:interfaces/DTO/Pedido.dart';
 
 class FinalizarPedidoPage extends StatefulWidget {
   final List<Map<String, dynamic>> produtos;
 
-  const FinalizarPedidoPage({Key? key, required this.produtos}) : super(key: key);
+  const FinalizarPedidoPage({Key? key, required this.produtos})
+      : super(key: key);
 
   @override
   _FinalizarPedidoPageState createState() => _FinalizarPedidoPageState();
@@ -20,6 +24,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   String? cartaoSelecionado;
   late ConexaoDB conexaoDB;
   late CartaoDAO cartaoDAO;
+  late PedidoDAO pedidoDAO;
   List<Cartao> cartoes = [];
   bool isLoading = false;
 
@@ -28,6 +33,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
     super.initState();
     conexaoDB = ConexaoDB();
     cartaoDAO = CartaoDAO(conexaoDB: conexaoDB);
+    pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       carregarCartoes();
@@ -37,28 +43,29 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   }
 
   Future<void> carregarCartoes() async {
-  setState(() {
-    isLoading = true; // Exibe carregamento
-  });
-
-  try {
-    String cpfCliente = '351.935.576-00'; // Substitua pelo CPF do cliente logado
-    cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
-
-    if (cartoes.isNotEmpty) {
-      // Verifica se o número do cartão não é nulo antes de converter para string
-      cartaoSelecionado = cartoes[0].numero.toString();
-    } else {
-      cartaoSelecionado = null; // Nenhum cartão disponível
-    }
-  } catch (e) {
-    print('Erro ao carregar cartões: $e');
-  } finally {
     setState(() {
-      isLoading = false; // Finaliza carregamento
+      isLoading = true; // Exibe carregamento
     });
+
+    try {
+      String cpfCliente =
+          '351.935.576-00'; // Substitua pelo CPF do cliente logado
+      cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
+
+      if (cartoes.isNotEmpty) {
+        // Verifica se o número do cartão não é nulo antes de converter para string
+        cartaoSelecionado = cartoes[0].numero.toString();
+      } else {
+        cartaoSelecionado = null; // Nenhum cartão disponível
+      }
+    } catch (e) {
+      print('Erro ao carregar cartões: $e');
+    } finally {
+      setState(() {
+        isLoading = false; // Finaliza carregamento
+      });
+    }
   }
-}
 
   Widget selecionarCartao() {
     if (isLoading) {
@@ -90,22 +97,21 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
   }
 
   Future<void> finalizarPedido() async {
-    if (formaPagamento == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione uma forma de pagamento.')),
-      );
-      return;
-    }
-
-    if (formaPagamento == 'Cartão' && cartaoSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um cartão cadastrado.')),
-      );
-      return;
-    }
-
     try {
-      pedidoController.processarPedido(widget.produtos);
+      double precoTotal = widget.produtos.fold(
+        0,
+        (soma, produto) => soma + produto['quantidade'] * produto['preco'],
+      );
+
+      Pedido pedido = Pedido(
+        clienteCpf: '02083037669',
+        fornecedorCnpj: '11111111111111',
+        entregadorCpf: '020.879.892-73',
+        preco: precoTotal,
+      );
+
+      await pedidoDAO.cadastrarPedido(pedido);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pedido finalizado com sucesso!')),
       );
@@ -185,7 +191,8 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CadastroCartaoScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => CadastroCartaoScreen()),
                   );
                   carregarCartoes();
                 },
