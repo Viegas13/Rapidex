@@ -99,6 +99,26 @@ class ProdutoDAO {
     }
   }
 
+    Future<List<Produto>> listarTodosProdutos() async {
+    try {
+      await verificarConexao();
+
+      final results = await conexaoDB.connection.query(
+        '''
+        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        FROM produto
+        ''',
+      );
+
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
     try {
       await verificarConexao();
@@ -143,6 +163,28 @@ class ProdutoDAO {
     } catch (e) {
       print('Erro ao listar produtos: $e');
       rethrow;
+    }
+  }
+
+  Future<Produto?> buscarProduto(int produto_id) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      var result = await conexaoDB.connection.query(
+        'SELECT * FROM produto WHERE produto_id = @produto_id',
+        substitutionValues: {'produto_id': produto_id},
+      );
+
+      if (result.isNotEmpty) {
+        return Produto.fromMap(result[0].toColumnMap());
+      } else {
+        print(produto_id);
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar dados do cliente: $e');
+      return null;
     }
   }
 }

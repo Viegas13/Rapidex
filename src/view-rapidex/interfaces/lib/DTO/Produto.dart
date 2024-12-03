@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Produto {
   final int produto_id;
   final String nome;
