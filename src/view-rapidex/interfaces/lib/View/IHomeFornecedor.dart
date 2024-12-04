@@ -4,6 +4,7 @@ import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/View/IAdicionarProduto.dart';
+import 'package:interfaces/View/IEditarProduto.dart';
 import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 
@@ -40,7 +41,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     try {
       print('Carregando produtos do fornecedor...');
       final resultado =
-          await produtoDAO.listarProdutosComDetalhes(widget.cnpjFornecedor);
+          await produtoDAO.listarProdutosFornecedor(widget.cnpjFornecedor);
 
       setState(() {
         produtos = resultado;
@@ -54,16 +55,17 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     }
   }
 
-  void excluirProduto(Produto produto) async {
+  Future<void> excluirProduto(Produto produto) async {
     try {
+      ProdutoDAO produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
       await produtoDAO.removerProduto(produto.nome);
-      setState(() {
-        produtos.remove(produto);
-      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${produto.nome} excluído com sucesso.')),
+        const SnackBar(content: Text('Produto excluído com sucesso!')),
       );
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir produto')),
+      );
       print('Erro ao excluir produto: $e');
     }
   }
@@ -119,6 +121,18 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
+                          leading: (produto.imagem != null &&
+                                  produto.imagem!.isNotEmpty)
+                              ? Image.memory(
+                                  produto.imagem!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons
+                                        .image_not_supported); // Ícone se a imagem for inválida
+                                  },
+                                )
+                              : Icon(Icons
+                                  .image), // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
                               'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
@@ -129,7 +143,13 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                 icon:
                                     const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
-                                  // Navegar para a tela de edição
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditarProdutoScreen(
+                                          id: produto.produto_id),
+                                    ),
+                                  );
                                 },
                               ),
                               IconButton(

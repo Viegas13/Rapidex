@@ -6,7 +6,6 @@ class Fornecedor {
   final String telefone;
 
   Fornecedor({
-
     required this.cnpj,
     required this.nome,
     required this.telefone,
@@ -24,7 +23,6 @@ class Fornecedor {
       telefone: map['telefone'] ?? '',
     );
   }
-
 
   Map<String, dynamic> toMap() {
     return {

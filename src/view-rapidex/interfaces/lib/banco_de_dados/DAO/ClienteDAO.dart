@@ -99,7 +99,7 @@ class ClienteDAO {
         'SELECT * FROM cliente WHERE email = @email AND senha = @senha',
         substitutionValues: {'email': email, 'senha': senha},
       );
-      
+
       if (result.isNotEmpty) {
         return Cliente.fromMap(result[0].toColumnMap());
       } else {
@@ -110,5 +110,4 @@ class ClienteDAO {
       rethrow;
     }
   }
-
 }
