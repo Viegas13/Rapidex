@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/DTO/Fornecedor.dart';
@@ -57,36 +58,37 @@ class _EditarPerfilFornecedorScreenState
   }
 
   Future<void> salvarAlteracoes() async {
-  try {
-    // Buscar o fornecedor para obter a senha atual antes de atualizar os outros dados
-    final fornecedorMap = await fornecedorDAO.buscarFornecedor(widget.cnpj);
+    try {
+      // Buscar o fornecedor para obter a senha atual antes de atualizar os outros dados
+      final fornecedorMap = await fornecedorDAO.buscarFornecedor(widget.cnpj);
 
-    // Certifique-se de que o mapa não é nulo e converta para um objeto Fornecedor
-    if (fornecedorMap != null) {
-      final fornecedor = Fornecedor.fromMap(fornecedorMap);
+      // Certifique-se de que o mapa não é nulo e converta para um objeto Fornecedor
+      if (fornecedorMap != null) {
+        final fornecedor = Fornecedor.fromMap(fornecedorMap);
 
-      // Atualizar os dados do fornecedor mantendo a senha atual, se não for alterada
-      final fornecedorAtualizado = Fornecedor(
-        cnpj: widget.cnpj,
-        nome: nomeController.text,
-        telefone: telefoneController.text,
-        email: emailController.text,
-        senha: senhaController.text.isNotEmpty ? senhaController.text : fornecedor.senha,
-      );
+        // Atualizar os dados do fornecedor mantendo a senha atual, se não for alterada
+        final fornecedorAtualizado = Fornecedor(
+          cnpj: widget.cnpj,
+          nome: nomeController.text,
+          telefone: telefoneController.text,
+          email: emailController.text,
+          senha: senhaController.text.isNotEmpty
+              ? senhaController.text
+              : fornecedor.senha,
+        );
 
-      // Atualizar no banco de dados
-      await fornecedorDAO.atualizarFornecedor(fornecedorAtualizado.toMap());
+        // Atualizar no banco de dados
+        await fornecedorDAO.atualizarFornecedor(fornecedorAtualizado.toMap());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informações atualizadas com sucesso!')),
-      );
-      Navigator.pop(context); // Voltar para a tela anterior
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Informações atualizadas com sucesso!')),
+        );
+        Navigator.pop(context); // Voltar para a tela anterior
+      }
+    } catch (e) {
+      print('Erro ao salvar alterações: $e');
     }
-  } catch (e) {
-    print('Erro ao salvar alterações: $e');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

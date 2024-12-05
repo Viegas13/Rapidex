@@ -71,6 +71,32 @@ class FornecedorDAO {
     }
   }
 
+  // Buscar fornecedor por CNPJ
+  Future<String?> buscarNomeFornecedor(String cnpj) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      print("abriu conexão");
+
+      var resultado = await conexaoDB.connection.query(
+        'SELECT nome FROM fornecedor WHERE cnpj = @cnpj',
+        substitutionValues: {'cnpj': cnpj},
+      );
+
+      print("fez query");
+
+      if (resultado.isNotEmpty) {
+        return resultado.toString().replaceAll(RegExp(r'[\[\]\s]'), '');
+      } else {
+        return null; // Caso não haja resultados
+      }
+    } catch (e) {
+      print('Erro ao buscar fornecedor: $e');
+      return null; // Não há rethrow necessário aqui, pois não estamos lidando com a propagação do erro
+    }
+  }
+
   // Atualizar fornecedor
   Future<void> atualizarFornecedor(Map<String, dynamic> fornecedor) async {
     try {

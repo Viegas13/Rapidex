@@ -40,7 +40,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
-      final resultado = await produtoDAO.listarProdutosComDetalhes('11111111111111'); // Fornecedor fictício
+      final resultado = await produtoDAO
+          .listarProdutosFornecedor('11111111111111'); // Fornecedor fictício
 
       print('Produtos carregados: ${resultado.length}');
       setState(() {
@@ -62,7 +63,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
       produtosPorCategoria["Hortifruit"] = [];
       produtosPorCategoria["Açougue"] = [];
       produtosPorCategoria["Embutidos"] = [];
-      produtosPorCategoria["Outros"] = [];  // Categoria padrão
+      produtosPorCategoria["Outros"] = []; // Categoria padrão
 
       // Filtra os produtos em cada categoria com base na descrição
       for (var produto in produtos) {
@@ -73,7 +74,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
         } else if (produto.descricao.toLowerCase().contains("embutido")) {
           produtosPorCategoria["Embutidos"]?.add(produto);
         } else {
-          produtosPorCategoria["Outros"]?.add(produto); // Produtos sem categoria
+          produtosPorCategoria["Outros"]
+              ?.add(produto); // Produtos sem categoria
         }
       }
     });
@@ -209,7 +211,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   titulo,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 8),

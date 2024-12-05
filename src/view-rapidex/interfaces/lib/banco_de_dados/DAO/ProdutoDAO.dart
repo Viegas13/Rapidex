@@ -6,7 +6,7 @@ class ProdutoDAO {
 
   ProdutoDAO({required this.conexaoDB});
 
-   Future<void> verificarConexao() async {
+  Future<void> verificarConexao() async {
     if (conexaoDB.connection.isClosed) {
       print("Conexão fechada. Reabrindo...");
       await conexaoDB.openConnection();
@@ -22,8 +22,8 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade)
-        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade)
+        INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade) 
+        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade) RETURNING produto_id
         ''',
         substitutionValues: produto,
       );
@@ -42,7 +42,7 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE nome = @nome
+        DELETE FROM produto WHERE idProduto = @id
         ''',
         substitutionValues: {'nome': nome},
       );
@@ -62,8 +62,8 @@ class ProdutoDAO {
       await conexaoDB.connection.query(
         '''
         UPDATE produto 
-        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor = @fornecedor, restrito = @restrito, quantidade = @quantidade 
-        WHERE id = @id
+        SET nome = @nome, validade = @validade, preco = @preco, imagem = @imagem, descricao = @descricao, fornecedor_cnpj = @fornecedor_cnpj, restritoPorIdade = @restritoPorIdade, quantidade = @quantidade 
+        WHERE produto_id = @produto_id
         ''',
         substitutionValues: produto,
       );
@@ -99,52 +99,19 @@ class ProdutoDAO {
     }
   }
 
-  Future<Produto?> buscarCliente(String cpf) async {
+    Future<List<Produto>> listarTodosProdutos() async {
     try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
-      var result = await conexaoDB.connection.query(
-        'SELECT * FROM cliente WHERE cpf = @cpf',
-        substitutionValues: {'cpf': cpf},
-      );
-
-      if (result.isNotEmpty) {
-        return Produto.fromMap(result[0].toColumnMap());
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Erro ao buscar dados do cliente: $e');
-      return null;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> listarProdutos(
-      String cnpjFornecedor) async {
-    try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
+      await verificarConexao();
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT nome, quantidade
+        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
-        WHERE fornecedor_cnpj = @fornecedor_cnpj
         ''',
-        substitutionValues: {
-          'fornecedor_cnpj': cnpjFornecedor,
-        },
       );
 
-      print('Resultados encontrados: $results');
-
       return results.map((row) {
-        return {
-          'nome': row[0],
-          'quantidade': row[1],
-        };
+        return Produto.fromMap(row.toColumnMap());
       }).toList();
     } catch (e) {
       print('Erro ao listar produtos: $e');
@@ -152,18 +119,41 @@ class ProdutoDAO {
     }
   }
 
-  Future<List<Produto>> listarProdutosComDetalhes(String cnpjFornecedor) async {
+  Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
     try {
-      await verificarConexao(); // Garante que a conexão está aberta
+      await verificarConexao();
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
-        WHERE fornecedor_cnpj = @fornecedor_cnpj
         ''',
+      );
+
+      return results.map((row) {
+        return Produto.fromMap(row.toColumnMap());
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar produtos: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Produto>> buscarProdutosPorNome(String chave) async {
+    try {
+      await verificarConexao();
+
+      final results = await conexaoDB.connection.query(
+        '''
+  SELECT 
+    p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, 
+    restritoPorIdade, quantidade, f.nome AS nome_fornecedor
+  FROM produto p 
+    JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
+  WHERE p.nome = @chave OR f.nome = @chave;
+  ''',
         substitutionValues: {
-          'fornecedor_cnpj': cnpjFornecedor,
+          'chave': chave,
         },
       );
 
@@ -173,6 +163,28 @@ class ProdutoDAO {
     } catch (e) {
       print('Erro ao listar produtos: $e');
       rethrow;
+    }
+  }
+
+  Future<Produto?> buscarProduto(int produto_id) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      var result = await conexaoDB.connection.query(
+        'SELECT * FROM produto WHERE produto_id = @produto_id',
+        substitutionValues: {'produto_id': produto_id},
+      );
+
+      if (result.isNotEmpty) {
+        return Produto.fromMap(result[0].toColumnMap());
+      } else {
+        print(produto_id);
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar dados do cliente: $e');
+      return null;
     }
   }
 }
