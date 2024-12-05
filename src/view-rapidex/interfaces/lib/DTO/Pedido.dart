@@ -1,29 +1,29 @@
 class Pedido {
   final int? pedidoId;
-  final String clienteCpf;
-  final String fornecedorCnpj;
-  final String entregadorCpf;
+  final String cliente_cpf;
+  final String fornecedor_cnpj;
+  final String entregador_cpf;
   final double preco;
-  final String statusPedido;
+  final String status_pedido;
 
   Pedido({
     this.pedidoId,
-    required this.clienteCpf,
-    required this.fornecedorCnpj,
-    required this.entregadorCpf,
+    required this.cliente_cpf,
+    required this.fornecedor_cnpj,
+    required this.entregador_cpf,
     required this.preco,
-    this.statusPedido = 'pendente',
+    this.status_pedido = 'pendente',
   });
 
   // Construtor para conversão de Map para Pedido
   factory Pedido.fromMap(Map<String, dynamic> map) {
     return Pedido(
       pedidoId: map['pedido_id'] as int?,
-      clienteCpf: map['cliente_cpf'] as String,
-      fornecedorCnpj: map['fornecedor_cnpj'] as String,
-      entregadorCpf: map['entregador_cpf'] as String,
+      cliente_cpf: map['cliente_cpf'] as String,
+      fornecedor_cnpj: map['fornecedor_cnpj'] as String,
+      entregador_cpf: map['entregador_cpf'] as String,
       preco: map['preco'] as double,
-      statusPedido: map['status_pedido'] as String,
+      status_pedido: map['status_pedido'] as String,
     );
   }
 
@@ -31,11 +31,11 @@ class Pedido {
   Map<String, dynamic> toMap() {
     return {
       'pedido_id': pedidoId,
-      'cliente_cpf': clienteCpf,
-      'fornecedor_cnpj': fornecedorCnpj,
-      'entregador_cpf': entregadorCpf,
+      'cliente_cpf': cliente_cpf,
+      'fornecedor_cnpj': fornecedor_cnpj,
+      'entregador_cpf': entregador_cpf,
       'preco': preco,
-      'status_pedido': statusPedido,
+      'status_pedido': status_pedido,
     };
   }
 }

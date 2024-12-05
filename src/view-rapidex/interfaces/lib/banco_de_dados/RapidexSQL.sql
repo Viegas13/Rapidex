@@ -54,6 +54,8 @@ CREATE TABLE Produto (
     quantidade INT
     --FOREIGN KEY () REFERENCES Endereco()
 );
+CREATE TYPE status_pedido AS ENUM ('pendente', 'a caminho', 'cancelado', 'entregue');
+
 
 -- Tabela Pedido com ON DELETE CASCADE
 CREATE TABLE Pedido (
@@ -62,11 +64,12 @@ CREATE TABLE Pedido (
     fornecedor_cnpj VARCHAR(14),
     entregador_cpf VARCHAR(14),
     preco FLOAT,
-    status_pedido ENUM('pendente', 'a caminho', 'cancelado', 'entregue') DEFAULT 'pendente',
+    status_pedido status_pedido DEFAULT 'pendente',
     FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE,
     FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ)
 );
+
 
 -- Tabela Entrega com ON DELETE CASCADE
 CREATE TABLE Entrega (

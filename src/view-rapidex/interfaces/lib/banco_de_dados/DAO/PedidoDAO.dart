@@ -16,7 +16,7 @@ class PedidoDAO {
       await conexaoDB.connection.query(
         '''
         INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, entregador_cpf, preco, status_pedido)
-        VALUES (@clienteCpf, @fornecedorCnpj, @entregadorCpf, @preco, @statusPedido)
+        VALUES (@cliente_cpf, @fornecedor_cnpj, @entregador_cpf, @preco, @status_pedido)
         ''',
         substitutionValues: pedido.toMap(),
       );
@@ -26,9 +26,34 @@ class PedidoDAO {
       rethrow;
     }
   }
+  
+  Future<List<Pedido>> buscarPedidosPorStatus({
+  required String cliente_cpf,
+  required List<String> status_pedido,
+  }) async {
+    try {
+      // Constrói a consulta para buscar os pedidos
+      final result = await conexaoDB.connection.query(
+        '''
+        SELECT * FROM Pedido 
+        WHERE cliente_cpf = @cliente_cpf AND status_pedido = ANY(@status_pedido)
+        ''',
+        substitutionValues: {
+          'cliente_cpf': cliente_cpf,
+          'status_pedido': status_pedido,
+        },
+      );
+
+      // Mapeia os resultados em objetos Pedido
+      return result.map((row) => Pedido.fromMap(row.toColumnMap())).toList();
+    } catch (e) {
+      print('Erro ao buscar pedidos por status: $e');
+      return [];
+    }
+  }
 
   // Método para verificar se há pedidos pendentes ou a caminho
-  Future<bool> verificarPedidoAtivo(String clienteCpf) async {
+  Future<bool> verificarPedidoAtivo(String cliente_cpf) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -38,9 +63,9 @@ class PedidoDAO {
         '''
         SELECT COUNT(*) 
         FROM Pedido 
-        WHERE cliente_cpf = @clienteCpf AND status_pedido IN ('pendente', 'a caminho')
+        WHERE cliente_cpf = @cliente_cpf AND status_pedido IN ('pendente', 'a caminho')
         ''',
-        substitutionValues: {'clienteCpf': clienteCpf},
+        substitutionValues: {'cliente_cpf': cliente_cpf},
       );
 
       return result.first[0] > 0;
@@ -73,7 +98,7 @@ class PedidoDAO {
   }
 
   // Método para buscar pedidos por cliente
-  Future<List<Pedido>> buscarPedidosPorCliente(String clienteCpf) async {
+  Future<List<Pedido>> buscarPedidosPorCliente(String cliente_cpf) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -83,9 +108,9 @@ class PedidoDAO {
         '''
         SELECT * 
         FROM Pedido 
-        WHERE cliente_cpf = @clienteCpf
+        WHERE cliente_cpf = @cliente_cpf
         ''',
-        substitutionValues: {'clienteCpf': clienteCpf},
+        substitutionValues: {'cliente_cpf': cliente_cpf},
       );
 
       return result.map((row) {

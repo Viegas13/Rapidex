@@ -20,29 +20,43 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
   ];
 
   final String clienteCpf = '02083037669'; // CPF fixo do cliente
-  final ConexaoDB conexaoDB = ConexaoDB();
+  late ConexaoDB conexaoDB;
+  late PedidoDAO pedidoDAO;
   bool carregando = true;
 
   @override
   void initState() {
     super.initState();
-    verificarPedidosPendentes();
+    conexaoDB = ConexaoDB();
+    pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
+    conexaoDB.initConnection().then((_) {
+      verificarPedidosPendentes();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
+    });
   }
 
-  Future<void> verificarPedidosPendentes() async {
-    try {
-      await conexaoDB.initConnection();
-      final pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
-      final pedidoPendente = await pedidoDAO.verificarPedidoAtivo(clienteCpf);
+Future<void> verificarPedidosPendentes() async {
+  try {
+    // Garante que a conexão está aberta
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
+    }
 
-      if (pedidoPendente != null) {
-        Navigator.pushReplacement(
+    // Busca os pedidos com status pendente ou a caminho
+    final pedidos = await PedidoDAO(conexaoDB: conexaoDB).buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'a caminho']);
+
+      // Verifica se a lista de pedidos retornada está vazia ou não
+      if (pedidos != null && pedidos.isNotEmpty) {
+        final pedidoPendente = pedidos.first; // Pega o primeiro pedido encontrado
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => IAlterarStatusPedido(),
           ),
         );
       } else {
+        // Caso não haja pedidos pendentes, mantém a tela atual
         setState(() {
           carregando = false;
         });
@@ -52,8 +66,8 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
       setState(() {
         carregando = false;
       });
+      }
     }
-  }
 
   @override
   Widget build(BuildContext context) {

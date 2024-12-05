@@ -104,9 +104,9 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       );
 
       Pedido pedido = Pedido(
-        clienteCpf: '02083037669',
-        fornecedorCnpj: '11111111111111',
-        entregadorCpf: '020.879.892-73',
+        cliente_cpf: '02083037669',
+        fornecedor_cnpj: '11111111111111',
+        entregador_cpf: '423.089.890-84',
         preco: precoTotal,
       );
 
