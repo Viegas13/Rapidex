@@ -107,7 +107,6 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     }
   }
 
-
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -314,14 +313,16 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HomeFornecedorScreen(cnpjFornecedor: '11111111111111'),
+                              builder: (context) => HomeFornecedorScreen(
+                                  cnpjFornecedor: '11111111111111'),
                             ),
                           );
                         }
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
-                          vertical: 12.0, horizontal: 24.0,
+                          vertical: 12.0,
+                          horizontal: 24.0,
                         ),
                         child: Text(
                           'Cadastrar Produto',
