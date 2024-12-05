@@ -5,6 +5,7 @@ import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/Busca.dart';
 import 'package:interfaces/widgets/Item.dart';
 import '../DTO/Produto.dart';
@@ -44,6 +45,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
       print('Erro ao inicializar conexão: $error');
     });
   }
+
 
  Future<void> buscarProdutos() async {
     try {

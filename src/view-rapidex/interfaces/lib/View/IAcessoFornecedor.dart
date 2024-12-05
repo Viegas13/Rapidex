@@ -6,6 +6,7 @@ import 'package:interfaces/View/IPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/controller/EmailController.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:postgres/postgres.dart';
 
@@ -60,6 +61,9 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
       if (fornecedorLogado != null) {
         corTextAreas = Colors.black12;
         fornecedorLogou = true;
+
+        SessionController sessionController = SessionController();
+        sessionController.setSession(email, senha);
 
         Navigator.push(
           context,
