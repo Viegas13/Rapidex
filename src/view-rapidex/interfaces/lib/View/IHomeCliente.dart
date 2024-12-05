@@ -4,6 +4,7 @@ import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/Item.dart';
 import '../DTO/Produto.dart';
 
@@ -39,6 +40,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   }
 
   Future<void> carregarProdutos() async {
+
     try {
       final resultado = await produtoDAO
           .listarProdutosComDetalhes('11111111111111'); // Fornecedor fictício

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
+import 'package:interfaces/controller/SessionController.dart';
 
 void confirmarLogout(BuildContext context) {
   showDialog(
@@ -17,6 +18,9 @@ void confirmarLogout(BuildContext context) {
           ),
           ElevatedButton(
             onPressed: () {
+              SessionController sessionController = SessionController();
+              sessionController.limparSession();
+
               Navigator.of(context).pop(); // Fecha o diálogo
               Navigator.pushReplacement(
                 context,
