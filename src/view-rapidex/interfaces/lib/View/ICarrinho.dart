@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IHomeCliente.dart';
+import 'package:interfaces/View/IAlterarStatusPedido.dart';
+import '../banco_de_dados/DBHelper/ConexaoDB.dart';
+import '../banco_de_dados/DAO/PedidoDAO.dart';
 import 'IFinalizarpedido.dart';
 
 class CarrinhoPage extends StatefulWidget {
@@ -16,8 +19,64 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     {'nome': 'Produto C', 'quantidade': 0, 'preco': 20.0},
   ];
 
+  final String clienteCpf = '02083037669'; // CPF fixo do cliente
+  late ConexaoDB conexaoDB;
+  late PedidoDAO pedidoDAO;
+  bool carregando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    conexaoDB = ConexaoDB();
+    pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
+    conexaoDB.initConnection().then((_) {
+      verificarPedidosPendentes();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
+    });
+  }
+
+Future<void> verificarPedidosPendentes() async {
+  try {
+    // Garante que a conexão está aberta
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
+    }
+
+    // Busca os pedidos com status pendente ou a caminho
+    final pedidos = await PedidoDAO(conexaoDB: conexaoDB).buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'a caminho']);
+
+      // Verifica se a lista de pedidos retornada está vazia ou não
+      if (pedidos != null && pedidos.isNotEmpty) {
+        final pedidoPendente = pedidos.first; // Pega o primeiro pedido encontrado
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IAlterarStatusPedido(),
+          ),
+        );
+      } else {
+        // Caso não haja pedidos pendentes, mantém a tela atual
+        setState(() {
+          carregando = false;
+        });
+      }
+    } catch (e) {
+      print('Erro ao verificar pedidos pendentes: $e');
+      setState(() {
+        carregando = false;
+      });
+      }
+    }
+
   @override
   Widget build(BuildContext context) {
+    if (carregando) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
@@ -27,7 +86,8 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeClienteScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const HomeClienteScreen()),
             );
           },
         ),
@@ -76,7 +136,6 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             const Spacer(),
             ElevatedButton(
               onPressed: () {
-                // Filtra os produtos com quantidade maior que 0 e envia para FinalizarPedido
                 final produtosFiltrados = produtosCarrinho
                     .where((produto) => produto['quantidade'] > 0)
                     .toList();
