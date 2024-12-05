@@ -7,6 +7,7 @@ import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/controller/emailController.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:postgres/postgres.dart';
@@ -62,6 +63,9 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
       if (clienteLogado != null) {
         corTextAreas = Colors.black12;
         clienteLogou = true;
+
+        SessionController sessionController = SessionController();
+        sessionController.setSession(email, senha);
 
         Navigator.push(
           context,

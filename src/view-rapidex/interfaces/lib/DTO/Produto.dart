@@ -26,7 +26,7 @@ class Produto {
   factory Produto.fromMap(Map<String, dynamic> map) {
     return Produto(
       produto_id: int.tryParse(map['produto_id'].toString()) ?? 0, 
-      nome: map['nome_produto'] ?? '', // Ajuste para usar o alias `nome_produto`
+      nome: map['nome'] ?? '', 
       validade: map['validade'] != null
           ? DateTime.tryParse(map['validade'].toString())
           : null,
