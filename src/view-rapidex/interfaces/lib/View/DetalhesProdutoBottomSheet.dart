@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/ItemPedido.dart';
+import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import '../DTO/Produto.dart';
 
 class DetalhesProdutoBottomSheet extends StatefulWidget {
@@ -21,6 +24,25 @@ class DetalhesProdutoBottomSheet extends StatefulWidget {
 
 class _DetalhesProdutoBottomSheetState
     extends State<DetalhesProdutoBottomSheet> {
+      late ConexaoDB conexaoDB;
+  late ItemPedidoDAO itemPedidoDAO;
+
+@override
+  void initState() {
+    super.initState();
+    conexaoDB = ConexaoDB();
+    itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
+
+    conexaoDB.initConnection().then((_) {
+      print('Conexão estabelecida no initState.');
+    }).catchError((error) {
+      print('Erro ao estabelecer conexão no initState: $error');
+    });
+  }
+
+
+
+
   int quantidadeSelecionada = 1;
 
   void _incrementarQuantidade() {
@@ -146,10 +168,52 @@ class _DetalhesProdutoBottomSheetState
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: quantidadeSelecionada > 0
-              ? () {
-                  // Lógica para adicionar ao carrinho
-                  print(
-                      "Adicionado '${widget.produtoSelecionado.nome}' ao carrinho com quantidade: $quantidadeSelecionada.");
+              ? () async {
+                  try {
+                    
+                    final produtoSelecionado = widget.produtoSelecionado;
+
+                    // Calculando o valor total
+                    final valorTotal =
+                        produtoSelecionado.preco * quantidadeSelecionada;
+
+                    //DEBUGANDO
+                    print("DEBUGANDO:");
+                    print(produtoSelecionado.produto_id);
+                    print(quantidadeSelecionada);
+                    print(valorTotal);
+                    print("FIM DO UDEBUG");
+
+                    // Criando o mapa com os dados do ItemPedido
+                    Map<String, dynamic> itemPedido = {
+                      'produto_id': produtoSelecionado.produto_id,
+                      'pedido_id': null, // Pedido ainda não associado
+                      'quantidade': quantidadeSelecionada,
+                      'valor_total': valorTotal,
+                      'cliente_cpf': '70275182606', // CPF fixo
+                    };
+
+                    // Inserindo o ItemPedido no banco de dados
+                    await itemPedidoDAO.cadastrarItemPedido(itemPedido);
+
+                    // Feedback positivo
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Item "${produtoSelecionado.nome}" adicionado ao carrinho com sucesso!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    // Captura de erros e feedback negativo
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Erro ao adicionar o item "${widget.produtoSelecionado.nome}" ao carrinho.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 }
               : null, // Desativa o botão se a quantidade for <= 0
           style: ElevatedButton.styleFrom(

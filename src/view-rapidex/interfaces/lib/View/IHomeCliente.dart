@@ -102,7 +102,11 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     try {
       print('Carregando produtos do fornecedor...');
       final resultado = await produtoDAO.listarTodosProdutos();
-
+      for(int i=0; i < resultado.length; i++){
+        print("ESSES SÃO OS IDS: ");
+        print(resultado[i].produto_id);
+        
+      }
       print('Produtos carregados: ${resultado.length}');
       setState(() {
         produtos = resultado;
