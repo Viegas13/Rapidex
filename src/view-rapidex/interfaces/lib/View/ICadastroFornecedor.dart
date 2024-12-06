@@ -3,6 +3,7 @@ import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
 //import 'IHomeFornecedor.dart';
@@ -22,6 +23,8 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
+
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
@@ -77,6 +80,9 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
 
     try {
       await fornecedorDAO.cadastrarFornecedor(fornecedor);
+
+      sessionController.setSession(emailController.text, senhaController.text);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
