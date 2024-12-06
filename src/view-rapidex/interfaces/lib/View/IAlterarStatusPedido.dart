@@ -54,16 +54,20 @@ class _IAlterarStatusPedidoState extends State<IAlterarStatusPedido> {
               child: const Text('Pendente'),
             ),
             ElevatedButton(
-              onPressed: () => alterarStatusPedido(1, 'a caminho'),
-              child: const Text('A Caminho'),
+              onPressed: () => alterarStatusPedido(1, 'em preparo'),
+              child: const Text('Em preparo'),
+            ),
+            ElevatedButton(
+              onPressed: () => alterarStatusPedido(1, 'pronto'),
+              child: const Text('Pronto'),
+            ),
+            ElevatedButton(
+              onPressed: () => alterarStatusPedido(1, 'retirado'),
+              child: const Text('Retirado'),
             ),
             ElevatedButton(
               onPressed: () => alterarStatusPedido(1, 'cancelado'),
               child: const Text('Cancelado'),
-            ),
-            ElevatedButton(
-              onPressed: () => alterarStatusPedido(1, 'entregue'),
-              child: const Text('Entregue'),
             ),
           ],
         ),

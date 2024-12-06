@@ -106,8 +106,9 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       Pedido pedido = Pedido(
         cliente_cpf: '02083037669',
         fornecedor_cnpj: '11111111111111',
-        entregador_cpf: '423.089.890-84',
-        preco: precoTotal,
+        endereco_entrega: '30720-49302083037669',
+        preco: precoTotal, 
+        frete: precoTotal * 0.01,
       );
 
       await pedidoDAO.cadastrarPedido(pedido);

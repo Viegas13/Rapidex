@@ -15,8 +15,8 @@ class PedidoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, entregador_cpf, preco, status_pedido)
-        VALUES (@cliente_cpf, @fornecedor_cnpj, @entregador_cpf, @preco, @status_pedido)
+        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido)
+        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido)
         ''',
         substitutionValues: pedido.toMap(),
       );
@@ -63,7 +63,7 @@ class PedidoDAO {
         '''
         SELECT COUNT(*) 
         FROM Pedido 
-        WHERE cliente_cpf = @cliente_cpf AND status_pedido IN ('pendente', 'a caminho')
+        WHERE cliente_cpf = @cliente_cpf AND status_pedido IN ('pendente', 'em preparo', 'pronto', 'retirado',)
         ''',
         substitutionValues: {'cliente_cpf': cliente_cpf},
       );
@@ -118,7 +118,7 @@ class PedidoDAO {
           'pedido_id': row[0],
           'cliente_cpf': row[1],
           'fornecedor_cnpj': row[2],
-          'entregador_cpf': row[3],
+          'endereco_entrega': row[3],
           'preco': row[4],
           'status_pedido': row[5],
         });

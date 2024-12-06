@@ -44,7 +44,7 @@ Future<void> verificarPedidosPendentes() async {
     }
 
     // Busca os pedidos com status pendente ou a caminho
-    final pedidos = await PedidoDAO(conexaoDB: conexaoDB).buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'a caminho']);
+    final pedidos = await PedidoDAO(conexaoDB: conexaoDB).buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'em preparo', 'pronto', 'retirado']);
 
       // Verifica se a lista de pedidos retornada está vazia ou não
       if (pedidos != null && pedidos.isNotEmpty) {
