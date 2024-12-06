@@ -5,6 +5,7 @@ import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/View/ILoginGeral.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/ConfirmarExclusao.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
 import 'package:interfaces/widgets/DropdownTextField.dart';
@@ -13,9 +14,8 @@ import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 
 class PerfilClienteScreen extends StatefulWidget {
-  final String cpf;
 
-  const PerfilClienteScreen({super.key, required this.cpf});
+  const PerfilClienteScreen({super.key});
 
   @override
   _PerfilClienteScreenState createState() => _PerfilClienteScreenState();
@@ -33,25 +33,40 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
 
   late ClienteDAO clienteDAO;
   late EnderecoDAO enderecoDAO;
+  late String cpf_cliente;
   List<String> enderecosFormatados = ['Carregando...'];
 
+  SessionController sessionController = SessionController();
+  
   @override
-  void initState() {
-    super.initState();
-    final conexaoDB = ConexaoDB();
-    conexaoDB.initConnection().then((_) {
-      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
-      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
-      buscarCliente();
-      buscarEnderecos();
-    }).catchError((error) {
-      print('Erro ao inicializar conexão: $error');
-    });
+void initState() {
+  super.initState();
+  final conexaoDB = ConexaoDB();
+  conexaoDB.initConnection().then((_) {
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+    enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+    inicializarDados(); 
+  }).catchError((error) {
+    print('Erro ao inicializar conexão: $error');
+  });
+}
+
+Future<void> inicializarDados() async {
+  try {
+    cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
+    if (cpf_cliente.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    await buscarCliente();
+    await buscarEnderecos();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
   }
+}
 
   Future<void> buscarCliente() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
+      final cliente = await clienteDAO.buscarCliente(cpf_cliente);
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
@@ -71,7 +86,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
 
   Future<void> buscarEnderecos() async {
     try {
-      final enderecos = await enderecoDAO.listarEnderecos(widget.cpf);
+      final enderecos = await enderecoDAO.listarEnderecos(cpf_cliente);
       setState(() {
         enderecosFormatados = enderecos.map((endereco) {
           final complemento = endereco['complemento']?.isNotEmpty == true
@@ -91,7 +106,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
 
   Future<void> excluirContaCliente() async {
     try {
-      await clienteDAO.deletarCliente(widget.cpf);
+      await clienteDAO.deletarCliente(cpf_cliente);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta excluída com sucesso!')),
       );
@@ -149,7 +164,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },
@@ -185,7 +200,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },
@@ -216,7 +231,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        EditarPerfilClienteScreen(cpf: widget.cpf),
+                        EditarPerfilClienteScreen(cpf: cpf_cliente),
                   ),
                 );
 

@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/carrinho': (context) => const CarrinhoPage(),
           '/perfil_cliente': (context) =>
-              const PerfilClienteScreen(cpf: "70275182606"),
+              const PerfilClienteScreen(),
           '/perfil_fornecedor': (context) =>
               const PerfilFornecedorScreen(cnpj: "11111111111111"),
           '/perfil_entregador': (context) =>
