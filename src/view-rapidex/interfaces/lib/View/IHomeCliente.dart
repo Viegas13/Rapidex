@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/DetalhesProdutoBottomSheet.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/Busca.dart';
 import 'package:interfaces/widgets/Item.dart';
 import '../DTO/Produto.dart';
@@ -44,6 +46,25 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     });
   }
 
+
+ Future<void> buscarProdutos() async {
+    try {
+      final resultado = await produtoDAO
+          .listarProdutosFornecedor('11111111111111'); // Fornecedor fictício
+      setState(() {
+        produtos = resultado;
+        _filtrarProdutos(); // Filtra os produtos após o carregamento
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Erro ao carregar produtos: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  
   // Método que verifica a categoria
   bool verificarCategoria(String descricao, String chave) {
     final regex = RegExp(chave, caseSensitive: false);
@@ -258,14 +279,34 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
   // Exibe os produtos encontrados na busca
   Widget _buildBusca() {
-    List<Produto> buscas = busca;
+  List<Produto> buscas = busca;
 
-    return ListView.builder(
-      itemCount: buscas.length,
-      itemBuilder: (context, index) {
-        final produto = buscas[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
+  return ListView.builder(
+    itemCount: buscas.length,
+    itemBuilder: (context, index) {
+      final produto = buscas[index];
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
+        child: GestureDetector(
+          onTap: () {
+            // Filtrar produtos do mesmo fornecedor, removendo o selecionado
+            final produtosFornecedor = produtos
+                .where((p) =>
+                    p.fornecedorCnpj == produto.fornecedorCnpj &&
+                    p.nome != produto.nome)
+                .toList();
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return DetalhesProdutoBottomSheet(
+                  produtoSelecionado: produto,
+                  produtosCategoria: busca, // Passa a lista de busca como categoria
+                  produtosFornecedor: produtosFornecedor,
+                );
+              },
+            );
+          },
           child: FutureBuilder<String?>(
             future: fornecedorDAO.buscarNomeFornecedor(produto.fornecedorCnpj),
             builder: (context, snapshot) {
@@ -277,7 +318,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 final fornecedorNome =
                     snapshot.data ?? "Fornecedor desconhecido";
 
-                print(fornecedorNome);
                 return Busca(
                   nome: produto.nome,
                   fornecedor: fornecedorNome,
@@ -289,10 +329,11 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
               }
             },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   // Exibe os produtos de uma categoria
   Widget _buildCategoria(String titulo) {
@@ -321,10 +362,31 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                     final produto = produtosCategoria[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Item(
-                        nome: produto.nome,
-                        // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
-                        preco: produto.preco,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Filtrar produtos do mesmo fornecedor, removendo o selecionado
+                          final produtosFornecedor = produtos
+                              .where((p) =>
+                                  p.fornecedorCnpj == produto.fornecedorCnpj &&
+                                  p.nome != produto.nome)
+                              .toList();
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return DetalhesProdutoBottomSheet(
+                                produtoSelecionado: produto,
+                                produtosCategoria: produtosCategoria,
+                                produtosFornecedor: produtosFornecedor,
+                              );
+                            },
+                          );
+                        },
+                        child: Item(
+                          nome: produto.nome,
+                          // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
+                          preco: produto.preco,
+                        ),
                       ),
                     );
                   },
