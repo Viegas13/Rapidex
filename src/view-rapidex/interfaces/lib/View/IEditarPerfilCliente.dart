@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/DTO/Cliente.dart';
@@ -25,21 +26,36 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
 
   late ClienteDAO clienteDAO;
 
+  late String cpf_cliente;
+  SessionController sessionController = SessionController();
+
   @override
   void initState() {
     super.initState();
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
-      buscarCliente();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
 
+  Future<void> inicializarDados() async {
+  try {
+    cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
+    if (cpf_cliente.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    await buscarCliente();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
+
   Future<void> buscarCliente() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
+      final cliente = await clienteDAO.buscarCliente(cpf_cliente);
       if (cliente != null) {
         setState(() {
           nomeController.text = cliente.nome;
@@ -60,11 +76,11 @@ class _EditarPerfilClienteScreenState extends State<EditarPerfilClienteScreen> {
 
   Future<void> salvarAlteracoes() async {
     try {
-      final cliente = await clienteDAO.buscarCliente(widget.cpf);
+      final cliente = await clienteDAO.buscarCliente(cpf_cliente);
 
       if (cliente != null) {
         final clienteAtualizado = Cliente(
-          cpf: widget.cpf,
+          cpf: cpf_cliente,
           nome: nomeController.text,
           senha: cliente.senha, // Manter a senha atual
           email: emailController.text,

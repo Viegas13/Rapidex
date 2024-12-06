@@ -33,6 +33,9 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   late FornecedorDAO fornecedorDAO;
   final TextEditingController buscaController = TextEditingController();
 
+  SessionController sessionController = SessionController();
+  
+
   @override
   void initState() {
     super.initState();
@@ -165,7 +168,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const PerfilClienteScreen(cpf: '70275182606')),
+                              const PerfilClienteScreen()),
                     );
                   },
                 ),
