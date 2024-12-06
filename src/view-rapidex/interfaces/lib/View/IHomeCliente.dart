@@ -52,8 +52,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
  Future<void> buscarProdutos() async {
     try {
-      final resultado = await produtoDAO
-          .listarProdutosFornecedor('11111111111111'); // Fornecedor fictício
+      final resultado = await produtoDAO.listarTodosProdutos(); 
       setState(() {
         produtos = resultado;
         _filtrarProdutos(); // Filtra os produtos após o carregamento
