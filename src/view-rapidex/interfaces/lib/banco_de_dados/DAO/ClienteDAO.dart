@@ -48,6 +48,27 @@ class ClienteDAO {
     }
   }
 
+  Future<String?> buscarCpf(String? email, String? senha) async {
+  try {
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
+    }
+    var resultado = await conexaoDB.connection.query(
+      'SELECT cpf FROM cliente WHERE email = @email AND senha = @senha',
+      substitutionValues: {'email': email, 'senha': senha},
+    );
+
+    if (resultado.isNotEmpty) {
+        return resultado.toString().replaceAll(RegExp(r'[\[\]\s]'), '');
+      } else {
+        return null; // Caso não haja resultados
+      }
+    } catch (e) {
+      print('Erro ao buscar cpf: $e');
+      return null; 
+    }
+}
+
   // Método para deletar cliente
   Future<void> deletarCliente(String cpf) async {
     try {
