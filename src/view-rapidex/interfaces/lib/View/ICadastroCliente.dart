@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
@@ -27,6 +28,8 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
+  SessionController sessionController = SessionController();
+       
   @override
   void initState() {
     super.initState();
@@ -72,13 +75,16 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
     try {
       Map<String, dynamic> cliente = {
         'nome': nomeController.text,
-        'cpf': cpf,
+        'cpf': cpfController.text,
         'senha': senhaController.text,
-        'email': email,
+        'email': emailController.text,
         'telefone': telefoneController.text,
         'datanascimento': dataNascimentoController.text,
       };
 
+      sessionController.setSession(emailController.text, senhaController.text);
+
+      print(sessionController.email);
       await clienteDAO.cadastrarCliente(cliente);
 
       ScaffoldMessenger.of(context).showSnackBar(

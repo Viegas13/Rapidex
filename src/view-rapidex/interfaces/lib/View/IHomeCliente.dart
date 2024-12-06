@@ -33,6 +33,9 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   late FornecedorDAO fornecedorDAO;
   final TextEditingController buscaController = TextEditingController();
 
+  SessionController sessionController = SessionController();
+  
+
   @override
   void initState() {
     super.initState();
@@ -49,8 +52,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
  Future<void> buscarProdutos() async {
     try {
-      final resultado = await produtoDAO
-          .listarProdutosFornecedor('11111111111111'); // Fornecedor fictício
+      final resultado = await produtoDAO.listarTodosProdutos(); 
       setState(() {
         produtos = resultado;
         _filtrarProdutos(); // Filtra os produtos após o carregamento
@@ -165,7 +167,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const PerfilClienteScreen(cpf: '70275182606')),
+                              const PerfilClienteScreen()),
                     );
                   },
                 ),
