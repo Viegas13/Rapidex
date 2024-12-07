@@ -1,7 +1,7 @@
 import 'package:interfaces/DTO/Status.dart';
 
 class Entrega {
-  final int entregaId;
+  final int? entregaId;
   final int pedidoId;
   final String entregadorCPF;
   final Status status;
@@ -10,7 +10,7 @@ class Entrega {
   final double valorFinal;
 
   Entrega({
-    required this.entregaId,
+    this.entregaId,
     required this.pedidoId,
     required this.entregadorCPF,
     required this.status,
