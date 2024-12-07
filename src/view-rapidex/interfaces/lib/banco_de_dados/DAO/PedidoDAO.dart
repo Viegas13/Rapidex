@@ -128,4 +128,21 @@ class PedidoDAO {
       rethrow;
     }
   }
+
+  Future<List<Pedido>> buscarPedidosDisponiveisEntrega() async {
+    try {
+      // Constrói a consulta para buscar os pedidos
+      final result = await conexaoDB.connection.query(
+        '''
+        SELECT * FROM Pedido 
+        WHERE status_pedido = 'em preparo'
+        ''',
+      );
+
+      return result.map((row) => Pedido.fromMap(row.toColumnMap())).toList();
+    } catch (e) {
+      print('Erro ao buscar pedidos por status: $e');
+      return [];
+    }
+  }
 }
