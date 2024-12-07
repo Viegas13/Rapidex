@@ -82,10 +82,10 @@ class _CadastroClienteScreenState extends State<CadastroClienteScreen> {
         'datanascimento': dataNascimentoController.text,
       };
 
-      sessionController.setSession(emailController.text, senhaController.text);
-
-      print(sessionController.email);
       await clienteDAO.cadastrarCliente(cliente);
+
+      sessionController.setSession(emailController.text, senhaController.text);
+      print(sessionController.email);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
