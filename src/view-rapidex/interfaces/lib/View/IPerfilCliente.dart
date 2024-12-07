@@ -86,7 +86,7 @@ Future<void> inicializarDados() async {
 
   Future<void> buscarEnderecos() async {
     try {
-      final enderecos = await enderecoDAO.listarEnderecos(cpf_cliente);
+      final enderecos = await enderecoDAO.listarEnderecosCliente(cpf_cliente);
       setState(() {
         enderecosFormatados = enderecos.map((endereco) {
           final complemento = endereco['complemento']?.isNotEmpty == true
