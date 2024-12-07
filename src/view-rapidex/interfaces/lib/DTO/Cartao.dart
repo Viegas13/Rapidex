@@ -6,6 +6,7 @@ class Cartao {
   final int agencia;
   final String bandeira;
   final String clienteCpf;
+  final String cpf_titular;
 
   Cartao({
     required this.numero,
@@ -15,6 +16,7 @@ class Cartao {
     required this.agencia,
     required this.bandeira,
     required this.clienteCpf,
+    required this.cpf_titular,
   });
 
   // Método para converter um objeto Cartao em um mapa (útil para inserções no banco de dados)
@@ -27,6 +29,7 @@ class Cartao {
       'agencia': agencia,
       'bandeira': bandeira,
       'cliente_cpf': clienteCpf,
+      'cpf_titular': cpf_titular,
     };
   }
 
@@ -40,6 +43,7 @@ class Cartao {
       agencia: map['agencia'] as int,
       bandeira: map['bandeira'] as String,
       clienteCpf: map['cliente_cpf'] as String,
+      cpf_titular: map['cpf_titular'] as String,
     );
   }
 }

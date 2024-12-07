@@ -74,7 +74,7 @@ CREATE TABLE Pedido (
     FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ)
 );
 
-CREATE TYPE status_entrega AS ENUM ('aguardando retirada', 'a caminho', 'chegou', 'entregue', 'cancelado');
+CREATE TYPE status_entrega AS ENUM ('aguardando_retirada', 'a_caminho', 'chegou', 'entregue', 'cancelado');
 -- aguardando retirada -> entregador aceitou e não marcou que está indo
 -- a caminho -> entregador marca que está indo
 -- chegou -> entregador marca que chegou
@@ -97,9 +97,9 @@ CREATE TABLE Entrega (
     endereco_retirada VARCHAR(255),
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
     valor_final FLOAT,
-    FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
-    FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
-    FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
+    --FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
+    --FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
+    --FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
 );
 
 -- Tabela Cartao com ON DELETE CASCADE
