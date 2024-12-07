@@ -49,7 +49,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
 
     try {
       String cpfCliente =
-          '351.935.576-00'; // Substitua pelo CPF do cliente logado
+          '02083037669'; // Substitua pelo CPF do cliente logado
       cartoes = await cartaoDAO.buscarCartoesPorCliente(cpfCliente);
 
       if (cartoes.isNotEmpty) {
