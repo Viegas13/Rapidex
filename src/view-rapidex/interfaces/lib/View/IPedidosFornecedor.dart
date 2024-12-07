@@ -9,8 +9,7 @@ class PedidosFornecedorScreen extends StatefulWidget {
   const PedidosFornecedorScreen({super.key});
 
   @override
-  _PedidosFornecedorScreenState createState() =>
-      _PedidosFornecedorScreenState();
+  _PedidosFornecedorScreenState createState() => _PedidosFornecedorScreenState();
 }
 
 class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
@@ -18,6 +17,7 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
   late ConexaoDB conexaoDB;
   late FornecedorDAO fornecedorDAO;
   List<Pedido> pedidosAndamento = [];
+  List<Pedido> pedidosHistorico = [];
   bool isLoading = true;
   SessionController sessionController = SessionController();
 
@@ -41,10 +41,8 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
       print('Erro ao inicializar conexão: $error');
     });
   }
-    
 
   Future<void> carregarPedidos() async {
-
     String cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
 
     if (cnpj.isEmpty) {
@@ -57,8 +55,10 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
 
     try {
       final pedidos = await pedidoDAO.buscarPedidosPorFornecedor(cnpj);
+
       setState(() {
-        pedidosAndamento = pedidos;
+        pedidosAndamento = pedidos.where((pedido) => pedido.status_pedido != 'retirado' && pedido.status_pedido != 'cancelado').toList();
+        pedidosHistorico = pedidos.where((pedido) => pedido.status_pedido == 'retirado' || pedido.status_pedido == 'cancelado').toList();
         isLoading = false;
       });
     } catch (e) {
@@ -69,61 +69,118 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
     }
   }
 
-  Future<void> alterarStatus(Pedido pedido, String novoStatus) async {
+  Future<List<Map<String, dynamic>>> buscarItensDoPedido(int? pedidoId) async {
     try {
-      await pedidoDAO.atualizarStatusPedido(pedido.pedido_id, novoStatus);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Status do pedido atualizado com sucesso!')),
-      );
-      carregarPedidos(); // Recarrega a lista de pedidos após a alteração
+      return await pedidoDAO.buscarItensPorPedido(pedidoId);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao atualizar status')),
-      );
-      print('Erro ao atualizar status: $e');
+      print('Erro ao buscar itens do pedido: $e');
+      return [];
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pedidos do Fornecedor'),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pedidos do Fornecedor'),
+          backgroundColor: Colors.orange,  // Cor laranja no AppBar
+          bottom: const TabBar(
+            indicatorColor: Colors.orange,  // Indicador de aba laranja
+            tabs: [
+              Tab(text: 'Em Andamento'),
+              Tab(text: 'Histórico'),
+            ],
+          ),
+        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.orange))  // Spinner laranja
+            : TabBarView(
+                children: [
+                  _buildPedidosListView(pedidosAndamento),
+                  _buildPedidosListView(pedidosHistorico),
+                ],
+              ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: pedidosAndamento.length,
-              itemBuilder: (context, index) {
-                final pedido = pedidosAndamento[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: ListTile(
-                    title: Text('Pedido #${pedido.pedido_id}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Status atual: ${pedido.status_pedido}'),
-                        DropdownButton<String>(
-                          value: pedido.status_pedido,
-                          onChanged: (String? novoStatus) {
-                            if (novoStatus != null) {
-                              alterarStatus(pedido, novoStatus);
-                            }
-                          },
-                          items: statusList.map((String status) {
-                            return DropdownMenuItem<String>(
-                              value: status,
-                              child: Text(status),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
     );
+  }
+
+  Widget _buildPedidosListView(List<Pedido> pedidos) {
+    return ListView.builder(
+      itemCount: pedidos.length,
+      itemBuilder: (context, index) {
+        final pedido = pedidos[index];
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: buscarItensDoPedido(pedido.pedido_id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(color: Colors.orange));
+            } else if (snapshot.hasError) {
+              return ListTile(
+                title: Text('Pedido #${pedido.pedido_id}'),
+                subtitle: const Text('Erro ao carregar itens do pedido'),
+              );
+            } else {
+              final itens = snapshot.data ?? [];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  title: Text('Pedido #${pedido.pedido_id}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Status atual: ${pedido.status_pedido}'),
+                      // Exibindo os itens do pedido
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: itens.map((item) {
+                          return Text(
+                            'Produto: ${item['nome_produto']}, Quantidade: ${item['quantidade']}, Total: ${item['valor_total']}',
+                            style: const TextStyle(fontSize: 14),
+                          );
+                        }).toList(),
+                      ),
+                      DropdownButton<String>(
+                        value: statusList.contains(pedido.status_pedido)
+                            ? pedido.status_pedido
+                            : statusList.first,
+                        onChanged: (String? novoStatus) {
+                          if (novoStatus != null) {
+                            alterarStatus(pedido, novoStatus);
+                          }
+                        },
+                        items: statusList.map((String status) {
+                          return DropdownMenuItem<String>(
+                            value: status,
+                            child: Text(status),
+                          );
+                        }).toList(),
+                        dropdownColor: Colors.orange[50],  // Fundo do dropdown laranja claro
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> alterarStatus(Pedido pedido, String novoStatus) async {
+    try {
+      await pedidoDAO.atualizarStatusPedido(pedido.pedido_id, novoStatus);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Status do pedido atualizado com sucesso!', style: TextStyle(color: Colors.orange))),
+      );
+      carregarPedidos(); // Recarrega a lista de pedidos após a alteração
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao atualizar status', style: TextStyle(color: Colors.red))),
+      );
+      print('Erro ao atualizar status: $e');
+    }
   }
 }
