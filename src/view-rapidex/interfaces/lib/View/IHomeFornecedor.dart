@@ -24,7 +24,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   bool isLoading = true;
   late ProdutoDAO produtoDAO;
   late FornecedorDAO fornecedorDAO;
-  late String cnpj;
+  String cnpj = '';
   SessionController sessionController = SessionController();
 
   @override

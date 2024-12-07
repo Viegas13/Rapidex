@@ -19,7 +19,7 @@ class PerfilFornecedorScreen extends StatefulWidget {
 class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
   late FornecedorDAO fornecedorDAO;
   Fornecedor? fornecedor;
-  late String cnpj;
+  String cnpj = '';
   SessionController sessionController = SessionController();
 
   @override
@@ -28,7 +28,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
-      carregarDadosFornecedor();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
@@ -38,7 +38,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     try {
       print("chegou na busca");
       final fornecedorMap =
-          await fornecedorDAO.buscarFornecedor("11111111111111"); //widget.cnpj
+          await fornecedorDAO.buscarFornecedor(cnpj); //widget.cnpj
       if (fornecedorMap != null) {
         setState(() {
           fornecedor = Fornecedor.fromMap(fornecedorMap);
@@ -55,6 +55,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     if (cnpj.isEmpty) {
       throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
     }
+    carregarDadosFornecedor();
   } catch (e) {
     print('Erro ao inicializar dados: $e');
   }

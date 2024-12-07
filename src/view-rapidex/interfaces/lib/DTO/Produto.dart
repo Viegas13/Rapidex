@@ -35,9 +35,8 @@ class Produto {
           ? Uint8List.fromList((map['imagem'] as List<int>))
           : null, // Permite imagens nulas,
       descricao: map['descricao'] ?? '',
-      fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
-      restrito: map['restritoPorIdade'] == true ||
-          map['restritoPorIdade'].toString() == 'true',
+      fornecedorCnpj: map['fornecedor_cnpj'] ?? false,
+      restrito: map['restritoPorIdade']?.toString() == 'true',
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }

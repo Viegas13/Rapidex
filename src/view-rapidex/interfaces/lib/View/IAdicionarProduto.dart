@@ -89,42 +89,81 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     }
   }
 
-  Future<bool> cadastrarProduto() async {
-  try {
-    if (cnpj.isEmpty) {
-      throw Exception('CNPJ não foi inicializado.');
-    }
+  Future<void> removerImagem() async{
+  setState(() {
+    imagemSelecionada = null; // Reseta a imagem para null
+  });
+}
 
-    Uint8List? imagemBytes;
-    if (imagemSelecionada != null) {
-      imagemBytes = imagemSelecionada!;
-    }
-
-    Map<String, dynamic> produto = {
-      'nome': nomeController.text,
-      'validade': validadeController.text,
-      'preco': precoController.text,
-      'imagem': imagemBytes,
-      'descricao': descricaoController.text,
-      'fornecedor': cnpj,
-      'restrito': restritoPorIdade ? 'true' : 'false',
-      'quantidade': quantidadeController.text,
-    };
-
-    await produtoDAO.cadastrarProduto(produto);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-    );
-
-    return true;
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Erro ao cadastrar produto: $e')),
-    );
-    print('Erro ao cadastrar produto: $e');
+  bool validarCampos() {
+  if (nomeController.text.isEmpty) {
+    exibirMensagem("O nome do produto é obrigatório!");
     return false;
   }
+
+  if (validadeController.text.isNotEmpty) {
+    try {
+      DateFormat('dd/MM/yyyy').parse(validadeController.text);
+    } catch (_) {
+      exibirMensagem("A data de validade não está no formato correto!");
+      return false;
+    }
+  }
+
+  if (precoController.text.isEmpty || double.tryParse(precoController.text) == null) {
+    exibirMensagem("O preço informado é inválido!");
+    return false;
+  }
+
+  if (quantidade <= 0) {
+    exibirMensagem("A quantidade deve ser maior que zero!");
+    return false;
+  }
+
+  return true;
+}
+
+void exibirMensagem(String mensagem) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensagem)));
+}
+
+  Future<bool> cadastrarProduto() async {
+    if (!validarCampos()) return false;
+    try {
+      if (cnpj.isEmpty) {
+        throw Exception('CNPJ não foi inicializado.');
+      }
+
+      Uint8List? imagemBytes;
+      if (imagemSelecionada != null) {
+        imagemBytes = imagemSelecionada!;
+      }
+
+      Map<String, dynamic> produto = {
+        'nome': nomeController.text,
+        'validade': validadeController.text,
+        'preco': precoController.text,
+        'imagem': imagemBytes,
+        'descricao': descricaoController.text,
+        'fornecedor': cnpj,
+        'restrito': restritoPorIdade,
+        'quantidade': quantidadeController.text,
+      };
+
+      await produtoDAO.cadastrarProduto(produto);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+      );
+
+      return true;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao cadastrar produto: $e')),
+      );
+      print('Erro ao cadastrar produto: $e');
+      return false;
+    }
 }
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
@@ -192,29 +231,63 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap: selecionarImagem,
-                    child: Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: imagemSelecionada != null
-                          ? Image.memory(
-                              imagemSelecionada!,
-                              fit: BoxFit.cover,
-                            )
-                          : const Center(
-                              child: Text(
-                                'Anexar imagem do produto',
-                                style: TextStyle(color: Colors.black45),
+                    onTap: () async {
+                      if (imagemSelecionada == null) {
+                        await selecionarImagem(); // Apenas seleciona imagem se não houver uma
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: imagemSelecionada != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.memory(
+                                    imagemSelecionada!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Text(
+                                    'Anexar imagem do produto',
+                                    style: TextStyle(color: Colors.black45),
+                                  ),
+                                ),
+                        ),
+                        if (imagemSelecionada != null)
+                          Positioned(
+                            top: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: () {
+                                // Remove a imagem
+                                removerImagem();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
                     labelText: 'Descrição',
@@ -296,11 +369,12 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   quantidade = int.tryParse(value) ?? 1;
-                                  if (quantidade < 1) quantidade = 1;
-                                  quantidadeController.text =
-                                      quantidade.toString();
+                                  if (quantidade < 1) {
+                                    quantidade = 1;
+                                    quantidadeController.text = '1';
+                                  }
                                 });
-                              },
+                              }
                             ),
                           ),
                           IconButton(
