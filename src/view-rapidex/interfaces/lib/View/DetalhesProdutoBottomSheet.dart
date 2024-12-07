@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/ItemPedido.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import '../DTO/Produto.dart';
 
 class DetalhesProdutoBottomSheet extends StatefulWidget {
@@ -26,18 +28,40 @@ class _DetalhesProdutoBottomSheetState
     extends State<DetalhesProdutoBottomSheet> {
   late ConexaoDB conexaoDB;
   late ItemPedidoDAO itemPedidoDAO;
+  late ClienteDAO clienteDAO;
+  late String cpf_cliente;
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
-    itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
+    
 
     conexaoDB.initConnection().then((_) {
-      print('Conexão estabelecida no initState.');
+      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+      itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
+      inicializarDados();      
     }).catchError((error) {
       print('Erro ao estabelecer conexão no initState: $error');
     });
+  }
+
+  Future<void> inicializarDados() async {
+    try {
+      cpf_cliente = await clienteDAO.buscarCpf(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cpf_cliente.isEmpty) {
+        throw Exception('CPF não encontrado para o email e senha fornecidos.');
+      }
+      else{
+        print("CPF encontrado com sucesso! Esse é ele:");
+        print(cpf_cliente);
+      }
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
   }
 
   int quantidadeSelecionada = 1;
@@ -164,65 +188,63 @@ class _DetalhesProdutoBottomSheetState
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: quantidadeSelecionada > 0
-              ? () async {
-                  try {
-                    final produtoSelecionado = widget.produtoSelecionado;
+  onPressed: quantidadeSelecionada > 0
+      ? () async {
+          try {
+            final produtoSelecionado = widget.produtoSelecionado;
 
-                    // Calculando o valor total
-                    final valorTotal =
-                        produtoSelecionado.preco * quantidadeSelecionada;
+            // Calculando o valor total
+            final valorTotal = produtoSelecionado.preco * quantidadeSelecionada;
 
-                    //DEBUGANDO
-                    print("DEBUGANDO:");
-                    print(produtoSelecionado.produto_id);
-                    print(quantidadeSelecionada);
-                    print(valorTotal);
-                    print("FIM DO UDEBUG");
+            // Criando o mapa com os dados do ItemPedido
+            Map<String, dynamic> itemPedido = {
+              'produto_id': produtoSelecionado.produto_id,
+              'pedido_id': null, // Pedido ainda não associado
+              'quantidade': quantidadeSelecionada,
+              'valor_total': valorTotal,
+              'cliente_cpf': cpf_cliente, // CPF refatorado com a sessão
+            };
 
-                    // Criando o mapa com os dados do ItemPedido
-                    Map<String, dynamic> itemPedido = {
-                      'produto_id': produtoSelecionado.produto_id,
-                      'pedido_id': null, // Pedido ainda não associado
-                      'quantidade': quantidadeSelecionada,
-                      'valor_total': valorTotal,
-                      'cliente_cpf': '70275182606', // CPF fixo até refatorar com a sessão
-                    };
+            // Inserindo o ItemPedido no banco de dados
+            await itemPedidoDAO.cadastrarItemPedido(itemPedido);
 
-                    // Inserindo o ItemPedido no banco de dados
-                    await itemPedidoDAO.cadastrarItemPedido(itemPedido);
+            // Fecha o BottomSheet e exibe o SnackBar
+            if (context.mounted) {
+              Navigator.pop(context); // Fecha o BottomSheet
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Item "${produtoSelecionado.nome}" adicionado ao carrinho com sucesso!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            // Exibe o erro diretamente no contexto do BottomSheet
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Erro ao adicionar o item "${widget.produtoSelecionado.nome}" ao carrinho.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        }
+      : null, // Desativa o botão se a quantidade for <= 0
+  style: ElevatedButton.styleFrom(
+    backgroundColor: quantidadeSelecionada > 0
+        ? Colors.orange
+        : Colors.grey, // Cor do botão muda quando desativado
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+  ),
+  child: const Text(
+    "Adicionar ao Carrinho",
+    style: TextStyle(fontSize: 16, color: Colors.white),
+  ),
+),
 
-                    // Feedback positivo
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Item "${produtoSelecionado.nome}" adicionado ao carrinho com sucesso!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } catch (e) {
-                    // Captura de erros e feedback negativo
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Erro ao adicionar o item "${widget.produtoSelecionado.nome}" ao carrinho.'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              : null, // Desativa o botão se a quantidade for <= 0
-          style: ElevatedButton.styleFrom(
-            backgroundColor: quantidadeSelecionada > 0
-                ? Colors.orange
-                : Colors.grey, // Cor do botão muda quando desativado
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-          ),
-          child: const Text(
-            "Adicionar ao Carrinho",
-            style: TextStyle(fontSize: 16, color: Colors.white),
-          ),
-        ),
       ],
     );
   }
