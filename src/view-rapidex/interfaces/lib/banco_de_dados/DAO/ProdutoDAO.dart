@@ -105,7 +105,7 @@ class ProdutoDAO {
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
         ''',
       );
