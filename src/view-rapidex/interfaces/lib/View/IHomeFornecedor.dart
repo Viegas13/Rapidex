@@ -74,7 +74,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> excluirProduto(Produto produto) async {
     try {
       ProdutoDAO produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-      await produtoDAO.removerProduto(produto.nome);
+      await produtoDAO.removerProduto(produto.produto_id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produto excluído com sucesso!')),
       );

@@ -34,7 +34,7 @@ class ProdutoDAO {
     }
   }
 
-  Future<void> removerProduto(String nome) async {
+  Future<void> removerProduto(int produto_id) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -42,9 +42,9 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE idProduto = @id
+        DELETE FROM produto WHERE produto_id = @produto_id
         ''',
-        substitutionValues: {'nome': nome},
+        substitutionValues: {'produto_id': produto_id},
       );
       print('Produto excluído com sucesso!');
     } catch (e) {
