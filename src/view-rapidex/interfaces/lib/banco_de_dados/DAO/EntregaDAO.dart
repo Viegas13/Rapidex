@@ -131,6 +131,50 @@ class EntregaDAO {
     }
   }
 
+  Future<Entrega?> buscarEntregaPorEntregador3Status(String cpf, List<Status> status) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      var result = await conexaoDB.connection.query(
+        '''
+        SELECT * FROM entrega
+        WHERE entregador_cpf = @cpf AND status_entrega IN (@status1, @status2, @status3)
+        ''',
+        substitutionValues: {'cpf': cpf, 'status1': status[0].name, 'status2': status[1].name, 'status3': status[2].name},
+      );
+
+      if (result.isNotEmpty) {
+        return Entrega.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar entrega: $e');
+      return null;
+    }
+  }
+
+  Future<void> atualizarStatusEntrega(String cpf, Status status) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      await conexaoDB.connection.query(
+        '''
+        UPDATE entrega
+        SET status_entrega = @status
+        WHERE entregador_cpf = @cpf
+        ''',
+        substitutionValues: {'cpf': cpf, 'status': status.name},
+      );
+
+    } catch (e) {
+      print('Erro ao buscar entrega: $e');
+      return null;
+    }
+  }
+
 /*  Future<List<Entrega>> listarEntregas(String cpfEntregador) async {
   try {
     await verificarConexao(); // Garante que a conexão com o banco está ativa.

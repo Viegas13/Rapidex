@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Entrega.dart';
 import 'package:interfaces/DTO/Entregador.dart';
 import 'package:interfaces/DTO/Status.dart';
+import 'package:interfaces/View/IHomeEntregador.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -24,6 +25,10 @@ class _AcompanhamentoEntregadorScreenState
 
   Entregador? entregadorLogado;
   Entrega? entrega;
+  String? cpfLogado;
+
+  int countDeEstado = 0;
+  String textoBotaoDeEstado = 'Notificar - A Caminho';
 
   late Future<void> entregaFuture = _initializeEntregaFuture();
 
@@ -45,12 +50,45 @@ class _AcompanhamentoEntregadorScreenState
     entregadorLogado = await entregadorDAO?.BuscarEntregadorParaLogin(
         sessionController.email.toString(),
         sessionController.senha.toString());
-    Status status = Status.aguardando_retirada;
 
-    entrega = await entregaDAO?.buscarEntregaPorEntregadorStatus(
-        entregadorLogado!.cpf, status);
+    List<Status> status = [Status.aguardando_retirada, Status.a_caminho, Status.chegou];
+
+    cpfLogado = entregadorLogado!.cpf;
+
+    entrega = await entregaDAO?.buscarEntregaPorEntregador3Status(
+        cpfLogado!, status);
 
     setState(() {});
+  }
+
+   void changeTextEStatus() {
+    setState(() {
+      
+      if (countDeEstado == 0) {
+        textoBotaoDeEstado = "Notificar - Pedido Chegou";
+
+        countDeEstado++;
+
+        entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.a_caminho);
+      }
+      else if (countDeEstado == 1) {
+        textoBotaoDeEstado = "Finalizar Entrega";
+
+        countDeEstado++;
+
+        entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.chegou);
+      }
+      else {
+        entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.entregue);
+        //await Future.delayed(Duration(seconds: 1));
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeEntregadorScreen()),
+        );
+      }
+       
+    });
   }
 
   @override
@@ -117,10 +155,7 @@ class _AcompanhamentoEntregadorScreenState
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Recebimento confirmado!')),
-                            );
+                            changeTextEStatus();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
@@ -132,8 +167,8 @@ class _AcompanhamentoEntregadorScreenState
                               horizontal: 24,
                             ),
                           ),
-                          child: const Text(
-                            'Confirmar Recebimento/Entrega',
+                          child: Text(
+                            textoBotaoDeEstado,
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
