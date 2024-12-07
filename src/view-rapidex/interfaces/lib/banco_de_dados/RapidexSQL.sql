@@ -99,9 +99,9 @@ CREATE TABLE Entrega (
     endereco_retirada VARCHAR(255),
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
     valor_final FLOAT,
-    FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
-    FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
-    FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
+    --FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
+    --FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
+    --FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
 );
 
 -- Tabela Cartao com ON DELETE CASCADE

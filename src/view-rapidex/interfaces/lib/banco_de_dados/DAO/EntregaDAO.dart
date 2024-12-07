@@ -114,10 +114,7 @@ class EntregaDAO {
       }
       var result = await conexaoDB.connection.query(
         '''
-        SELECT entrega_id AS entregaId, pedido_id AS pedidoId, entregador_cpf AS entregadorCPF, 
-               status_entrega AS status, endereco_retirada AS enderecoRetirada, 
-               endereco_entrega AS enderecoEntrega, valor_final AS valorFinal
-        FROM entrega
+        SELECT * FROM entrega
         WHERE entregador_cpf = @cpf AND status_entrega = @status
         ''',
         substitutionValues: {'cpf': cpf, 'status': status.name},

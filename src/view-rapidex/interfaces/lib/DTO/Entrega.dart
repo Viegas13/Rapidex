@@ -21,14 +21,14 @@ class Entrega {
 
   factory Entrega.fromMap(Map<String, dynamic> map) {
     return Entrega(
-      entregaId: map['entregaId'] ?? 0,
-      pedidoId: map['pedidoId'] ?? 0,
-      entregadorCPF: map['entregadorCPF'] ?? '',
+      entregaId: map['entrega_id'] ?? 0,
+      pedidoId: map['pedido_id'] ?? 0,
+      entregadorCPF: map['entregador_cpf'] ?? '',
       status: Status.values
-          .byName(map['status'] ?? 'em_espera'), // Assumindo um enum
-      enderecoRetirada: map['enderecoRetirada'] ?? '',
-      enderecoEntrega: map['enderecoEntrega'] ?? '',
-      valorFinal: double.tryParse(map['valorFinal'].toString()) ?? 0.0,
+          .byName(map['status_entrega'] ?? 'aguardando_retirada'), // Assumindo um enum
+      enderecoRetirada: map['endereco_retirada'] ?? '',
+      enderecoEntrega: map['endereco_entrega'] ?? '',
+      valorFinal: double.tryParse(map['valor_final'].toString()) ?? 0.0,
     );
   }
 
