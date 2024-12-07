@@ -32,7 +32,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   final TextEditingController validadeController = TextEditingController();
   final TextEditingController precoController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
-  bool restritoPorIdade = false;
+  late bool restritoPorIdade = false;
   int quantidade = 1;
   TextEditingController quantidadeController = TextEditingController(text: '1');
 
@@ -85,9 +85,9 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
 
           // emailController.text = cliente.email; imagem
           descricaoController.text = produto.descricao;
-          restritoPorIdade = produto.restrito ?? false;
-          quantidadeController =
-              TextEditingController(text: produto.quantidade.toString());
+          restritoPorIdade = produto.restrito;
+          quantidadeController.text = produto.quantidade.toString();
+
         });
         print('Restrito por idade do banco: ${produto.restrito}');
       }

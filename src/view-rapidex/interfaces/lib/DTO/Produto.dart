@@ -36,7 +36,7 @@ class Produto {
           : null, // Permite imagens nulas,
       descricao: map['descricao'] ?? '',
       fornecedorCnpj: map['fornecedor_cnpj'] ?? false,
-      restrito: map['restritoPorIdade']?.toString() == 'true',
+      restrito: map['restritoPorIdade'],
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }
@@ -50,7 +50,7 @@ class Produto {
       'imagem': imagem,
       'descricao': descricao,
       'fornecedor_cnpj': fornecedorCnpj,
-      'restritoPorIdade': restrito.toString(),
+      'restritoPorIdade': restrito,
       'quantidade': quantidade,
     };
   }

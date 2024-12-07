@@ -239,7 +239,7 @@ void exibirMensagem(String mensagem) {
                     child: Stack(
                       children: [
                         Container(
-                          height: 150,
+                          height: 120,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
