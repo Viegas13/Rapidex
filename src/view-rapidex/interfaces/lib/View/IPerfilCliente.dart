@@ -164,7 +164,7 @@ Future<void> inicializarDados() async {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },
@@ -200,7 +200,7 @@ Future<void> inicializarDados() async {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },

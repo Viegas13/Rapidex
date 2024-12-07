@@ -13,13 +13,17 @@ class EnderecoDAO {
         await conexaoDB.openConnection();
       }
 
+      // Gera o endereco_id com base no cliente_cpf e cep
+      final String enderecoId = '${endereco['cep']}_${endereco['cliente_cpf']}';
+
       // Realiza a inserção do Endereco
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Endereco (cliente_cpf, bairro, rua, numero, cep, complemento, referencia)
-        VALUES (@cliente_cpf, @bairro, @rua, @numero, @cep, @complemento, @referencia)
+        INSERT INTO Endereco (endereco_id, cliente_cpf, bairro, rua, numero, cep, complemento, referencia)
+        VALUES (@endereco_id, @cliente_cpf, @bairro, @rua, @numero, @cep, @complemento, @referencia)
         ''',
         substitutionValues: {
+          'endereco_id': enderecoId,
           ...endereco,
         },
       );
@@ -30,6 +34,7 @@ class EnderecoDAO {
     }
   }
 
+  // Método para listar endereços de um cliente específico
   Future<List<Map<String, dynamic>>> listarEnderecos(String clienteCpf) async {
     try {
       // Garante que a conexão está aberta
@@ -40,7 +45,7 @@ class EnderecoDAO {
       // Consulta os endereços associados ao CPF do cliente
       final results = await conexaoDB.connection.query(
         '''
-      SELECT rua, numero, bairro, cep, complemento, referencia
+      SELECT endereco_id, rua, numero, bairro, cep, complemento, referencia
       FROM Endereco
       WHERE cliente_cpf = @cliente_cpf
       ''',
@@ -54,12 +59,13 @@ class EnderecoDAO {
       // Mapeia os resultados para uma lista de mapas
       return results.map((row) {
         return {
-          'rua': row[0],
-          'numero': row[1],
-          'bairro': row[2],
-          'cep': row[3],
-          'complemento': row[4],
-          'referencia': row[5],
+          'endereco_id': row[0],
+          'rua': row[1],
+          'numero': row[2],
+          'bairro': row[3],
+          'cep': row[4],
+          'complemento': row[5],
+          'referencia': row[6],
         };
       }).toList();
     } catch (e) {
@@ -68,20 +74,23 @@ class EnderecoDAO {
     }
   }
 
+  // Método para deletar um endereço com base no endereco_id
   Future<void> deletarEndereco(String clienteCpf, String cep) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
+      // Gera o endereco_id com base no cliente_cpf e cep
+      final String enderecoId = '${cep}_$clienteCpf';
+
       final int rowsAffected = await conexaoDB.connection.execute(
         '''
         DELETE FROM Endereco 
-        WHERE cliente_cpf = @cliente_cpf AND cep = @cep
+        WHERE endereco_id = @endereco_id
         ''',
         substitutionValues: {
-          'cliente_cpf': clienteCpf,
-          'cep': cep,
+          'endereco_id': enderecoId,
         },
       );
 

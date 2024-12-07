@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCEP.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
-import 'package:postgres/postgres.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 
 class CadastroEndereco extends StatefulWidget {
-  final String cpf;
-  const CadastroEndereco({super.key, required this.cpf});
+  const CadastroEndereco({super.key});
 
   @override
   State<CadastroEndereco> createState() => _CadastroEnderecoState();
@@ -17,6 +17,8 @@ class CadastroEndereco extends StatefulWidget {
 class _CadastroEnderecoState extends State<CadastroEndereco> {
   late ConexaoDB conexaoDB;
   late EnderecoDAO enderecoDAO;
+  late ClienteDAO clienteDAO;
+
   final TextEditingController _cepController = TextEditingController();
   final TextEditingController _ruaController = TextEditingController();
   final TextEditingController _bairroController = TextEditingController();
@@ -26,13 +28,16 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
       TextEditingController();
 
   final _cepFormatter = MaskTextInputFormatter(
-      mask: '#####-###', filter: {'#': RegExp(r'[0-9]')});
+    mask: '#####-###',
+    filter: {'#': RegExp(r'[0-9]')},
+  );
 
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
     enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
@@ -40,7 +45,6 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
       print('Erro ao estabelecer conexão no initState: $error');
     });
 
-    // Adiciona listeners para os campos de rua, bairro e número
     _ruaController.addListener(_syncCepWithAddress);
     _bairroController.addListener(_syncCepWithAddress);
     _numeroController.addListener(_syncCepWithAddress);
@@ -59,13 +63,22 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
   }
 
   Future<void> cadastrarEndereco() async {
+    final String? email = SessionController.instancia.email;
+
+    if (email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro: Usuário não autenticado!')),
+      );
+      return;
+    }
+
+    // Recebe as informações do endereço
     final String cep = _cepController.text.replaceAll('-', '');
     final String numero = _numeroController.text;
     final String rua = _ruaController.text;
     final String bairro = _bairroController.text;
 
     List<String> erros = [];
-
     if (cep.isEmpty || cep.length != 8) {
       erros.add('Digite um CEP válido com 8 dígitos.');
     }
@@ -90,8 +103,20 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     }
 
     try {
+      // Buscar o CPF do cliente com base no email da sessão
+      final String? cpf =
+          await clienteDAO.buscarCpf(email, SessionController.instancia.senha);
+
+      if (cpf == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro: CPF não encontrado!')),
+        );
+        return;
+      }
+
+      // Se o CPF foi encontrado, criamos o mapa para o cadastro de endereço
       final Map<String, dynamic> endereco = {
-        'cliente_cpf': widget.cpf.toString(), // Passa o CPF do cliente
+        'cliente_cpf': cpf, // Agora estamos usando o CPF encontrado
         'cep': cep,
         'rua': rua,
         'numero': numero,
@@ -106,7 +131,6 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
         const SnackBar(content: Text('Endereço cadastrado com sucesso!')),
       );
 
-      // Navega de volta para IPerfilCliente após o cadastro
       Navigator.pushReplacementNamed(context, '/perfil_cliente');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

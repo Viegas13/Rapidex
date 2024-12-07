@@ -1,41 +1,45 @@
 class Pedido {
-  final int? pedidoId;
-  final String cliente_cpf;
-  final String fornecedor_cnpj;
-  final String entregador_cpf;
-  final double preco;
-  final String status_pedido;
+  int? pedido_id;
+  String cliente_cpf;
+  String fornecedor_cnpj;
+  double preco;
+  double frete;
+  String endereco_entrega; // Novo campo
+  String status_pedido;
 
   Pedido({
-    this.pedidoId,
+    this.pedido_id,
     required this.cliente_cpf,
     required this.fornecedor_cnpj,
-    required this.entregador_cpf,
     required this.preco,
+    required this.frete,
+    required this.endereco_entrega,
     this.status_pedido = 'pendente',
   });
 
-  // Construtor para conversão de Map para Pedido
-  factory Pedido.fromMap(Map<String, dynamic> map) {
-    return Pedido(
-      pedidoId: map['pedido_id'] as int?,
-      cliente_cpf: map['cliente_cpf'] as String,
-      fornecedor_cnpj: map['fornecedor_cnpj'] as String,
-      entregador_cpf: map['entregador_cpf'] as String,
-      preco: map['preco'] as double,
-      status_pedido: map['status_pedido'] as String,
-    );
-  }
-
-  // Converte o Pedido para Map (para envio ao banco)
+  // Conversão para map (para inserir no banco)
   Map<String, dynamic> toMap() {
     return {
-      'pedido_id': pedidoId,
+      'pedido_id': pedido_id,
       'cliente_cpf': cliente_cpf,
       'fornecedor_cnpj': fornecedor_cnpj,
-      'entregador_cpf': entregador_cpf,
       'preco': preco,
+      'frete': frete,
+      'endereco_entrega': endereco_entrega,
       'status_pedido': status_pedido,
     };
+  }
+
+  // Conversão de map (ao buscar no banco)
+  factory Pedido.fromMap(Map<String, dynamic> map) {
+    return Pedido(
+      pedido_id: map['pedido_id'],
+      cliente_cpf: map['cliente_cpf'],
+      fornecedor_cnpj: map['fornecedor_cnpj'],
+      preco: map['preco'],
+      frete: map['frete'],
+      endereco_entrega: map['endereco_entrega'],
+      status_pedido: map['status_pedido'] ?? 'pendente',
+    );
   }
 }

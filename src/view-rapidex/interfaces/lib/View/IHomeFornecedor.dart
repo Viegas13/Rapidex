@@ -7,11 +7,12 @@ import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/IEditarProduto.dart';
 import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
-  final String cnpjFornecedor;
 
-  HomeFornecedorScreen({super.key, required this.cnpjFornecedor});
+  HomeFornecedorScreen({super.key});
 
   @override
   _HomeFornecedorScreenState createState() => _HomeFornecedorScreenState();
@@ -22,26 +23,43 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   List<Produto> produtos = [];
   bool isLoading = true;
   late ProdutoDAO produtoDAO;
+  late FornecedorDAO fornecedorDAO;
+  String cnpj = '';
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
-      carregarProdutos();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
 
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    }
+    await carregarProdutos();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
+
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
+      print(cnpj);
       final resultado =
-          await produtoDAO.listarProdutosFornecedor(widget.cnpjFornecedor);
+          await produtoDAO.listarProdutosFornecedor(cnpj);
 
       setState(() {
         produtos = resultado;
@@ -58,10 +76,11 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> excluirProduto(Produto produto) async {
     try {
       ProdutoDAO produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-      await produtoDAO.removerProduto(produto.nome);
+      await produtoDAO.removerProduto(produto.produto_id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produto excluído com sucesso!')),
       );
+      await carregarProdutos();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao excluir produto')),
@@ -92,9 +111,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const PerfilFornecedorScreen(
-                          cnpj: '11111111111111',
-                        ),
+                        builder: (context) => const PerfilFornecedorScreen(),
                       ),
                     );
                   },
@@ -147,7 +164,8 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => EditarProdutoScreen(
-                                          id: produto.produto_id),
+                                          id: produto.produto_id,
+                                          onProdutoEditado: carregarProdutos,),
                                     ),
                                   );
                                 },
@@ -172,7 +190,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AdicionarProdutoScreen()),
+            MaterialPageRoute(builder: (context) => AdicionarProdutoScreen(onProdutoAdicionado: carregarProdutos,)),
           );
         },
         backgroundColor: Colors.orangeAccent,

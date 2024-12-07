@@ -7,9 +7,14 @@ import 'package:interfaces/widgets/ImageLabelField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 
 class AdicionarProdutoScreen extends StatefulWidget {
-  const AdicionarProdutoScreen({super.key});
+  final VoidCallback onProdutoAdicionado;
+
+  const AdicionarProdutoScreen({super.key, required this.onProdutoAdicionado});
 
   @override
   _AdicionarProdutoScreenState createState() => _AdicionarProdutoScreenState();
@@ -19,6 +24,9 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
+  late FornecedorDAO fornecedorDAO;
+  String cnpj = '';
+  
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
@@ -26,8 +34,9 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
   int quantidade = 1;
-  final TextEditingController quantidadeController =
-      TextEditingController(text: '1');
+  final TextEditingController quantidadeController = TextEditingController(text: '1');
+
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
@@ -35,10 +44,12 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
     // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
-      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
+      inicializarDados();
+
       print('Conexão estabelecida no initState.');
     }).catchError((error) {
       // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
@@ -55,6 +66,17 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     super.dispose();
   }
 
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    }
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
+
   Future<void> selecionarImagem() async {
     final ImagePicker picker = ImagePicker();
     final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
@@ -67,46 +89,82 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     }
   }
 
-  Future<bool> cadastrarProduto() async {
+  Future<void> removerImagem() async{
+  setState(() {
+    imagemSelecionada = null; // Reseta a imagem para null
+  });
+}
+
+  bool validarCampos() {
+  if (nomeController.text.isEmpty) {
+    exibirMensagem("O nome do produto é obrigatório!");
+    return false;
+  }
+
+  if (validadeController.text.isNotEmpty) {
     try {
-      // Verifica se há uma imagem selecionada e a converte para bytes
+      DateFormat('dd/MM/yyyy').parse(validadeController.text);
+    } catch (_) {
+      exibirMensagem("A data de validade não está no formato correto!");
+      return false;
+    }
+  }
+
+  if (precoController.text.isEmpty || double.tryParse(precoController.text) == null) {
+    exibirMensagem("O preço informado é inválido!");
+    return false;
+  }
+
+  if (quantidade <= 0) {
+    exibirMensagem("A quantidade deve ser maior que zero!");
+    return false;
+  }
+
+  return true;
+}
+
+void exibirMensagem(String mensagem) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensagem)));
+}
+
+  Future<bool> cadastrarProduto() async {
+    if (!validarCampos()) return false;
+    try {
+      if (cnpj.isEmpty) {
+        throw Exception('CNPJ não foi inicializado.');
+      }
+
       Uint8List? imagemBytes;
       if (imagemSelecionada != null) {
         imagemBytes = imagemSelecionada!;
       }
 
-      // Monta o produto como um mapa
       Map<String, dynamic> produto = {
         'nome': nomeController.text,
         'validade': validadeController.text,
         'preco': precoController.text,
-        'imagem': imagemBytes, // Passa os bytes da imagem
+        'imagem': imagemBytes,
         'descricao': descricaoController.text,
-        'fornecedor': '11111111111111',
-        'restrito': restritoPorIdade ? 'true' : 'false',
+        'fornecedor': cnpj,
+        'restrito': restritoPorIdade,
         'quantidade': quantidadeController.text,
       };
 
-      // Chama o DAO para salvar no banco
       await produtoDAO.cadastrarProduto(produto);
 
-      // Exibe uma mensagem de sucesso
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
 
-      return true; // Retorna sucesso
+      return true;
     } catch (e) {
-      // Exibe uma mensagem de erro
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar produto')),
+        SnackBar(content: Text('Erro ao cadastrar produto: $e')),
       );
       print('Erro ao cadastrar produto: $e');
-
-      return false; // Retorna falha
+      return false;
     }
-  }
-
+}
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -173,29 +231,63 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap: selecionarImagem,
-                    child: Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: imagemSelecionada != null
-                          ? Image.memory(
-                              imagemSelecionada!,
-                              fit: BoxFit.cover,
-                            )
-                          : const Center(
-                              child: Text(
-                                'Anexar imagem do produto',
-                                style: TextStyle(color: Colors.black45),
+                    onTap: () async {
+                      if (imagemSelecionada == null) {
+                        await selecionarImagem(); // Apenas seleciona imagem se não houver uma
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: imagemSelecionada != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.memory(
+                                    imagemSelecionada!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Text(
+                                    'Anexar imagem do produto',
+                                    style: TextStyle(color: Colors.black45),
+                                  ),
+                                ),
+                        ),
+                        if (imagemSelecionada != null)
+                          Positioned(
+                            top: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: () {
+                                // Remove a imagem
+                                removerImagem();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
                     labelText: 'Descrição',
@@ -277,11 +369,12 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   quantidade = int.tryParse(value) ?? 1;
-                                  if (quantidade < 1) quantidade = 1;
-                                  quantidadeController.text =
-                                      quantidade.toString();
+                                  if (quantidade < 1) {
+                                    quantidade = 1;
+                                    quantidadeController.text = '1';
+                                  }
                                 });
-                              },
+                              }
                             ),
                           ),
                           IconButton(
@@ -310,13 +403,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                       onPressed: () async {
                         bool sucesso = await cadastrarProduto();
                         if (sucesso) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeFornecedorScreen(
-                                  cnpjFornecedor: '11111111111111'),
-                            ),
-                          );
+                          Navigator.pop(context);
+                          widget.onProdutoAdicionado();
                         }
                       },
                       child: const Padding(

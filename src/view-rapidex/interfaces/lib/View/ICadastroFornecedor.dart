@@ -6,6 +6,7 @@ import 'package:interfaces/banco_de_dados/DBHelper/ValidarEmail.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCNPJ.dart';
+import 'package:interfaces/controller/SessionController.dart';
 //import 'IHomeFornecedor.dart';
 class ICadastroFornecedor extends StatefulWidget {
   const ICadastroFornecedor({super.key});
@@ -70,6 +71,7 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       return;
     }
 
+    try {
     Map<String, dynamic> fornecedor = {
       'cnpj': cnpjController.text,
       'nome': nomeController.text,
@@ -78,17 +80,18 @@ class _ICadastroFornecedorState extends State<ICadastroFornecedor> {
       'telefone': telefoneController.text,
     };
 
-    try {
-      await fornecedorDAO.cadastrarFornecedor(fornecedor);
+    sessionController.setSession(email, senhaController.text);
 
-      sessionController.setSession(emailController.text, senhaController.text);
+    print(sessionController.email);
+      await fornecedorDAO.cadastrarFornecedor(fornecedor);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
+      
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
+        MaterialPageRoute(builder: (context) => HomeFornecedorScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

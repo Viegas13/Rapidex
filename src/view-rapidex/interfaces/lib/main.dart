@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
           '/perfil_cliente': (context) =>
               const PerfilClienteScreen(),
           '/perfil_fornecedor': (context) =>
-              const PerfilFornecedorScreen(cnpj: "11111111111111"),
+              const PerfilFornecedorScreen(),
           '/perfil_entregador': (context) =>
               const PerfilEntregadorScreen(cpf: "13774195684"),
         });
