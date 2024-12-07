@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IHomeEntregador.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
@@ -26,6 +27,8 @@ class _CadastroEntregadorScreenState extends State<CadastroEntregadorScreen> {
       TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
+
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
@@ -80,6 +83,8 @@ class _CadastroEntregadorScreenState extends State<CadastroEntregadorScreen> {
       };
 
       await entregadorDAO.cadastrarEntregador(Entregador);
+
+      sessionController.setSession(emailController.text, senhaController.text);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastro realizado com sucesso!')),

@@ -1,5 +1,7 @@
 enum Status {
-  em_espera,
-  em_andamento,
-  finalizada,
+  aguardando_retirada,
+  a_caminho,
+  chegou,
+  entregue,
+  cancelado
 }

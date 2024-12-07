@@ -14,8 +14,8 @@ class CartaoDAO {
       }
       await conexaoDB.connection.query(
         '''
-        INSERT INTO cartao (numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf)
-        VALUES (@numero, @cvv, @validade, @nomeTitular, @agencia, @bandeira, @cliente_cpf)
+        INSERT INTO cartao (numero, cvv, validade, nomeTitular, agencia, bandeira, cpf_titular, cliente_cpf)
+        VALUES (@numero, @cvv, @validade, @nomeTitular, @agencia, @bandeira, @cpf_titular, @cliente_cpf)
         ''',
         substitutionValues: cartao.toMap(),
       );
@@ -34,7 +34,7 @@ class CartaoDAO {
       }
       var result = await conexaoDB.connection.query(
         '''
-        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf
+        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cpf_titular, cliente_cpf
         FROM cartao
         WHERE cliente_cpf = @cpf
         ''',

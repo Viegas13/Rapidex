@@ -22,6 +22,8 @@ class _IAlterarStatusPedidoState extends State<IAlterarStatusPedido> {
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
+  
+
 
   Future<void> alterarStatusPedido(int pedidoId, String novoStatus) async {
     try {
