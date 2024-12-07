@@ -107,29 +107,30 @@ class EntregaDAO {
     }
   }
 
-  Future<Entrega?> buscarEntregaPorEntregadorStatus(String cpf, Status status) async {
-    try {
-      if (conexaoDB.connection.isClosed) {
-        await conexaoDB.openConnection();
-      }
-      var result = await conexaoDB.connection.query(
-        '''
-        SELECT * FROM entrega
-        WHERE entregador_cpf = @cpf AND status_entrega = @status
-        ''',
-        substitutionValues: {'cpf': cpf, 'status': status.name},
-      );
-
-      if (result.isNotEmpty) {
-        return Entrega.fromMap(result[0].toColumnMap());
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Erro ao buscar entrega: $e');
-      return null;
+  Future<List<Entrega>> buscarEntregasPorEntregadorStatus(String cpf, Status status) async {
+  try {
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
     }
+
+    var result = await conexaoDB.connection.query(
+      '''
+      SELECT * FROM entrega
+      WHERE entregador_cpf = @cpf AND status_entrega = @status
+      ''',
+      substitutionValues: {'cpf': cpf, 'status': status.name},
+    );
+
+    if (result.isNotEmpty) {
+      return result.map((row) => Entrega.fromMap(row.toColumnMap())).toList();
+    } else {
+      return [];
+    }
+  } catch (e) {
+    print('Erro ao buscar entregas: $e');
+    return [];
   }
+}
 
   Future<Entrega?> buscarEntregaPorEntregador3Status(String cpf, List<Status> status) async {
     try {

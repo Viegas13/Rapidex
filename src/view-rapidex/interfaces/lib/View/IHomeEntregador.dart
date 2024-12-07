@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/IAcompanhamentoEntregador.dart';
+import 'package:interfaces/View/IMinhasEntregas.dart';
 import 'package:interfaces/View/IPerfilEntregador.dart';
 import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
@@ -38,13 +39,18 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const AcompanhamentoEntregadorScreen()),
-                              //const PerfilEntregadorScreen(cpf: '13774195684')),
+                          builder: (context) => const PerfilEntregadorScreen(cpf: '13774195684')),
                     );
                   },
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MinhasEntregasScreen()),
+                    );
+                  },
                   child: const Text(
                     "Minhas Entregas",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
