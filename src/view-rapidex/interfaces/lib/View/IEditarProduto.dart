@@ -8,11 +8,14 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/DTO/Produto.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 
 class EditarProdutoScreen extends StatefulWidget {
   final int id;
+  final VoidCallback onProdutoEditado;
 
-  EditarProdutoScreen({super.key, required this.id});
+  EditarProdutoScreen({super.key, required this.id, required this.onProdutoEditado});
 
   @override
   _EditarProdutoScreenState createState() => _EditarProdutoScreenState();
@@ -22,6 +25,8 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
+  late FornecedorDAO fornecedorDAO;
+  String cnpj = '';
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
@@ -31,24 +36,42 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   int quantidade = 1;
   TextEditingController quantidadeController = TextEditingController(text: '1');
 
+  SessionController sessionController = SessionController();
+
   @override
   void initState() {
     super.initState();
     // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
     // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
+
       produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-      buscarProduto();
+      inicializarDados();
+
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
 
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    }
+    await buscarProduto();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
+
+
+
   Future<void> buscarProduto() async {
     try {
       final produto = await produtoDAO.buscarProduto(widget.id);
-
       if (produto != null) {
         setState(() {
           nomeController.text = produto.nome;
@@ -62,10 +85,11 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
 
           // emailController.text = cliente.email; imagem
           descricaoController.text = produto.descricao;
-          restritoPorIdade = produto.restrito;
+          restritoPorIdade = produto.restrito ?? false;
           quantidadeController =
               TextEditingController(text: produto.quantidade.toString());
         });
+        print('Restrito por idade do banco: ${produto.restrito}');
       }
     } catch (e) {
       print('Erro ao buscar cliente: $e');
@@ -83,6 +107,13 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
       });
     }
   }
+
+  Future<void> removerImagem() async{
+  setState(() {
+    imagemSelecionada = null; // Reseta a imagem para null
+  });
+}
+
 
   Future<void> salvarAlteracoes() async {
     try {
@@ -108,7 +139,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
           preco: preco,
           imagem: imagemSelecionada,
           descricao: descricaoController.text,
-          fornecedorCnpj: '11111111111111',
+          fornecedorCnpj: cnpj,
           restrito: restritoPorIdade,
           quantidade: quantidade,
         );
@@ -121,7 +152,8 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
 
         // Passa um valor para a tela anterior para indicar que os dados foram atualizados
         Navigator.pop(context,
-            true); // Passando `true` para indicar que as alterações foram feitas
+            true);
+        widget.onProdutoEditado();
       }
     } catch (e) {
       print('Erro ao salvar alterações: $e');
@@ -194,28 +226,63 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap: selecionarImagem,
-                    child: Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: imagemSelecionada != null
-                          ? Image.memory(
-                              imagemSelecionada!,
-                              fit: BoxFit.cover,
-                            )
-                          : const Center(
-                              child: Text(
-                                'Anexar imagem do produto',
-                                style: TextStyle(color: Colors.black45),
+                    onTap: () async {
+                      if (imagemSelecionada == null) {
+                        await selecionarImagem(); // Apenas seleciona imagem se não houver uma
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: imagemSelecionada != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.memory(
+                                    imagemSelecionada!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Text(
+                                    'Anexar imagem do produto',
+                                    style: TextStyle(color: Colors.black45),
+                                  ),
+                                ),
+                        ),
+                        if (imagemSelecionada != null)
+                          Positioned(
+                            top: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: () {
+                                // Remove a imagem
+                                removerImagem();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
                   const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
