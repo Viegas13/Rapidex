@@ -34,7 +34,7 @@ class ProdutoDAO {
     }
   }
 
-  Future<void> removerProduto(String nome) async {
+  Future<void> removerProduto(int produto_id) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -42,9 +42,9 @@ class ProdutoDAO {
 
       await conexaoDB.connection.query(
         '''
-        DELETE FROM produto WHERE idProduto = @id
+        DELETE FROM produto WHERE produto_id = @produto_id
         ''',
-        substitutionValues: {'nome': nome},
+        substitutionValues: {'produto_id': produto_id},
       );
       print('Produto excluído com sucesso!');
     } catch (e) {
@@ -105,7 +105,7 @@ class ProdutoDAO {
 
       final results = await conexaoDB.connection.query(
         '''
-        SELECT nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
+        SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
         ''',
       );
@@ -119,15 +119,16 @@ class ProdutoDAO {
     }
   }
 
-  Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
+  Future<List<Produto>> listarProdutosFornecedor(String? cnpjFornecedor) async {
     try {
       await verificarConexao();
 
       final results = await conexaoDB.connection.query(
         '''
         SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
-        FROM produto
+        FROM produto WHERE fornecedor_cnpj = @cnpjFornecedor
         ''',
+        substitutionValues: {'cnpjFornecedor': cnpjFornecedor},
       );
 
       return results.map((row) {
