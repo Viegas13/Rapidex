@@ -32,10 +32,10 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     super.initState();
     conexaoDB = ConexaoDB();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
-      carregarProdutos();
       inicializarDados();
     }).catchError((error) {
       print('Erro ao estabelecer conexão no initState: $error');
@@ -48,6 +48,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
     if (cnpj.isEmpty) {
       throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
     }
+    await carregarProdutos();
   } catch (e) {
     print('Erro ao inicializar dados: $e');
   }
@@ -56,6 +57,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
+      print(cnpj);
       final resultado =
           await produtoDAO.listarProdutosFornecedor(cnpj);
 

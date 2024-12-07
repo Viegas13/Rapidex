@@ -126,8 +126,9 @@ class ProdutoDAO {
       final results = await conexaoDB.connection.query(
         '''
         SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
-        FROM produto
+        FROM produto WHERE fornecedor_cnpj = @cnpjFornecedor
         ''',
+        substitutionValues: {'cnpjFornecedor': cnpjFornecedor},
       );
 
       return results.map((row) {

@@ -25,7 +25,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
   late FornecedorDAO fornecedorDAO;
-  late String cnpj;
+  String cnpj = '';
   
 
   final TextEditingController nomeController = TextEditingController();
@@ -43,12 +43,13 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     super.initState();
     // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
-    inicializarDados();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
     // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
-      // Após a conexão ser aberta, você pode adicionar lógica adicional, se necessário.
+      inicializarDados();
+
       print('Conexão estabelecida no initState.');
     }).catchError((error) {
       // Se ocorrer um erro ao abrir a conexão, é bom tratar aqui.
@@ -89,45 +90,42 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   }
 
   Future<bool> cadastrarProduto() async {
-    try {
-      // Verifica se há uma imagem selecionada e a converte para bytes
-      Uint8List? imagemBytes;
-      if (imagemSelecionada != null) {
-        imagemBytes = imagemSelecionada!;
-      }
-
-      // Monta o produto como um mapa
-      Map<String, dynamic> produto = {
-        'nome': nomeController.text,
-        'validade': validadeController.text,
-        'preco': precoController.text,
-        'imagem': imagemBytes, // Passa os bytes da imagem
-        'descricao': descricaoController.text,
-        'fornecedor': cnpj,
-        'restrito': restritoPorIdade ? 'true' : 'false',
-        'quantidade': quantidadeController.text,
-      };
-
-      // Chama o DAO para salvar no banco
-      await produtoDAO.cadastrarProduto(produto);
-
-      // Exibe uma mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
-      );
-
-      return true; // Retorna sucesso
-    } catch (e) {
-      // Exibe uma mensagem de erro
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar produto')),
-      );
-      print('Erro ao cadastrar produto: $e');
-
-      return false; // Retorna falha
+  try {
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não foi inicializado.');
     }
-  }
 
+    Uint8List? imagemBytes;
+    if (imagemSelecionada != null) {
+      imagemBytes = imagemSelecionada!;
+    }
+
+    Map<String, dynamic> produto = {
+      'nome': nomeController.text,
+      'validade': validadeController.text,
+      'preco': precoController.text,
+      'imagem': imagemBytes,
+      'descricao': descricaoController.text,
+      'fornecedor': cnpj,
+      'restrito': restritoPorIdade ? 'true' : 'false',
+      'quantidade': quantidadeController.text,
+    };
+
+    await produtoDAO.cadastrarProduto(produto);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cadastro realizado com sucesso!')),
+    );
+
+    return true;
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao cadastrar produto: $e')),
+    );
+    print('Erro ao cadastrar produto: $e');
+    return false;
+  }
+}
   // Função para selecionar a validade do produto
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
