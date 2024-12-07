@@ -76,7 +76,7 @@ class PedidoDAO {
   }
 
   // Método para atualizar o status de um pedido
-  Future<void> atualizarStatusPedido(int pedidoId, String novoStatus) async {
+  Future<void> atualizarStatusPedido(int? pedidoId, String novoStatus) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -128,4 +128,37 @@ class PedidoDAO {
       rethrow;
     }
   }
+  
+  Future<List<Pedido>> buscarPedidosPorFornecedor(String fornecedor_cnpj) async {
+  try {
+    if (conexaoDB.connection.isClosed) {
+      await conexaoDB.openConnection();
+    }
+
+    var result = await conexaoDB.connection.query(
+      '''
+      SELECT * 
+      FROM Pedido 
+      WHERE fornecedor_cnpj = @fornecedor_cnpj
+      ''',
+      substitutionValues: {'fornecedor_cnpj': fornecedor_cnpj},
+    );
+
+    return result.map((row) {
+      return Pedido.fromMap({
+        'pedido_id': row[0],
+        'cliente_cpf': row[1],
+        'fornecedor_cnpj': row[2],
+        'endereco_entrega': row[3],
+        'preco': row[4],
+        'frete': row[5],
+        'status_pedido': row[6],
+      });
+    }).toList();
+  } catch (e) {
+    print('Erro ao buscar pedidos por fornecedor: $e');
+    rethrow;
+  }
+}
+
 }
