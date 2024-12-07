@@ -76,7 +76,7 @@ CREATE TABLE Pedido (
     FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ)
 );
 
-CREATE TYPE status_entrega AS ENUM ('aguardando retirada', 'a caminho', 'chegou', 'entregue', 'cancelado');
+CREATE TYPE status_entrega AS ENUM ('aguardando_retirada', 'a_caminho', 'chegou', 'entregue', 'cancelado');
 -- aguardando retirada -> entregador aceitou e não marcou que está indo
 -- a caminho -> entregador marca que está indo
 -- chegou -> entregador marca que chegou

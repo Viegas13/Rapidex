@@ -1,4 +1,5 @@
 import 'package:interfaces/DTO/Entrega.dart';
+import 'package:interfaces/DTO/Status.dart';
 import '../DBHelper/ConexaoDB.dart';
 
 class EntregaDAO {
@@ -93,6 +94,33 @@ class EntregaDAO {
         WHERE entrega_id = @entregaId
         ''',
         substitutionValues: {'entregaId': entregaId},
+      );
+
+      if (result.isNotEmpty) {
+        return Entrega.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar entrega: $e');
+      return null;
+    }
+  }
+
+  Future<Entrega?> buscarEntregaPorEntregadorStatus(String cpf, Status status) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      var result = await conexaoDB.connection.query(
+        '''
+        SELECT entrega_id AS entregaId, pedido_id AS pedidoId, entregador_cpf AS entregadorCPF, 
+               status_entrega AS status, endereco_retirada AS enderecoRetirada, 
+               endereco_entrega AS enderecoEntrega, valor_final AS valorFinal
+        FROM entrega
+        WHERE entregador_cpf = @cpf AND status_entrega = @status
+        ''',
+        substitutionValues: {'cpf': cpf, 'status': status.name},
       );
 
       if (result.isNotEmpty) {
