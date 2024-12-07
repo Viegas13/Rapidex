@@ -38,7 +38,7 @@ CREATE TABLE Endereco (
     referencia VARCHAR(255),
     PRIMARY KEY (endereco_id),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE,
-    FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ)
+    FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ) ON DELETE CASCADE
 );
 
 CREATE TABLE Produto (
