@@ -24,10 +24,10 @@ class DetalhesProdutoBottomSheet extends StatefulWidget {
 
 class _DetalhesProdutoBottomSheetState
     extends State<DetalhesProdutoBottomSheet> {
-      late ConexaoDB conexaoDB;
+  late ConexaoDB conexaoDB;
   late ItemPedidoDAO itemPedidoDAO;
 
-@override
+  @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
@@ -39,9 +39,6 @@ class _DetalhesProdutoBottomSheetState
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
-
-
-
 
   int quantidadeSelecionada = 1;
 
@@ -170,7 +167,6 @@ class _DetalhesProdutoBottomSheetState
           onPressed: quantidadeSelecionada > 0
               ? () async {
                   try {
-                    
                     final produtoSelecionado = widget.produtoSelecionado;
 
                     // Calculando o valor total
@@ -190,7 +186,7 @@ class _DetalhesProdutoBottomSheetState
                       'pedido_id': null, // Pedido ainda não associado
                       'quantidade': quantidadeSelecionada,
                       'valor_total': valorTotal,
-                      'cliente_cpf': '70275182606', // CPF fixo
+                      'cliente_cpf': '70275182606', // CPF fixo até refatorar com a sessão
                     };
 
                     // Inserindo o ItemPedido no banco de dados
