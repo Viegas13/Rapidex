@@ -13,10 +13,49 @@ class ItemPedidoDAO {
     }
   }
 
-  /// Método para cadastrar um ItemPedido
-  Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
-    try {
-      await verificarConexao();
+Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
+  try {
+    await verificarConexao();
+
+    // Listar todos os itens já cadastrados
+    final itensCadastrados = await listarItensPedido();
+
+    // Verificar se o produto_id e pedido_id já existem
+    late ItemPedido? itemExistente = null;
+
+     for (var item in itensCadastrados) {
+      print("Antes do if");
+      print(itemPedido['pedido_id']);
+      /*
+      Nesse if, comparo se o pedidoId é igual a zero porque é dessa maneira,
+      aparentemente, que o map armazena null pra um int
+      */
+      if (item.produtoId == itemPedido['produto_id'] && item.pedidoId == 0) {
+        print("Passou do if");
+        itemExistente = item;
+        break;
+      }
+    }
+
+
+
+    if (itemExistente != null) {
+      // Atualizar a quantidade do item existente
+      final novaQuantidade = itemPedido['quantidade'];
+      await atualizarItemPedido({
+        'item_pedido_id': itemExistente.itemPedidoId,
+        'produto_id': itemExistente.produtoId,
+        'pedido_id': null, 
+        /*Aqui adiciono null porque isso é o que foi acordado para representar
+        que o pedido ainda não foi criado
+        */ 
+        'quantidade': novaQuantidade,
+        'valor_total': novaQuantidade * (itemPedido['valor_total'] / itemPedido['quantidade']),
+        'cliente_cpf': itemExistente.clienteCpf,
+      });
+      print('Quantidade do ItemPedido atualizada com sucesso!');
+    } else {
+      // Cadastrar um novo itemPedido
       await conexaoDB.connection.query(
         '''
         INSERT INTO Item_Pedido (produto_id, pedido_id, quantidade, valor_total, cliente_cpf)
@@ -26,11 +65,13 @@ class ItemPedidoDAO {
         substitutionValues: itemPedido,
       );
       print('ItemPedido cadastrado com sucesso!');
-    } catch (e) {
-      print('Erro ao cadastrar ItemPedido: $e');
-      rethrow;
     }
+  } catch (e) {
+    print('Erro ao cadastrar ou atualizar ItemPedido: $e');
+    rethrow;
   }
+}
+
 
   /// Método para listar todos os itens de pedidos
   Future<List<ItemPedido>> listarItensPedido() async {
