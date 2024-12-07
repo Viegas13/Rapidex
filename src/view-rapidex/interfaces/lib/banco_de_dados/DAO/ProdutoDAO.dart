@@ -119,7 +119,7 @@ class ProdutoDAO {
     }
   }
 
-  Future<List<Produto>> listarProdutosFornecedor(String cnpjFornecedor) async {
+  Future<List<Produto>> listarProdutosFornecedor(String? cnpjFornecedor) async {
     try {
       await verificarConexao();
 

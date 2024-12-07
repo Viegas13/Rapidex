@@ -7,9 +7,14 @@ import 'package:interfaces/widgets/ImageLabelField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/View/IHomeFornecedor.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 
 class AdicionarProdutoScreen extends StatefulWidget {
-  const AdicionarProdutoScreen({super.key});
+  final VoidCallback onProdutoAdicionado;
+
+  const AdicionarProdutoScreen({super.key, required this.onProdutoAdicionado});
 
   @override
   _AdicionarProdutoScreenState createState() => _AdicionarProdutoScreenState();
@@ -19,6 +24,9 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
+  late FornecedorDAO fornecedorDAO;
+  late String cnpj;
+  
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
@@ -26,14 +34,16 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   final TextEditingController descricaoController = TextEditingController();
   bool restritoPorIdade = false;
   int quantidade = 1;
-  final TextEditingController quantidadeController =
-      TextEditingController(text: '1');
+  final TextEditingController quantidadeController = TextEditingController(text: '1');
+
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
     super.initState();
     // Inicializa o objeto ConexaoDB
     conexaoDB = ConexaoDB();
+    inicializarDados();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
 
     // Inicia a conexão com o banco de dados
@@ -54,6 +64,17 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
     descricaoController.dispose();
     super.dispose();
   }
+
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    }
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
 
   Future<void> selecionarImagem() async {
     final ImagePicker picker = ImagePicker();
@@ -82,7 +103,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
         'preco': precoController.text,
         'imagem': imagemBytes, // Passa os bytes da imagem
         'descricao': descricaoController.text,
-        'fornecedor': '11111111111111',
+        'fornecedor': cnpj,
         'restrito': restritoPorIdade ? 'true' : 'false',
         'quantidade': quantidadeController.text,
       };
@@ -310,13 +331,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
                       onPressed: () async {
                         bool sucesso = await cadastrarProduto();
                         if (sucesso) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeFornecedorScreen(
-                                  cnpjFornecedor: '11111111111111'),
-                            ),
-                          );
+                          Navigator.pop(context);
+                          widget.onProdutoAdicionado();
                         }
                       },
                       child: const Padding(

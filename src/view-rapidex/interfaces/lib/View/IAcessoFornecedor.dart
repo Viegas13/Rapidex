@@ -69,7 +69,7 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
+                  HomeFornecedorScreen()),
         );
       } else {
         corTextAreas = Colors.red;

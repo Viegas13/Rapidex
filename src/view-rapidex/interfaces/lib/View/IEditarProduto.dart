@@ -8,11 +8,14 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/DTO/Produto.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 
 class EditarProdutoScreen extends StatefulWidget {
   final int id;
+  final VoidCallback onProdutoEditado;
 
-  EditarProdutoScreen({super.key, required this.id});
+  EditarProdutoScreen({super.key, required this.id, required this.onProdutoEditado});
 
   @override
   _EditarProdutoScreenState createState() => _EditarProdutoScreenState();
@@ -22,6 +25,8 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
   Uint8List? imagemSelecionada;
+  late FornecedorDAO fornecedorDAO;
+  late String cnpj;
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController validadeController = TextEditingController();
@@ -31,6 +36,8 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   int quantidade = 1;
   TextEditingController quantidadeController = TextEditingController(text: '1');
 
+  SessionController sessionController = SessionController();
+
   @override
   void initState() {
     super.initState();
@@ -39,11 +46,23 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
     // Inicia a conexão com o banco de dados
     conexaoDB.initConnection().then((_) {
       produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-      buscarProduto();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
+
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    }
+    await buscarProduto();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
 
   Future<void> buscarProduto() async {
     try {
@@ -108,7 +127,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
           preco: preco,
           imagem: imagemSelecionada,
           descricao: descricaoController.text,
-          fornecedorCnpj: '11111111111111',
+          fornecedorCnpj: cnpj,
           restrito: restritoPorIdade,
           quantidade: quantidade,
         );
@@ -121,7 +140,8 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
 
         // Passa um valor para a tela anterior para indicar que os dados foram atualizados
         Navigator.pop(context,
-            true); // Passando `true` para indicar que as alterações foram feitas
+            true);
+        widget.onProdutoEditado();
       }
     } catch (e) {
       print('Erro ao salvar alterações: $e');
