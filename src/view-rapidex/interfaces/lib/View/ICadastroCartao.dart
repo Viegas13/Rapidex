@@ -22,7 +22,7 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
   final TextEditingController nomeTitularController = TextEditingController();
   final TextEditingController agenciaController = TextEditingController();
   final TextEditingController bandeiraController = TextEditingController();
-  final TextEditingController clienteCpfController = TextEditingController();
+  final TextEditingController titularCpfController = TextEditingController();
 
   @override
   void initState() {
@@ -46,12 +46,12 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
     nomeTitularController.dispose();
     agenciaController.dispose();
     bandeiraController.dispose();
-    clienteCpfController.dispose();
+    titularCpfController.dispose();
     super.dispose();
   }
   
 Future<void> cadastrarCartao() async {
-  String cpf = clienteCpfController.text;
+  String cpf = titularCpfController.text;
 
   // Validação do CPF
   if (!validar_cpf(cpf)) {
@@ -95,7 +95,9 @@ Future<void> cadastrarCartao() async {
       nomeTitular: nomeTitularController.text,
       agencia: int.parse(agenciaController.text),
       bandeira: bandeiraController.text,
-      clienteCpf: clienteCpfController.text,
+      cpf_titular: titularCpfController.text,
+      clienteCpf: '02083037669',
+   
     );
 
     // Cadastro do cartão no banco de dados
@@ -162,9 +164,9 @@ Future<void> cadastrarCartao() async {
             ),
             const SizedBox(height: 16),
             CustomTextField(
-              controller: clienteCpfController,
-              labelText: 'CPF',
-              hintText: 'Insira seu CPF',
+              controller: titularCpfController,
+              labelText: 'CPF Titular',
+              hintText: 'Insira CPF do titular',
             ),
             const SizedBox(height: 16),
             const SizedBox(height: 20),
