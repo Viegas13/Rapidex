@@ -54,9 +54,10 @@ CREATE TABLE Produto (
     --FOREIGN KEY () REFERENCES Endereco()
 );
 
-CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'pronto', 'retirado', 'cancelado');
+CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'aceito', 'pronto', 'retirado', 'cancelado');
 -- pendente -> acabou de criar o pedido
 -- em preparo -> fornecedor marca que começou o preparo
+-- aceito -> algum entregador aceitou o pedido para realizar entrega
 -- pronto -> entregador pode buscar
 -- retirado -> forncedor marca no app que entregou o pedido ao entregador
 -- cancelado -> cancelou
@@ -96,7 +97,7 @@ CREATE TABLE Entrega (
     status_entrega status_entrega,
     endereco_retirada VARCHAR(255),
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
-    valor_final FLOAT,
+    valor_final FLOAT
     --FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
     --FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
     --FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
