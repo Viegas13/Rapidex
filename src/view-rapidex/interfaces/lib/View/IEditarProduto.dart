@@ -10,6 +10,7 @@ import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'dart:io';
 
 class EditarProdutoScreen extends StatefulWidget {
   final int id;
@@ -24,7 +25,7 @@ class EditarProdutoScreen extends StatefulWidget {
 class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
-  Uint8List? imagemSelecionada;
+  String? imagemSelecionadaPath;
   late FornecedorDAO fornecedorDAO;
   String cnpj = '';
 
@@ -84,6 +85,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
           precoController.text = produto.preco.toString();
 
           // emailController.text = cliente.email; imagem
+          imagemSelecionadaPath = produto.imagem;
           descricaoController.text = produto.descricao;
           restritoPorIdade = produto.restrito;
           quantidadeController.text = produto.quantidade.toString();
@@ -97,25 +99,61 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
   }
 
   Future<void> selecionarImagem() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
+  final ImagePicker picker = ImagePicker();
+  final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
 
-    if (imagem != null) {
-      final Uint8List imageBytes = await imagem.readAsBytes();
-      setState(() {
-        imagemSelecionada = imageBytes;
-      });
-    }
+  if (imagem != null) {
+    setState(() {
+      imagemSelecionadaPath = imagem.path; // Armazena o caminho da imagem
+    });
   }
+}
 
   Future<void> removerImagem() async{
   setState(() {
-    imagemSelecionada = null; // Reseta a imagem para null
+    imagemSelecionadaPath = null; // Reseta a imagem para null
   });
 }
 
+  bool validarCampos() {
+  if (nomeController.text.isEmpty) {
+    exibirMensagem("O nome do produto é obrigatório!");
+    return false;
+  }
+
+  if (validadeController.text.isNotEmpty) {
+    try {
+      DateFormat('dd/MM/yyyy').parse(validadeController.text);
+    } catch (_) {
+      exibirMensagem("A data de validade não está no formato correto!");
+      return false;
+    }
+  }
+
+  if (imagemSelecionadaPath == null || imagemSelecionadaPath!.isEmpty) {
+    exibirMensagem("A imagem do produto é obrigatória!");
+    return false;
+  }
+
+  if (precoController.text.isEmpty || double.tryParse(precoController.text) == null) {
+    exibirMensagem("O preço informado é inválido!");
+    return false;
+  }
+
+  if (quantidade <= 0) {
+    exibirMensagem("A quantidade deve ser maior que zero!");
+    return false;
+  }
+
+  return true;
+}
+
+void exibirMensagem(String mensagem) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensagem)));
+}
 
   Future<void> salvarAlteracoes() async {
+    if (!validarCampos()) return;
     try {
       final produto = await produtoDAO.buscarProduto(widget.id);
 
@@ -123,7 +161,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
         double? preco = double.tryParse(precoController.text);
         int? quantidade = int.tryParse(quantidadeController.text);
 
-        if (preco == null || quantidade == null) {
+        if (preco == null || quantidade == null || imagemSelecionadaPath == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Preço ou quantidade inválidos!')),
           );
@@ -137,7 +175,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
               ? DateFormat('dd/MM/yyyy').parse(validadeController.text)
               : null,
           preco: preco,
-          imagem: imagemSelecionada,
+          imagem: imagemSelecionadaPath!,
           descricao: descricaoController.text,
           fornecedorCnpj: cnpj,
           restrito: restritoPorIdade,
@@ -227,24 +265,24 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
                   const SizedBox(height: 10),
                   GestureDetector(
                     onTap: () async {
-                      if (imagemSelecionada == null) {
-                        await selecionarImagem(); // Apenas seleciona imagem se não houver uma
+                      if (imagemSelecionadaPath == null) {
+                        await selecionarImagem();
                       }
                     },
                     child: Stack(
                       children: [
                         Container(
-                          height: 150,
+                          height: 120,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: imagemSelecionada != null
+                          child: imagemSelecionadaPath != null && imagemSelecionadaPath!.isNotEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.memory(
-                                    imagemSelecionada!,
+                                  child: Image.file(
+                                    File(imagemSelecionadaPath!), // Exibe a imagem selecionada ou cadastrada
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
@@ -257,17 +295,14 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen> {
                                   ),
                                 ),
                         ),
-                        if (imagemSelecionada != null)
+                        if (imagemSelecionadaPath != null && imagemSelecionadaPath!.isNotEmpty)
                           Positioned(
                             top: 5,
                             right: 5,
                             child: GestureDetector(
-                              onTap: () {
-                                // Remove a imagem
-                                removerImagem();
-                              },
+                              onTap: removerImagem,
                               child: Container(
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.red,
                                   shape: BoxShape.circle,
                                 ),

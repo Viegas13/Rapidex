@@ -138,18 +138,17 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
-                          leading: (produto.imagem != null &&
-                                  produto.imagem!.isNotEmpty)
-                              ? Image.memory(
-                                  produto.imagem!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons
-                                        .image_not_supported); // Ícone se a imagem for inválida
-                                  },
-                                )
-                              : Icon(Icons
-                                  .image), // Ícone padrão se não houver imagem
+                          leading: (produto.imagem != null && produto.imagem!.isNotEmpty)
+                            ? Image.network(
+                                produto.imagem!,
+                                fit: BoxFit.cover,
+                                width: 50,
+                                height: 50,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.image_not_supported); // Ícone caso a URL seja inválida
+                                },
+                              )
+                            : const Icon(Icons.image), // Ícone padrão se não houver URL // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
                               'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
