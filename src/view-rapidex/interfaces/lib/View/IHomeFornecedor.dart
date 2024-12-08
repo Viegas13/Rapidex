@@ -145,6 +145,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                 width: 50,
                                 height: 50,
                                 errorBuilder: (context, error, stackTrace) {
+                                  print('Erro ao carregar imagem: $error');
                                   return const Icon(Icons.image_not_supported); // Ícone caso a URL seja inválida
                                 },
                               )

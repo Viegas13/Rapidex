@@ -189,9 +189,9 @@ void exibirMensagem(String mensagem) {
         );
 
         // Passa um valor para a tela anterior para indicar que os dados foram atualizados
+        widget.onProdutoEditado();
         Navigator.pop(context,
             true);
-        widget.onProdutoEditado();
       }
     } catch (e) {
       print('Erro ao salvar alterações: $e');
