@@ -110,6 +110,7 @@ class PedidoDAO {
         SELECT * 
         FROM Pedido 
         WHERE cliente_cpf = @cliente_cpf
+        ORDER BY pedido_id ASC
         ''',
         substitutionValues: {'cliente_cpf': cliente_cpf},
       );
@@ -119,9 +120,10 @@ class PedidoDAO {
           'pedido_id': row[0],
           'cliente_cpf': row[1],
           'fornecedor_cnpj': row[2],
-          'endereco_entrega': row[3],
-          'preco': row[4],
-          'status_pedido': row[5],
+          'preco': row[3],
+          'frete': row[4],
+          'endereco_entrega': row[5],
+          'status_pedido': row[6],
         });
       }).toList();
     } catch (e) {

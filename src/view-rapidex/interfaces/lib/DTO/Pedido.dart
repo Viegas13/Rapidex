@@ -36,8 +36,8 @@ class Pedido {
       pedido_id: map['pedido_id'],
       cliente_cpf: map['cliente_cpf'],
       fornecedor_cnpj: map['fornecedor_cnpj'],
-      preco: map['preco'],
-      frete: map['frete'],
+      preco: (map['preco'] as double?) ?? 0.0, // Tratar null como 0.0
+      frete: (map['frete'] as double?) ?? 0.0, // Tratar null como 0.0
       endereco_entrega: map['endereco_entrega'],
       status_pedido: map['status_pedido'] ?? 'pendente',
     );

@@ -99,6 +99,7 @@ Future<void> inicializarDados() async {
               .trim();
         }).toList();
       });
+      print('Endereços encontrados');
     } catch (e) {
       print('Erro ao buscar endereços: $e');
     }
