@@ -7,12 +7,13 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/widgets/ConfirmarExclusao.dart';
 import 'package:interfaces/widgets/ConfirmarLogout.dart';
 import 'package:interfaces/widgets/CustomReadOnlyTextField.dart';
+import 'package:interfaces/controller/SessionController.dart';
+
 import 'package:intl/intl.dart';
 
 class PerfilEntregadorScreen extends StatefulWidget {
-  final String cpf;
 
-  const PerfilEntregadorScreen({super.key, required this.cpf});
+  const PerfilEntregadorScreen({super.key});
 
   @override
   _PerfilEntregadorScreenState createState() => _PerfilEntregadorScreenState();
@@ -26,7 +27,8 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController cartaoController = TextEditingController();
-
+  late String cpf_entregador;
+  SessionController sessionController = SessionController();
   late EntregadorDAO entregadorDAO;
 
   @override
@@ -35,15 +37,26 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
-      buscarEntregador();
+      inicializarDados(); 
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
+  Future<void> inicializarDados() async {
+  try {
+    cpf_entregador = await entregadorDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
+    if (cpf_entregador.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    await buscarEntregador();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
 
   Future<void> buscarEntregador() async {
     try {
-      final entregador = await entregadorDAO.buscarEntregador(widget.cpf);
+      final entregador = await entregadorDAO.buscarEntregador(cpf_entregador);
       if (entregador != null) {
         setState(() {
           nomeController.text = entregador.nome;
@@ -63,7 +76,7 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
 
   Future<void> excluirContaEntregador() async {
     try {
-      await entregadorDAO.deletarEntregador(widget.cpf);
+      await entregadorDAO.deletarEntregador(cpf_entregador);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta excluída com sucesso!')),
       );
@@ -124,7 +137,7 @@ class _PerfilEntregadorScreenState extends State<PerfilEntregadorScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        EditarPerfilEntregadorScreen(cpf: widget.cpf),
+                        EditarPerfilEntregadorScreen(cpf: cpf_entregador),
                   ),
                 );
 
