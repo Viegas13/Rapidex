@@ -30,7 +30,7 @@ Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
       Nesse if, comparo se o pedidoId é igual a zero porque é dessa maneira,
       aparentemente, que o map armazena null pra um int
       */
-      if (item.produtoId == itemPedido['produto_id'] && item.pedidoId == 0) {
+      if (item.produtoId == itemPedido['produto_id'] && item.pedidoId == 0 && item.clienteCpf == itemPedido['cliente_cpf']) {
         print("Passou do if");
         itemExistente = item;
         break;
