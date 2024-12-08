@@ -1,7 +1,7 @@
 class ItemPedido {
   final int itemPedidoId;
   final int produtoId;
-  final int pedidoId;
+  late  int? pedidoId;
   final int quantidade;
   final double valorTotal;
   final String clienteCpf;

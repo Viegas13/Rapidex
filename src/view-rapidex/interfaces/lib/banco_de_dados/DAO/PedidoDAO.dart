@@ -1,5 +1,6 @@
 import '../DBHelper/ConexaoDB.dart';
 import '../../DTO/Pedido.dart';
+import '../../DTO/ItemPedido.dart';
 
 class PedidoDAO {
   final ConexaoDB conexaoDB;
@@ -15,8 +16,8 @@ class PedidoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido)
-        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido)
+        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido, data_de_entrega)
+        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido, @data_de_entrega)
         ''',
         substitutionValues: pedido.toMap(),
       );
@@ -26,10 +27,10 @@ class PedidoDAO {
       rethrow;
     }
   }
-  
+
   Future<List<Pedido>> buscarPedidosPorStatus({
-  required String cliente_cpf,
-  required List<String> status_pedido,
+    required String cliente_cpf,
+    required List<String> status_pedido,
   }) async {
     try {
       // Constrói a consulta para buscar os pedidos
@@ -63,7 +64,7 @@ class PedidoDAO {
         '''
         SELECT COUNT(*) 
         FROM Pedido 
-        WHERE cliente_cpf = @cliente_cpf AND status_pedido IN ('pendente', 'em preparo', 'pronto', 'retirado',)
+        WHERE cliente_cpf = @cliente_cpf AND status_pedido IN ('pendente', 'em preparo', 'pronto', 'retirado')
         ''',
         substitutionValues: {'cliente_cpf': cliente_cpf},
       );
@@ -76,7 +77,7 @@ class PedidoDAO {
   }
 
   // Método para atualizar o status de um pedido
-  Future<void> atualizarStatusPedido(int pedidoId, String novoStatus) async {
+  Future<void> atualizarStatusPedido(int? pedidoId, String novoStatus) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -96,6 +97,34 @@ class PedidoDAO {
       rethrow;
     }
   }
+  
+
+
+  Future <Pedido?> buscarPedidoPorId(int pedidoId) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      var result = await conexaoDB.connection.query(
+      '''
+      SELECT * 
+      FROM Pedido 
+      WHERE pedido_id = @pedido_id
+      ''',
+    substitutionValues: {'pedido_id': pedidoId},
+      );
+
+          if (result.isNotEmpty) {
+        return Pedido.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar dados do pedido: $e');
+      return null;
+    }
+  }
 
   // Método para buscar pedidos por cliente
   Future<List<Pedido>> buscarPedidosPorCliente(String cliente_cpf) async {
@@ -109,6 +138,7 @@ class PedidoDAO {
         SELECT * 
         FROM Pedido 
         WHERE cliente_cpf = @cliente_cpf
+        ORDER BY pedido_id ASC
         ''',
         substitutionValues: {'cliente_cpf': cliente_cpf},
       );
@@ -118,14 +148,90 @@ class PedidoDAO {
           'pedido_id': row[0],
           'cliente_cpf': row[1],
           'fornecedor_cnpj': row[2],
-          'endereco_entrega': row[3],
-          'preco': row[4],
-          'status_pedido': row[5],
+          'preco': row[3],
+          'frete': row[4],
+          'endereco_entrega': row[5],
+          'status_pedido': row[6],
+          'data_de_entrega': row[7],
         });
       }).toList();
     } catch (e) {
       print('Erro ao buscar pedidos: $e');
       rethrow;
     }
+  }
+
+  Future<List<Pedido>> buscarPedidosDisponiveisEntrega() async {
+    try {
+      // Constrói a consulta para buscar os pedidos
+      final result = await conexaoDB.connection.query(
+        '''
+        SELECT * FROM Pedido 
+        WHERE status_pedido = 'em preparo'
+        ''',
+      );
+
+      return result.map((row) => Pedido.fromMap(row.toColumnMap())).toList();
+    } catch (e) {
+      print('Erro ao buscar pedidos por status: $e');
+      return [];
+    }
+  }
+  
+  Future<List<Pedido>> buscarPedidosPorFornecedor(
+      String fornecedor_cnpj) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      var result = await conexaoDB.connection.query(
+        '''
+        SELECT * 
+        FROM Pedido 
+        WHERE fornecedor_cnpj = @fornecedor_cnpj
+        ''',
+        substitutionValues: {'fornecedor_cnpj': fornecedor_cnpj},
+      );
+
+      return result.map((row) {
+        return Pedido.fromMap({
+          'pedido_id': row[0],
+          'cliente_cpf': row[1],
+          'fornecedor_cnpj': row[2],
+          'preco': row[3],
+          'frete': row[4],
+          'endereco_entrega': row[5],
+          'status_pedido': row[6],
+          'data_de_entrega': row[7],
+        });
+      }).toList();
+    } catch (e) {
+      print('Erro ao buscar pedidos: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> buscarItensPorPedido(int? pedidoId) async {
+    final connection = conexaoDB.connection;
+
+    final List<List<dynamic>> results = await connection.query(
+      '''
+      SELECT ip.produto_id, p.nome, ip.quantidade, ip.valor_total
+      FROM Item_Pedido ip
+      JOIN Produto p ON ip.produto_id = p.produto_id
+      WHERE ip.pedido_id = @pedidoId
+      ''',
+      substitutionValues: {'pedidoId': pedidoId},
+    );
+
+    return results.map((row) {
+      return {
+        'produto_id': row[0],
+        'nome_produto': row[1],
+        'quantidade': row[2],
+        'valor_total': row[3],
+      };
+    }).toList();
   }
 }

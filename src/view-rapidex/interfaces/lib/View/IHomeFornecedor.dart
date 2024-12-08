@@ -10,9 +10,9 @@ import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/View/IPedidosFornecedor.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
-
   HomeFornecedorScreen({super.key});
 
   @override
@@ -44,23 +44,24 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   }
 
   Future<void> inicializarDados() async {
-  try { 
-    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
-    if (cnpj.isEmpty) {
-      throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+    try {
+      cnpj = await fornecedorDAO.buscarCnpj(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cnpj.isEmpty) {
+        throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+      }
+      await carregarProdutos();
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
     }
-    await carregarProdutos();
-  } catch (e) {
-    print('Erro ao inicializar dados: $e');
   }
-}
 
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
       print(cnpj);
-      final resultado =
-          await produtoDAO.listarProdutosFornecedor(cnpj);
+      final resultado = await produtoDAO.listarProdutosFornecedor(cnpj);
 
       setState(() {
         produtos = resultado;
@@ -117,6 +118,22 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                     );
                   },
                 ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.list_alt,
+                    color: Colors.white,
+                    size: 35.0,
+                  ),
+                  tooltip: 'Ver Pedidos',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PedidosFornecedorScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -165,8 +182,9 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => EditarProdutoScreen(
-                                          id: produto.produto_id,
-                                          onProdutoEditado: carregarProdutos,),
+                                        id: produto.produto_id,
+                                        onProdutoEditado: carregarProdutos,
+                                      ),
                                     ),
                                   );
                                 },
@@ -191,7 +209,10 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AdicionarProdutoScreen(onProdutoAdicionado: carregarProdutos,)),
+            MaterialPageRoute(
+                builder: (context) => AdicionarProdutoScreen(
+                      onProdutoAdicionado: carregarProdutos,
+                    )),
           );
         },
         backgroundColor: Colors.orangeAccent,

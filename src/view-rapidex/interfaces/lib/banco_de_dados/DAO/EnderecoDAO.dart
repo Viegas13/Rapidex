@@ -5,18 +5,14 @@ class EnderecoDAO {
 
   EnderecoDAO({required this.conexaoDB});
 
-  // Método para cadastrar um Endereco no banco de dados
-  Future<void> cadastrarEndereco(Map<String, dynamic> endereco) async {
+  Future<void> cadastrarEnderecoCliente(Map<String, dynamic> endereco) async {
     try {
-      // Garante que a conexão está aberta
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
-      // Gera o endereco_id com base no cliente_cpf e cep
       final String enderecoId = '${endereco['cep']}_${endereco['cliente_cpf']}';
 
-      // Realiza a inserção do Endereco
       await conexaoDB.connection.query(
         '''
         INSERT INTO Endereco (endereco_id, cliente_cpf, bairro, rua, numero, cep, complemento, referencia)
@@ -34,15 +30,37 @@ class EnderecoDAO {
     }
   }
 
-  // Método para listar endereços de um cliente específico
-  Future<List<Map<String, dynamic>>> listarEnderecos(String clienteCpf) async {
+  Future<void> cadastrarEnderecoFornecedor(Map<String, dynamic> endereco) async {
     try {
-      // Garante que a conexão está aberta
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
-      // Consulta os endereços associados ao CPF do cliente
+      final String enderecoId = '${endereco['cep']}_${endereco['fornecedor_cnpj']}';
+
+      await conexaoDB.connection.query(
+        '''
+        INSERT INTO Endereco (endereco_id, fornecedor_cnpj, bairro, rua, numero, cep, complemento, referencia)
+        VALUES (@endereco_id, @fornecedor_cnpj, @bairro, @rua, @numero, @cep, @complemento, @referencia)
+        ''',
+        substitutionValues: {
+          'endereco_id': enderecoId,
+          ...endereco,
+        },
+      );
+      print('Endereco cadastrado com sucesso!');
+    } catch (e) {
+      print('Erro ao cadastrar Endereco: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> listarEnderecosCliente(String clienteCpf) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
       final results = await conexaoDB.connection.query(
         '''
       SELECT endereco_id, rua, numero, bairro, cep, complemento, referencia
@@ -56,7 +74,42 @@ class EnderecoDAO {
 
       print('Resultados encontrados: $results');
 
-      // Mapeia os resultados para uma lista de mapas
+      return results.map((row) {
+        return {
+          'endereco_id': row[0],
+          'rua': row[1],
+          'numero': row[2],
+          'bairro': row[3],
+          'cep': row[4],
+          'complemento': row[5],
+          'referencia': row[6],
+        };
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar endereços: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> listarEnderecosFornecedor(String fornecedorCnpj) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      final results = await conexaoDB.connection.query(
+        '''
+      SELECT endereco_id, rua, numero, bairro, cep, complemento, referencia
+      FROM Endereco
+      WHERE fornecedor_cnpj = @fornecedor_cnpj
+      ''',
+        substitutionValues: {
+          'fornecedor_cnpj': fornecedorCnpj,
+        },
+      );
+
+      print('Resultados encontrados: $results');
+
       return results.map((row) {
         return {
           'endereco_id': row[0],
