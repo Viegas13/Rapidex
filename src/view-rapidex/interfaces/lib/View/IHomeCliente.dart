@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/DetalhesProdutoBottomSheet.dart';
+import 'package:interfaces/View/IListaPedidos.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
 import 'package:interfaces/banco_de_dados/DAO/PedidoDAO.dart';
@@ -9,7 +10,6 @@ import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/widgets/Busca.dart';
 import 'package:interfaces/widgets/Item.dart';
-import 'package:interfaces/View/IAlterarStatusPedido.dart';
 import '../DTO/Produto.dart';
 
 class HomeClienteScreen extends StatefulWidget {
@@ -68,7 +68,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => IAlterarStatusPedido(),
+            builder: (context) => IListaPedidosScreen(),
           ),
         );
       } else {

@@ -97,6 +97,34 @@ class PedidoDAO {
       rethrow;
     }
   }
+  
+
+
+  Future <Pedido?> buscarPedidoPorId(int pedidoId) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      var result = await conexaoDB.connection.query(
+      '''
+      SELECT * 
+      FROM Pedido 
+      WHERE pedido_id = @pedido_id
+      ''',
+    substitutionValues: {'pedido_id': pedidoId},
+      );
+
+          if (result.isNotEmpty) {
+        return Pedido.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar dados do pedido: $e');
+      return null;
+    }
+  }
 
   // Método para buscar pedidos por cliente
   Future<List<Pedido>> buscarPedidosPorCliente(String cliente_cpf) async {

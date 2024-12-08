@@ -134,13 +134,15 @@ Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
     }
   }
 
+  //atualiza o ID do item pedido e remove o cliente vinculado a esse item pedido 
   Future<void> atualizarIDItemPedido(int itemPedidoID, int? pedidoid) async {
     try {
       await verificarConexao();
       await conexaoDB.connection.query(
         '''
         UPDATE Item_Pedido 
-        SET pedido_id = @pedido_id
+        SET pedido_id = @pedido_id,
+        cliente_cpf = NULL
         WHERE item_pedido_id = @item_pedido_id
         ''',
         substitutionValues: {
