@@ -23,7 +23,7 @@ class ProdutoDAO {
       await conexaoDB.connection.query(
         '''
         INSERT INTO produto (nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade) 
-        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor_cnpj, @restritoPorIdade, @quantidade) RETURNING produto_id
+        VALUES (@nome, @validade, @preco, @imagem, @descricao, @fornecedor, @restrito, @quantidade) RETURNING produto_id
         ''',
         substitutionValues: produto,
       );

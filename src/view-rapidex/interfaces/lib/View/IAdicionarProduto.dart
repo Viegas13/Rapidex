@@ -285,6 +285,7 @@ void exibirMensagem(String mensagem) {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
                     labelText: 'Descrição',

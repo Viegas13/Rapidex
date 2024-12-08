@@ -34,8 +34,8 @@ class Produto {
       preco: double.tryParse(map['preco'].toString()) ?? 0.0,
       imagem: map['imagem'],
       descricao: map['descricao'] ?? '',
-      fornecedorCnpj: map['fornecedor_cnpj'] ?? false,
-      restrito: map['restritoPorIdade'],
+      fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
+      restrito: map['restritoPorIdade'] ?? false,
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }
