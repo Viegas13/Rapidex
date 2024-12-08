@@ -46,10 +46,10 @@ CREATE TABLE Produto (
     nome VARCHAR(255),
     validade DATE,
     preco FLOAT,
-    imagem bytea,
+    imagem VARCHAR(255) NOT NULL,
     descricao VARCHAR(255),
     fornecedor_cnpj VARCHAR(255),
-    restritoPorIdade VARCHAR(10),
+    restritoPorIdade boolean,
     quantidade INT
     --FOREIGN KEY () REFERENCES Endereco()
 );
