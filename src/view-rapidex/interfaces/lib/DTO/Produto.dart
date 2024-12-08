@@ -35,7 +35,7 @@ class Produto {
       imagem: map['imagem'],
       descricao: map['descricao'] ?? '',
       fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
-      restrito: map['restritoPorIdade'] == true,
+      restrito: map['restritoPorIdade'] == 1 || map['restritoPorIdade'] == true,
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }

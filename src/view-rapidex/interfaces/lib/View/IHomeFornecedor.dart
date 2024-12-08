@@ -1,3 +1,4 @@
+import "dart:io";
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
@@ -139,16 +140,16 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                             horizontal: 10, vertical: 5),
                         child: ListTile(
                           leading: (produto.imagem != null && produto.imagem!.isNotEmpty)
-                            ? Image.network(
-                                produto.imagem!,
-                                fit: BoxFit.cover,
-                                width: 50,
-                                height: 50,
-                                errorBuilder: (context, error, stackTrace) {
-                                  print('Erro ao carregar imagem: $error');
-                                  return const Icon(Icons.image_not_supported); // Ícone caso a URL seja inválida
-                                },
-                              )
+                            ? Image.file(
+                              File(produto.imagem), // Carrega imagem de arquivo local
+                              fit: BoxFit.cover,
+                              width: 50,
+                              height: 50,
+                              errorBuilder: (context, error, stackTrace) {
+                                print('Erro ao carregar imagem: $error');
+                                return const Icon(Icons.image_not_supported);
+                              },
+                            )
                             : const Icon(Icons.image), // Ícone padrão se não houver URL // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
