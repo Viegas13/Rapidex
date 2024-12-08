@@ -108,7 +108,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            const PerfilEntregadorScreen(cpf: '13774195684'),
+                            const PerfilEntregadorScreen(),
                       ),
                     );
                   },
