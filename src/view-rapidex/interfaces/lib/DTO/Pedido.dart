@@ -6,6 +6,7 @@ class Pedido {
   double frete;
   String endereco_entrega; // Novo campo
   String status_pedido;
+  DateTime data_de_entrega;
 
   Pedido({
     this.pedido_id,
@@ -15,6 +16,7 @@ class Pedido {
     required this.frete,
     required this.endereco_entrega,
     this.status_pedido = 'pendente',
+    required this.data_de_entrega,
   });
 
   // Conversão para map (para inserir no banco)
@@ -27,6 +29,7 @@ class Pedido {
       'frete': frete,
       'endereco_entrega': endereco_entrega,
       'status_pedido': status_pedido,
+      'data_de_entrega': data_de_entrega,
     };
   }
 
@@ -40,6 +43,7 @@ class Pedido {
       frete: (map['frete'] as double?) ?? 0.0, // Tratar null como 0.0
       endereco_entrega: map['endereco_entrega'],
       status_pedido: map['status_pedido'] ?? 'pendente',
+      data_de_entrega: map['data_de_entrega'] ?? DateTime.now(), 
     );
   }
 }

@@ -16,8 +16,8 @@ class PedidoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido)
-        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido)
+        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido, data_de_entrega)
+        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido, @data_de_entrega)
         ''',
         substitutionValues: pedido.toMap(),
       );
@@ -152,6 +152,7 @@ class PedidoDAO {
           'frete': row[4],
           'endereco_entrega': row[5],
           'status_pedido': row[6],
+          'data_de_entrega': row[7],
         });
       }).toList();
     } catch (e) {
@@ -202,6 +203,7 @@ class PedidoDAO {
           'frete': row[4],
           'endereco_entrega': row[5],
           'status_pedido': row[6],
+          'data_de_entrega': row[7],
         });
       }).toList();
     } catch (e) {

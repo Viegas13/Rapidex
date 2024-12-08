@@ -1,13 +1,14 @@
   import 'package:flutter/material.dart';
   import 'package:interfaces/DTO/Cartao.dart';
   import 'package:interfaces/DTO/Produto.dart';
-import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
-import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+  import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
+  import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
   import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
   import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
   import 'package:interfaces/controller/SessionController.dart';
-import 'package:interfaces/widgets/DropdownTextField.dart';
+  import 'package:interfaces/widgets/DropdownTextField.dart';
   import 'package:interfaces/widgets/Item.dart';
+  import 'package:intl/intl.dart';
   import '../banco_de_dados/DAO/PedidoDAO.dart';
   import '../banco_de_dados/DAO/ItemPedidoDAO.dart';
   import 'ICadastroCartao.dart';
@@ -31,13 +32,14 @@ import 'package:interfaces/widgets/DropdownTextField.dart';
   class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
     final PedidoController pedidoController = PedidoController();
     final TextEditingController enderecoController = TextEditingController();
+    final TextEditingController dataEntregaController = TextEditingController();
     String? formaPagamento;
     String? cartaoSelecionado;
     late ConexaoDB conexaoDB;
     late CartaoDAO cartaoDAO;
     late PedidoDAO pedidoDAO;
     late ProdutoDAO produtoDAO;
-
+    DateTime? dataEntrega;
     late ClienteDAO clienteDAO;
     late ItemPedidoDAO itemPedidoDAO;
     late FornecedorDAO fornecedorDAO;
@@ -127,6 +129,24 @@ import 'package:interfaces/widgets/DropdownTextField.dart';
       print('Erro ao buscar endereços: $e');
     }
   }
+    Future<void> selecionarDataEntrega() async {
+    DateTime? Selecionada = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+
+    if (Selecionada != null) {
+       setState(() {
+          dataEntrega = Selecionada;
+          // Atualiza o controlador para exibir a data de forma legível
+          dataEntregaController.text = "${dataEntrega!.day.toString().padLeft(2, '0')}/"
+              "${dataEntrega!.month.toString().padLeft(2, '0')}/"
+              "${dataEntrega!.year}";
+        });
+      }
+    }
 
    Widget selecionarCartao() {
   if (isLoading) {
@@ -180,12 +200,16 @@ import 'package:interfaces/widgets/DropdownTextField.dart';
         double precoTotal = widget.produtos.fold(
           0, (soma, produto) => soma + produto.valorTotal,
         );
+
+        DateTime dataParaEntrega = dataEntrega ?? DateTime.now();
+
         Pedido pedido = Pedido(
           cliente_cpf: cpf_cliente,
           fornecedor_cnpj: '',
           endereco_entrega: '$cep$cpf_cliente',
           preco: precoTotal, 
           frete: precoTotal * 0.01,
+          data_de_entrega: dataParaEntrega,
         );
 
         final Iproduto = await produtoDAO.buscarProduto(widget.produtos.first.produtoId);
@@ -308,6 +332,29 @@ import 'package:interfaces/widgets/DropdownTextField.dart';
                     },
                   ),
                   const SizedBox(height: 16),
+                              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Data de Entrega:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: selecionarDataEntrega,
+                  child: const Text('Selecionar Data'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: dataEntregaController,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: 'Deixe em branco para efetuar entrega hoje',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
                   onPressed: finalizarPedido,
