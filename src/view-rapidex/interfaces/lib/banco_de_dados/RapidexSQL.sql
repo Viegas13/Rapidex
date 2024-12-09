@@ -38,7 +38,7 @@ CREATE TABLE Endereco (
     referencia VARCHAR(255),
     PRIMARY KEY (endereco_id),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE,
-    FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ)
+    FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedor(CNPJ) ON DELETE CASCADE
 );
 
 CREATE TABLE Produto (
@@ -46,17 +46,18 @@ CREATE TABLE Produto (
     nome VARCHAR(255),
     validade DATE,
     preco FLOAT,
-    imagem bytea,
+    imagem VARCHAR(255) NOT NULL,
     descricao VARCHAR(255),
     fornecedor_cnpj VARCHAR(255),
-    restritoPorIdade VARCHAR(10),
+    restritoPorIdade boolean,
     quantidade INT
     --FOREIGN KEY () REFERENCES Endereco()
 );
 
-CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'pronto', 'retirado', 'cancelado');
+CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'aceito', 'pronto', 'retirado', 'cancelado');
 -- pendente -> acabou de criar o pedido
 -- em preparo -> fornecedor marca que começou o preparo
+-- aceito -> algum entregador aceitou o pedido para realizar entrega
 -- pronto -> entregador pode buscar
 -- retirado -> forncedor marca no app que entregou o pedido ao entregador
 -- cancelado -> cancelou
@@ -68,6 +69,7 @@ CREATE TABLE Pedido (
     fornecedor_cnpj VARCHAR(14),
     preco FLOAT,
     frete FLOAT,
+    data_de_entrega DATE,
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
     status_pedido status_pedido DEFAULT 'pendente',
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE,
@@ -96,7 +98,7 @@ CREATE TABLE Entrega (
     status_entrega status_entrega,
     endereco_retirada VARCHAR(255),
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
-    valor_final FLOAT,
+    valor_final FLOAT
     --FOREIGN KEY (pedido_id) REFERENCES Pedido(pedido_id) ON DELETE CASCADE,
     --FOREIGN KEY (entregador_cpf) REFERENCES Entregador(CPF) ON DELETE CASCADE,
     --FOREIGN KEY (endereco_entrega) REFERENCES Endereco(endereco_id) ON DELETE CASCADE
@@ -111,6 +113,7 @@ CREATE TABLE Cartao (
     nomeTitular VARCHAR(255),
     agencia BIGINT,
     bandeira VARCHAR(255),
+    
     cliente_cpf VARCHAR(255),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE
 );

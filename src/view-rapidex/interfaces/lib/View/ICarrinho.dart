@@ -254,8 +254,8 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
                     FinalizarPedidoPage(), passando uma lista dos itens
                     do pedido
                     */
-                    //builder: (context) => FinalizarPedidoPage(produtos:itensFinalizarPedido),
-                    builder: (context) => IAlterarStatusPedido(),
+                    builder: (context) => FinalizarPedidoPage(produtos:itensFinalizarPedido),
+                    //builder: (context) => IAlterarStatusPedido(),
                   ),
                 );
               },

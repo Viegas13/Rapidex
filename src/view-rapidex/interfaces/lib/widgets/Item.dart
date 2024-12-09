@@ -3,13 +3,13 @@ import 'package:intl/intl.dart';
 
 class Item extends StatelessWidget {
   final String nome;
-  //final String imagem; retirar o comentário depois de corrigir a lógica da imagem
+  final String imagem;
   final double preco;
 
   const Item({
     super.key,
     required this.nome,
-    //required this.imagem, retirar o comentário depois de corrigir a lógica da imagem
+    required this.imagem,
     required this.preco,
   });
 
@@ -35,7 +35,6 @@ class Item extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          /*retirar o comentário depois de corrigir a lógica da imagem
 
           // Imagem do produto 
             Expanded(
@@ -47,7 +46,7 @@ class Item extends StatelessWidget {
                 width: double.infinity,
               ),
             ),
-          ),*/
+          ),
           // Nome e preço
           Padding(
             padding: const EdgeInsets.all(8.0),

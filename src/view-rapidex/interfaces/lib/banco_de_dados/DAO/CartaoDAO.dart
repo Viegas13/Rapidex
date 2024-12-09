@@ -14,8 +14,8 @@ class CartaoDAO {
       }
       await conexaoDB.connection.query(
         '''
-        INSERT INTO cartao (numero, cvv, validade, nomeTitular, agencia, bandeira, cpf_titular, cliente_cpf)
-        VALUES (@numero, @cvv, @validade, @nomeTitular, @agencia, @bandeira, @cpf_titular, @cliente_cpf)
+        INSERT INTO cartao (numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf, cpf_titular)
+        VALUES (@numero, @cvv, @validade, @nomeTitular, @agencia, @bandeira, @cliente_cpf, @cpf_titular)
         ''',
         substitutionValues: cartao.toMap(),
       );
@@ -34,15 +34,24 @@ class CartaoDAO {
       }
       var result = await conexaoDB.connection.query(
         '''
-        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cpf_titular, cliente_cpf
+        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf, cpf_titular
         FROM cartao
-        WHERE cliente_cpf = @cpf
+        WHERE cliente_cpf = @cliente_cpf
         ''',
-        substitutionValues: {'cpf': cpf},
+        substitutionValues: {'cliente_cpf': cpf},
       );
 
       return result.map((row) {
-        return Cartao.fromMap(row.toColumnMap());
+        return Cartao.fromMap({
+          'numero': row[0],
+          'cvv': row[1],
+          'validade': row[2],
+          'nomeTitular': row[3],
+          'agencia': row[4],
+          'bandeira': row[5],
+          'cliente_cpf': row[6],
+          'cpf_titular': row[7],
+        });
       }).toList();
     } catch (e) {
       print('Erro ao buscar cartões: $e');
@@ -99,7 +108,7 @@ class CartaoDAO {
       }
       var result = await conexaoDB.connection.query(
         '''
-        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf
+        SELECT numero, cvv, validade, nomeTitular, agencia, bandeira, cliente_cpf, cpf_titular
         FROM cartao
         WHERE numero = @numero
         ''',

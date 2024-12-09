@@ -30,7 +30,7 @@ Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
       Nesse if, comparo se o pedidoId é igual a zero porque é dessa maneira,
       aparentemente, que o map armazena null pra um int
       */
-      if (item.produtoId == itemPedido['produto_id'] && item.pedidoId == 0) {
+      if (item.produtoId == itemPedido['produto_id'] && item.pedidoId == 0 && item.clienteCpf == itemPedido['cliente_cpf']) {
         print("Passou do if");
         itemExistente = item;
         break;
@@ -133,6 +133,30 @@ Future<void> cadastrarItemPedido(Map<String, dynamic> itemPedido) async {
       rethrow;
     }
   }
+
+  //atualiza o ID do item pedido e remove o cliente vinculado a esse item pedido 
+  Future<void> atualizarIDItemPedido(int itemPedidoID, int? pedidoid) async {
+    try {
+      await verificarConexao();
+      await conexaoDB.connection.query(
+        '''
+        UPDATE Item_Pedido 
+        SET pedido_id = @pedido_id,
+        cliente_cpf = NULL
+        WHERE item_pedido_id = @item_pedido_id
+        ''',
+        substitutionValues: {
+          'pedido_id': pedidoid,           // Substitui o @pedido_id
+          'item_pedido_id': itemPedidoID   // Substitui o @item_pedido_id
+        },
+      );
+      print('ItemPedido atualizado com sucesso!');
+    } catch (e) {
+      print('Erro ao atualizar ItemPedido: $e');
+      rethrow;
+    }
+  }
+
 
   /// Método para remover um ItemPedido
   Future<void> removerItemPedido(int itemPedidoId) async {

@@ -5,7 +5,8 @@ class Produto {
   final String nome;
   final DateTime? validade;
   final double preco;
-  final Uint8List? imagem;
+  // final Uint8List? imagem;
+  final String imagem;
   final String descricao;
   final String fornecedorCnpj;
   final bool restrito;
@@ -31,12 +32,10 @@ class Produto {
           ? DateTime.tryParse(map['validade'].toString())
           : null,
       preco: double.tryParse(map['preco'].toString()) ?? 0.0,
-      imagem: map['imagem'] != null
-          ? Uint8List.fromList((map['imagem'] as List<int>))
-          : null, // Permite imagens nulas,
+      imagem: map['imagem'],
       descricao: map['descricao'] ?? '',
-      fornecedorCnpj: map['fornecedor_cnpj'] ?? false,
-      restrito: map['restritoPorIdade']?.toString() == 'true',
+      fornecedorCnpj: map['fornecedor_cnpj'] ?? '',
+      restrito: map['restritoPorIdade'] == 1 || map['restritoPorIdade'] == true,
       quantidade: int.tryParse(map['quantidade'].toString()) ?? 0,
     );
   }
@@ -50,7 +49,7 @@ class Produto {
       'imagem': imagem,
       'descricao': descricao,
       'fornecedor_cnpj': fornecedorCnpj,
-      'restritoPorIdade': restrito.toString(),
+      'restritoPorIdade': restrito,
       'quantidade': quantidade,
     };
   }

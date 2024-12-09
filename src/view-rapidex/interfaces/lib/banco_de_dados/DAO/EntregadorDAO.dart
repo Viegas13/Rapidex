@@ -39,7 +39,6 @@ class EntregadorDAO {
 
       if (result.isNotEmpty) {
         return Entregador.fromMap(result[0].toColumnMap());
-        
       } else {
         return null;
       }
@@ -90,7 +89,8 @@ class EntregadorDAO {
     }
   }
 
-  Future<Entregador?> BuscarEntregadorParaLogin(String email, String senha) async {
+  Future<Entregador?> BuscarEntregadorParaLogin(
+      String email, String senha) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -100,7 +100,7 @@ class EntregadorDAO {
         'SELECT * FROM Entregador WHERE email = @email AND senha = @senha',
         substitutionValues: {'email': email, 'senha': senha},
       );
-      
+
       if (result.isNotEmpty) {
         return Entregador.fromMap(result[0].toColumnMap());
       } else {
@@ -112,4 +112,24 @@ class EntregadorDAO {
     }
   }
 
+  Future<String?> buscarCpf(String? email, String? senha) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+      var resultado = await conexaoDB.connection.query(
+        'SELECT cpf FROM entregador WHERE email = @email AND senha = @senha',
+        substitutionValues: {'email': email, 'senha': senha},
+      );
+
+      if (resultado.isNotEmpty) {
+        return resultado.toString().replaceAll(RegExp(r'[\[\]\s]'), '');
+      } else {
+        return null; // Caso não haja resultados
+      }
+    } catch (e) {
+      print('Erro ao buscar cpf: $e');
+      return null;
+    }
+  }
 }

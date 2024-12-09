@@ -5,7 +5,8 @@ class Endereco {
   final int numero;
   final String complemento;
   final String referencia;
-  final String clienteCpf;
+  final String? clienteCpf;
+  final String? fornecedorCnpj;
 
   Endereco({
     required this.cep,
@@ -14,10 +15,19 @@ class Endereco {
     required this.numero,
     required this.complemento,
     required this.referencia,
-    required this.clienteCpf,
-  });
+    this.clienteCpf,
+    this.fornecedorCnpj,
+  }) {
+    if ((clienteCpf == null && fornecedorCnpj == null) ||
+        (clienteCpf != null && fornecedorCnpj != null)) {
+      throw ArgumentError(
+          'Deve ser fornecido apenas um dos parâmetros: clienteCpf ou fornecedorCnpj.');
+    }
+  }
 
-  String get enderecoId => '${cep}_$clienteCpf';
+  String get enderecoId => clienteCpf != null
+      ? '${cep}_$clienteCpf'
+      : '${cep}_$fornecedorCnpj';
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,6 +39,7 @@ class Endereco {
       'complemento': complemento,
       'referencia': referencia,
       'cliente_cpf': clienteCpf,
+      'fornecedor_cnpj': fornecedorCnpj,
     };
   }
 }
