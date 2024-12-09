@@ -365,7 +365,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 return Busca(
                   nome: produto.nome,
                   fornecedor: fornecedorNome,
-                  // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
+                  imagem: produto.imagem,
                   preco: produto.preco,
                 );
               } else {
@@ -428,7 +428,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                         },
                         child: Item(
                           nome: produto.nome,
-                          // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
+                          imagem: produto.imagem,
                           preco: produto.preco,
                         ),
                       ),
