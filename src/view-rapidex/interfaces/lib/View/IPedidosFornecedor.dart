@@ -4,6 +4,7 @@ import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/DTO/Pedido.dart';
 import 'package:interfaces/controller/SessionController.dart';
+import 'package:intl/intl.dart';
 
 class PedidosFornecedorScreen extends StatefulWidget {
   const PedidosFornecedorScreen({super.key});
@@ -55,10 +56,21 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
 
     try {
       final pedidos = await pedidoDAO.buscarPedidosPorFornecedor(cnpj);
+      final DateTime today = DateTime.now();
+      final String todayStr = DateFormat('yyyy-MM-dd').format(today);
 
       setState(() {
-        pedidosAndamento = pedidos.where((pedido) => pedido.status_pedido != 'retirado' && pedido.status_pedido != 'cancelado').toList();
-        pedidosHistorico = pedidos.where((pedido) => pedido.status_pedido == 'retirado' || pedido.status_pedido == 'cancelado').toList();
+        pedidosAndamento = pedidos.where((pedido) =>
+          pedido.status_pedido != 'retirado' &&
+          pedido.status_pedido != 'cancelado' &&
+          DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) == todayStr
+        ).toList();
+        
+        pedidosHistorico = pedidos.where((pedido) =>
+          (pedido.status_pedido == 'retirado' || pedido.status_pedido == 'cancelado') &&
+          DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) == todayStr
+        ).toList();
+
         isLoading = false;
       });
     } catch (e) {
@@ -85,9 +97,9 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Pedidos do Fornecedor'),
-          backgroundColor: Colors.orange,  // Cor laranja no AppBar
+          backgroundColor: Colors.orange, 
           bottom: const TabBar(
-            indicatorColor: Colors.orange,  // Indicador de aba laranja
+            indicatorColor: Colors.orange, 
             tabs: [
               Tab(text: 'Em Andamento'),
               Tab(text: 'Histórico'),
@@ -95,7 +107,7 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
           ),
         ),
         body: isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.orange))  // Spinner laranja
+            ? const Center(child: CircularProgressIndicator(color: Colors.orange))
             : TabBarView(
                 children: [
                   _buildPedidosListView(pedidosAndamento),
