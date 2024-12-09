@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Entrega.dart';
 import 'package:interfaces/DTO/Entregador.dart';
+import 'package:interfaces/DTO/Pedido.dart';
 import 'package:interfaces/DTO/Status.dart';
 import 'package:interfaces/View/IHomeEntregador.dart';
+import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/PedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'dart:math';
@@ -21,6 +24,8 @@ class _AcompanhamentoEntregadorScreenState
     extends State<AcompanhamentoEntregadorScreen> {
   EntregadorDAO? entregadorDAO;
   EntregaDAO? entregaDAO;
+  EnderecoDAO? enderecoDAO;
+  PedidoDAO? pedidoDAO;
 
   SessionController sessionController = SessionController();
 
@@ -44,6 +49,7 @@ class _AcompanhamentoEntregadorScreenState
       
       entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
       entregaDAO = EntregaDAO(conexaoDB: conexaoDB);
+      pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
 
       randomTempo = random.nextInt(35) + 25;
 
@@ -92,6 +98,17 @@ class _AcompanhamentoEntregadorScreenState
         );
       }
     });
+  }
+
+  Future<String?> getEnderecoFornecedor(String cnpj) async {
+    final enderecoFornecedor = await enderecoDAO!.listarEnderecosFornecedor(cnpj);
+
+    if (enderecoFornecedor.isNotEmpty) {
+      
+      return enderecoFornecedor[0]['rua'].toString() + ' ' + enderecoFornecedor[0]['numero'].toString() + ', ' + enderecoFornecedor[0]['bairro'].toString();
+    }
+
+    return null;
   }
 
   @override
