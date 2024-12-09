@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/DTO/Cartao.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
 import '../banco_de_dados/DAO/CartaoDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ValidarCPF.dart';
@@ -15,6 +17,7 @@ class CadastroCartaoScreen extends StatefulWidget {
 class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
   late ConexaoDB conexaoDB;
   late CartaoDAO cartaoDAO;
+  late ClienteDAO clienteDAO;
 
   final TextEditingController numeroController = TextEditingController();
   final TextEditingController cvvController = TextEditingController();
@@ -22,21 +25,35 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
   final TextEditingController nomeTitularController = TextEditingController();
   final TextEditingController agenciaController = TextEditingController();
   final TextEditingController bandeiraController = TextEditingController();
-  final TextEditingController clienteCpfController = TextEditingController();
-
+  final TextEditingController titularCpfController = TextEditingController();
+  late String cpf_cliente;
+  SessionController sessionController = SessionController();
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
     cartaoDAO = CartaoDAO(conexaoDB: conexaoDB);
-    
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
     // Aguarda a inicialização da conexão antes de continuar
     conexaoDB.initConnection().then((_) {
+      inicializarDados();
       print('Conexão estabelecida no initState.');
     }).catchError((error) {
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
+
+      Future<void> inicializarDados() async {
+    try {
+    cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
+    if (cpf_cliente.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+    }
 
   @override
   void dispose() {
@@ -46,12 +63,12 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
     nomeTitularController.dispose();
     agenciaController.dispose();
     bandeiraController.dispose();
-    clienteCpfController.dispose();
+    titularCpfController.dispose();
     super.dispose();
   }
   
 Future<void> cadastrarCartao() async {
-  String cpf = clienteCpfController.text;
+  String cpf = titularCpfController.text;
 
   // Validação do CPF
   if (!validar_cpf(cpf)) {
@@ -95,7 +112,9 @@ Future<void> cadastrarCartao() async {
       nomeTitular: nomeTitularController.text,
       agencia: int.parse(agenciaController.text),
       bandeira: bandeiraController.text,
-      clienteCpf: clienteCpfController.text,
+      cpf_titular: titularCpfController.text,
+      clienteCpf: cpf_cliente,
+   
     );
 
     // Cadastro do cartão no banco de dados
@@ -162,9 +181,9 @@ Future<void> cadastrarCartao() async {
             ),
             const SizedBox(height: 16),
             CustomTextField(
-              controller: clienteCpfController,
-              labelText: 'CPF',
-              hintText: 'Insira seu CPF',
+              controller: titularCpfController,
+              labelText: 'CPF Titular',
+              hintText: 'Insira CPF do titular',
             ),
             const SizedBox(height: 16),
             const SizedBox(height: 20),

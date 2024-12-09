@@ -57,32 +57,27 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
     Fornecedor? fornecedorLogado =
         await fornecedorDAO.BuscarFornecedorParaLogin(email, senha);
 
-    setState(() {
-      if (fornecedorLogado != null) {
+    if (fornecedorLogado != null) {
+      setState(() {
         corTextAreas = Colors.black12;
         fornecedorLogou = true;
+      });
 
-        SessionController sessionController = SessionController();
-        sessionController.setSession(email, senha);
+      SessionController sessionController = SessionController();
+      sessionController.setSession(email, senha);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  HomeFornecedorScreen(cnpjFornecedor: "11111111111111")),
-        );
-      } else {
-        corTextAreas = Colors.red;
-        fornecedorLogou = false;
-        print("FORNECEDOR NULL!!!!!!!!!!!");
-      }
-    });
-  }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeFornecedorScreen()),
+      );
+    } else {
 
-  void toggleCaixaDeErroLogin() {
-    setState(() {
-      erroVisivel = !erroVisivel;
-    });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dados Incorretos!')),
+      );
+
+      senhaController.clear();
+    }
   }
 
   @override
@@ -223,7 +218,6 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
                     ElevatedButton(
                       onPressed: () {
                         logarFornecedor();
-                        toggleCaixaDeErroLogin();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -245,68 +239,6 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
                 ),
               ),
             ),
-            if (!fornecedorLogou)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 300,
-                child: Center(
-                  child: AnimatedOpacity(
-                    opacity: erroVisivel ? 1.0 : 0.0,
-                    duration: Duration(seconds: 1),
-                    child: Container(
-                      width: 250,
-                      height: 150,
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(width: 3, color: Colors.orange),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Dados Incorretos",
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              toggleCaixaDeErroLogin();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 10),
-                            ),
-                            child: Text(
-                              "OK",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ));
   }

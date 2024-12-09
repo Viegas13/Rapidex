@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:interfaces/banco_de_dados/DBHelper/ValidarCEP.dart';
-import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
-import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
-import 'package:postgres/postgres.dart';
-import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/widgets/CustomTextField.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ValidarCEP.dart';
+import 'package:interfaces/controller/SessionController.dart';
 
 class CadastroEndereco extends StatefulWidget {
-  final String cpf;
-  const CadastroEndereco({super.key, required this.cpf});
+  const CadastroEndereco({super.key});
 
   @override
   State<CadastroEndereco> createState() => _CadastroEnderecoState();
@@ -17,6 +18,9 @@ class CadastroEndereco extends StatefulWidget {
 class _CadastroEnderecoState extends State<CadastroEndereco> {
   late ConexaoDB conexaoDB;
   late EnderecoDAO enderecoDAO;
+  late ClienteDAO clienteDAO;
+  late FornecedorDAO fornecedorDAO;
+
   final TextEditingController _cepController = TextEditingController();
   final TextEditingController _ruaController = TextEditingController();
   final TextEditingController _bairroController = TextEditingController();
@@ -29,22 +33,27 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
       mask: '#####-###', filter: {'#': RegExp(r'[0-9]')});
 
   @override
-  void initState() {
-    super.initState();
-    conexaoDB = ConexaoDB();
-    enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+void initState() {
+  super.initState();
+  conexaoDB = ConexaoDB();
+  enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+  clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+  fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
-    conexaoDB.initConnection().then((_) {
-      print('Conexão estabelecida no initState.');
-    }).catchError((error) {
-      print('Erro ao estabelecer conexão no initState: $error');
-    });
+  conexaoDB.initConnection().then((_) {
+    print('Conexão estabelecida no initState.');
+  }).catchError((error) {
+    print('Erro ao estabelecer conexão no initState: $error');
+  });
 
-    // Adiciona listeners para os campos de rua, bairro e número
-    _ruaController.addListener(_syncCepWithAddress);
-    _bairroController.addListener(_syncCepWithAddress);
-    _numeroController.addListener(_syncCepWithAddress);
-  }
+  // Adiciona listener para buscar endereço ao preencher o CEP
+  _cepController.addListener(() {
+    final cep = _cepController.text.replaceAll('-', '');
+    if (cep.length == 8) {
+      _buscarEndereco();
+    }
+  });
+}
 
   @override
   void dispose() {
@@ -59,62 +68,108 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
   }
 
   Future<void> cadastrarEndereco() async {
-    final String cep = _cepController.text.replaceAll('-', '');
-    final String numero = _numeroController.text;
-    final String rua = _ruaController.text;
-    final String bairro = _bairroController.text;
+  final String? email = SessionController.instancia.email;
 
-    List<String> erros = [];
+  if (email == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Erro: Usuário não autenticado!')),
+    );
+    return;
+  }
 
-    if (cep.isEmpty || cep.length != 8) {
-      erros.add('Digite um CEP válido com 8 dígitos.');
-    }
-    if (rua.isEmpty) {
-      erros.add('Rua é obrigatória.');
-    }
-    if (bairro.isEmpty) {
-      erros.add('Bairro é obrigatório.');
-    }
-    if (numero.isEmpty) {
-      erros.add('Número é obrigatório.');
-    }
+  // Recebe as informações do endereço
+  final String cep = _cepController.text.replaceAll('-', '');
+  final String numero = _numeroController.text;
+  final String rua = _ruaController.text;
+  final String bairro = _bairroController.text;
+  final String complemento = _complementoController.text;
+  final String referencia = _pontoReferenciaController.text;
 
-    if (erros.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(erros.join('\n')),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
+  List<String> erros = [];
+  if (cep.isEmpty || cep.length != 8) {
+    erros.add('Digite um CEP válido com 8 dígitos.');
+  }
+  if (rua.isEmpty) {
+    erros.add('Rua é obrigatória.');
+  }
+  if (bairro.isEmpty) {
+    erros.add('Bairro é obrigatório.');
+  }
+  if (numero.isEmpty) {
+    erros.add('Número é obrigatório.');
+  }
 
-    try {
-      final Map<String, dynamic> endereco = {
-        'cliente_cpf': widget.cpf.toString(), // Passa o CPF do cliente
+  if (erros.isNotEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(erros.join('\n')),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+    return;
+  }
+
+  try {
+    // Identificação automática
+    final String? cpf =
+        await clienteDAO.buscarCpf(email, SessionController.instancia.senha);
+
+    if (cpf != null) {
+      // Cadastro de cliente
+      await enderecoDAO.cadastrarEnderecoCliente({
+        'cliente_cpf': cpf,
         'cep': cep,
         'rua': rua,
         'numero': numero,
         'bairro': bairro,
-        'complemento': _complementoController.text,
-        'referencia': _pontoReferenciaController.text,
-      };
-
-      await enderecoDAO.cadastrarEndereco(endereco);
+        'complemento': complemento,
+        'referencia': referencia,
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Endereço cadastrado com sucesso!')),
+        const SnackBar(content: Text('Endereço cadastrado com sucesso para cliente!')),
       );
 
-      // Navega de volta para IPerfilCliente após o cadastro
+      // Redireciona para o perfil do cliente
       Navigator.pushReplacementNamed(context, '/perfil_cliente');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao cadastrar endereço: ${e.toString()}')),
-      );
-      print('Erro ao cadastrar cliente: $e');
+    } else {
+      // Tenta buscar o CNPJ se não encontrou o CPF
+      final String? cnpj = await fornecedorDAO.buscarCnpj(
+          email, SessionController.instancia.senha);
+
+      if (cnpj != null) {
+        // Cadastro de fornecedor
+        await enderecoDAO.cadastrarEnderecoFornecedor({
+          'fornecedor_cnpj': cnpj,
+          'cep': cep,
+          'rua': rua,
+          'numero': numero,
+          'bairro': bairro,
+          'complemento': complemento,
+          'referencia': referencia,
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Endereço cadastrado com sucesso para fornecedor!')),
+        );
+
+        // Redireciona para o perfil do fornecedor
+        Navigator.pushReplacementNamed(context, '/perfil_fornecedor');
+      } else {
+        // Caso nem CPF nem CNPJ sejam encontrados
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro: CPF ou CNPJ não encontrado!')),
+        );
+        return;
+      }
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao cadastrar endereço: ${e.toString()}')),
+    );
+    print('Erro ao cadastrar endereço: $e');
   }
+}
 
   Future<void> _buscarEndereco() async {
     final cep = _cepController.text.replaceAll('-', '');
@@ -169,13 +224,12 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
               labelText: 'CEP',
               hintText: 'Insira seu CEP',
               inputFormatters: [_cepFormatter],
-              onChanged: (_) => _buscarEndereco(),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _ruaController,
-              hintText: 'Insira sua Rua',
               labelText: 'Rua',
+              hintText: 'Insira sua Rua',
             ),
             const SizedBox(height: 16),
             CustomTextField(
@@ -186,22 +240,22 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
             const SizedBox(height: 16),
             CustomTextField(
               controller: _numeroController,
-              hintText: 'Insira o número',
               labelText: 'Número',
+              hintText: 'Insira o número',
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _complementoController,
-              hintText: 'Insira seu complemento',
               labelText: 'Complemento',
-            ),
-            const SizedBox(height: 32),
-            CustomTextField(
-              controller: _pontoReferenciaController,
-              hintText: 'Opcional',
-              labelText: 'Ponto de Referência',
+              hintText: 'Insira seu complemento',
             ),
             const SizedBox(height: 16),
+            CustomTextField(
+              controller: _pontoReferenciaController,
+              labelText: 'Ponto de Referência',
+              hintText: 'Opcional',
+            ),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: cadastrarEndereco,
               style: ElevatedButton.styleFrom(
@@ -209,8 +263,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Cadastrar',
                   style: TextStyle(color: Colors.black)),

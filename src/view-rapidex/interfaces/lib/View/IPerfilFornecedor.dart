@@ -6,19 +6,27 @@ import 'IEditarPerfilFornecedor.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/DTO/Fornecedor.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
+import 'package:interfaces/widgets/DropdownTextField.dart';
+import 'package:interfaces/View/ICadastroEndereco.dart';
 
 class PerfilFornecedorScreen extends StatefulWidget {
-  final String cnpj;
-
-  const PerfilFornecedorScreen({super.key, required this.cnpj});
+  const PerfilFornecedorScreen({super.key});
 
   @override
   _PerfilFornecedorScreenState createState() => _PerfilFornecedorScreenState();
 }
 
 class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
+  final TextEditingController enderecoController = TextEditingController();
+
   late FornecedorDAO fornecedorDAO;
+  late EnderecoDAO enderecoDAO;
+  List<String> enderecosFormatados = ['Carregando...'];
   Fornecedor? fornecedor;
+  String cnpj = '';
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
@@ -26,7 +34,8 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
-      carregarDadosFornecedor();
+      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
@@ -36,7 +45,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     try {
       print("chegou na busca");
       final fornecedorMap =
-          await fornecedorDAO.buscarFornecedor("11111111111111"); //widget.cnpj
+          await fornecedorDAO.buscarFornecedor(cnpj); //widget.cnpj
       if (fornecedorMap != null) {
         setState(() {
           fornecedor = Fornecedor.fromMap(fornecedorMap);
@@ -47,9 +56,24 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
     }
   }
 
+  Future<void> inicializarDados() async {
+    try {
+      cnpj = await fornecedorDAO.buscarCnpj(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cnpj.isEmpty) {
+        throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+      }
+      carregarDadosFornecedor();
+      buscarEnderecos();
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+  }
+
   Future<void> excluirContaFornecedor() async {
     try {
-      await fornecedorDAO.deletarFornecedor(widget.cnpj);
+      await fornecedorDAO.deletarFornecedor(cnpj);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta excluída com sucesso!')),
       );
@@ -64,6 +88,25 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
         const SnackBar(content: Text('Erro ao excluir conta')),
       );
       print('Erro ao excluir conta: $e');
+    }
+  }
+  Future<void> buscarEnderecos() async {
+    try {
+      final enderecos = await enderecoDAO.listarEnderecosFornecedor(cnpj);
+      setState(() {
+        enderecosFormatados = enderecos.map((endereco) {
+          final complemento = endereco['complemento']?.isNotEmpty == true
+              ? ', ${endereco['complemento']}'
+              : '';
+          final referencia = endereco['referencia']?.isNotEmpty == true
+              ? ' (${endereco['referencia']})'
+              : '';
+          return '${endereco['rua']} ${endereco['numero']}, ${endereco['bairro']} $complemento $referencia'
+              .trim();
+        }).toList();
+      });
+    } catch (e) {
+      print('Erro ao buscar endereços: $e');
     }
   }
 
@@ -98,6 +141,41 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                     const SizedBox(height: 24),
                     _buildReadOnlyField('Senha', fornecedor!.senha),
                     const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CadastroEndereco(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cadastrar Novo Endereço',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownTextField(
+                      labelText: 'Endereço',
+                      controller: enderecoController,
+                      items: enderecosFormatados.isNotEmpty &&
+                              enderecosFormatados[0] != 'Carregando...'
+                          ? enderecosFormatados
+                          : ['Nenhum endereço disponível'],
+                      onItemSelected: (selectedValue) {
+                        setState(() {
+                          enderecoController.text = selectedValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -105,9 +183,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  EditarPerfilFornecedorScreen(
-                                cnpj: fornecedor!.cnpj,
-                              ),
+                                  EditarPerfilFornecedorScreen(),
                             ),
                           ).then((value) {
                             // Atualiza os dados após retornar da tela de edição

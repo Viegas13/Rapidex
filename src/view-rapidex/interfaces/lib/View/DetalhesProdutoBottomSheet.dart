@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/ItemPedido.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
+import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/widgets/Item.dart';
 import '../DTO/Produto.dart';
 
 class DetalhesProdutoBottomSheet extends StatefulWidget {
@@ -21,6 +28,59 @@ class DetalhesProdutoBottomSheet extends StatefulWidget {
 
 class _DetalhesProdutoBottomSheetState
     extends State<DetalhesProdutoBottomSheet> {
+  late ConexaoDB conexaoDB;
+  late ItemPedidoDAO itemPedidoDAO;
+  late ClienteDAO clienteDAO;
+  late String cpf_cliente;
+  SessionController sessionController = SessionController();
+late FornecedorDAO fornecedorDAO;
+String? nomeFornecedor;
+
+@override
+void initState() {
+  super.initState();
+  conexaoDB = ConexaoDB();
+  fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
+
+  conexaoDB.initConnection().then((_) {
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+    itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
+    _buscarNomeFornecedor();
+    inicializarDados();
+  }).catchError((error) {
+    print('Erro ao estabelecer conexão no initState: $error');
+  });
+}
+
+Future<void> _buscarNomeFornecedor() async {
+  try {
+    String? cnpj = widget.produtoSelecionado.fornecedorCnpj;
+    if (cnpj != null && cnpj.isNotEmpty) {
+      nomeFornecedor = await fornecedorDAO.buscarNomeFornecedor(cnpj);
+      setState(() {}); // Atualiza o estado para refletir o nome do fornecedor
+    }
+  } catch (e) {
+    print('Erro ao buscar o nome do fornecedor: $e');
+  }
+}
+
+  Future<void> inicializarDados() async {
+    try {
+      cpf_cliente = await clienteDAO.buscarCpf(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cpf_cliente.isEmpty) {
+        throw Exception('CPF não encontrado para o email e senha fornecidos.');
+      }
+      else{
+        print("CPF encontrado com sucesso! Esse é ele:");
+        print(cpf_cliente);
+      }
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+  }
+
   int quantidadeSelecionada = 1;
 
   void _incrementarQuantidade() {
@@ -117,7 +177,7 @@ class _DetalhesProdutoBottomSheetState
         ),
         const SizedBox(height: 8),
         Text(
-          "Fornecedor: ${widget.produtoSelecionado.fornecedorCnpj}",
+          "Fornecedor: ${ nomeFornecedor ?? 'Carregando...'}",
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 8),
@@ -145,185 +205,164 @@ class _DetalhesProdutoBottomSheetState
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: quantidadeSelecionada > 0
-              ? () {
-                  // Lógica para adicionar ao carrinho
-                  print(
-                      "Adicionado '${widget.produtoSelecionado.nome}' ao carrinho com quantidade: $quantidadeSelecionada.");
-                }
-              : null, // Desativa o botão se a quantidade for <= 0
-          style: ElevatedButton.styleFrom(
-            backgroundColor: quantidadeSelecionada > 0
-                ? Colors.orange
-                : Colors.grey, // Cor do botão muda quando desativado
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-          ),
-          child: const Text(
-            "Adicionar ao Carrinho",
-            style: TextStyle(fontSize: 16, color: Colors.white),
-          ),
-        ),
+  onPressed: quantidadeSelecionada > 0
+      ? () async {
+          try {
+            final produtoSelecionado = widget.produtoSelecionado;
+
+            // Calculando o valor total
+            final valorTotal = produtoSelecionado.preco * quantidadeSelecionada;
+
+            // Criando o mapa com os dados do ItemPedido
+            Map<String, dynamic> itemPedido = {
+              'produto_id': produtoSelecionado.produto_id,
+              'pedido_id': null, // Pedido ainda não associado
+              'quantidade': quantidadeSelecionada,
+              'valor_total': valorTotal,
+              'cliente_cpf': cpf_cliente, // CPF refatorado com a sessão
+            };
+
+            // Inserindo o ItemPedido no banco de dados
+            await itemPedidoDAO.cadastrarItemPedido(itemPedido);
+
+            // Fecha o BottomSheet e exibe o SnackBar
+            if (context.mounted) {
+              Navigator.pop(context); // Fecha o BottomSheet
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Item "${produtoSelecionado.nome}" adicionado ao carrinho com sucesso!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            // Exibe o erro diretamente no contexto do BottomSheet
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Erro ao adicionar o item "${widget.produtoSelecionado.nome}" ao carrinho.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        }
+      : null, // Desativa o botão se a quantidade for <= 0
+  style: ElevatedButton.styleFrom(
+    backgroundColor: quantidadeSelecionada > 0
+        ? Colors.orange
+        : Colors.grey, // Cor do botão muda quando desativado
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+  ),
+  child: const Text(
+    "Adicionar ao Carrinho",
+    style: TextStyle(fontSize: 16, color: Colors.white),
+  ),
+),
+
       ],
     );
   }
 
   Widget _buildProdutosRelacionados(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Produtos Relacionados:",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Produtos Relacionados:",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 8),
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widget.produtosCategoria.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // Número de itens por linha
+          childAspectRatio: 1, // Proporção quadrada para os itens
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 150,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.produtosCategoria.length,
-            itemBuilder: (context, index) {
-              final produto = widget.produtosCategoria[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) {
-                      return DetalhesProdutoBottomSheet(
-                        produtoSelecionado: produto,
-                        produtosCategoria: widget.produtosCategoria,
-                        produtosFornecedor: widget.produtosFornecedor,
-                      );
-                    },
+        itemBuilder: (context, index) {
+          final produto = widget.produtosCategoria[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) {
+                  return DetalhesProdutoBottomSheet(
+                    produtoSelecionado: produto,
+                    produtosCategoria: widget.produtosCategoria,
+                    produtosFornecedor: widget.produtosFornecedor,
                   );
                 },
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  width: 120,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Imagem do produto (substituir caso necessário)
-                      Container(
-                        height: 80,
-                        color: Colors.grey.withOpacity(0.3),
-                        child: const Icon(Icons.image, size: 40),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        produto.nome,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "R\$ ${produto.preco.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.orange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               );
             },
-          ),
-        ),
-      ],
-    );
-  }
+            child: Item(
+              nome: produto.nome,
+              imagem: produto.imagem,
+              preco: produto.preco,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 
   Widget _buildProdutosDoFornecedor(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Outros produtos do fornecedor:",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Outros produtos do fornecedor:",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 8),
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widget.produtosFornecedor.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // Número de itens por linha
+          childAspectRatio: 1, // Itens quadrados
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
-        const SizedBox(height: 8),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: widget.produtosFornecedor.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Exibe 2 itens por linha
-            childAspectRatio: 3 / 4, // Ajusta proporção dos itens
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemBuilder: (context, index) {
-            final produto = widget.produtosFornecedor[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return DetalhesProdutoBottomSheet(
-                      produtoSelecionado: produto,
-                      produtosCategoria: widget.produtosCategoria,
-                      produtosFornecedor: widget.produtosFornecedor,
-                    );
-                  },
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Imagem do produto (substituir caso necessário)
-                    Container(
-                      height: 80,
-                      color: Colors.grey.withOpacity(0.3),
-                      child: const Icon(Icons.image, size: 40),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      produto.nome,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "R\$ ${produto.preco.toStringAsFixed(2)}",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
+        itemBuilder: (context, index) {
+          final produto = widget.produtosFornecedor[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) {
+                  return DetalhesProdutoBottomSheet(
+                    produtoSelecionado: produto,
+                    produtosCategoria: widget.produtosCategoria,
+                    produtosFornecedor: widget.produtosFornecedor,
+                  );
+                },
+              );
+            },
+            child: Item(
+              nome: produto.nome,
+              imagem: produto.imagem,
+              preco: produto.preco,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 
   String _formatarData(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";

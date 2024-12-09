@@ -3,14 +3,14 @@ import 'package:intl/intl.dart';
 
 class Busca extends StatelessWidget {
   final String nome;
-  // final String imagem; // Retirar o comentário depois de corrigir a lógica da imagem
+  final String imagem;
   final double preco;
   final String fornecedor;
 
   const Busca({
     super.key,
     required this.nome,
-    // required this.imagem, // Retirar o comentário depois de corrigir a lógica da imagem
+    required this.imagem,
     required this.preco,
     required this.fornecedor,
   });
@@ -38,8 +38,8 @@ class Busca extends StatelessWidget {
         crossAxisAlignment:
             CrossAxisAlignment.start, // Alinha os itens à esquerda
         children: [
-          // Imagem do produto (Comentada, mas preparada para lógica futura)
-          /* 
+          // Imagem do produto
+
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
@@ -50,7 +50,6 @@ class Busca extends StatelessWidget {
               ),
             ),
           ),
-          */
           // Row para a imagem à esquerda e textos à direita
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -58,8 +57,7 @@ class Busca extends StatelessWidget {
               crossAxisAlignment:
                   CrossAxisAlignment.start, // Alinha os textos no topo
               children: [
-                // Imagem (vai ocupar um espaço fixo)
-                /* 
+                // Imagem
                 Expanded(
                   flex: 2,
                   child: ClipRRect(
@@ -72,7 +70,6 @@ class Busca extends StatelessWidget {
                     ),
                   ),
                 ), 
-                */
                 // Texto à direita da imagem
                 Expanded(
                   flex: 3,

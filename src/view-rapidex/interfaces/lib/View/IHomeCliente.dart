@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/DetalhesProdutoBottomSheet.dart';
+import 'package:interfaces/View/IListaPedidos.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/banco_de_dados/DAO/PedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
@@ -28,8 +30,10 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   bool isLoading = true;
   bool isSearching = false; // Variável para controlar o estado de busca
   String termoBusca = "";
+  
 
   late ProdutoDAO produtoDAO;
+  late PedidoDAO pedidoDAO;
   late FornecedorDAO fornecedorDAO;
   final TextEditingController buscaController = TextEditingController();
 
@@ -40,6 +44,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
   void initState() {
     super.initState();
     final conexaoDB = ConexaoDB();
+    pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
     conexaoDB.initConnection().then((_) {
       produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
@@ -49,6 +54,39 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     });
   }
 
+  bool carregando = true;
+
+  Future<void> verificarPedidosPendentes() async {
+  
+  try {
+    // Busca os pedidos com status pendente ou a caminho
+    final pedidos = await pedidoDAO.buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'em preparo', 'pronto', 'retirado']);
+
+      // Verifica se a lista de pedidos retornada está vazia ou não
+      if (pedidos != null && pedidos.isNotEmpty) {
+        final pedidoPendente = pedidos.first; // Pega o primeiro pedido encontrado
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IListaPedidosScreen(),
+          ),
+        );
+      } else {
+        // Caso não haja pedidos pendentes, mantém a tela atual
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não há pedidos para acompanhar!')),
+      );
+        setState(() {
+          carregando = false;
+        });
+      }
+    } catch (e) {
+      print('Erro ao verificar pedidos pendentes: $e');
+      setState(() {
+        carregando = false;
+      });
+      }
+    }
 
  Future<void> buscarProdutos() async {
     try {
@@ -119,6 +157,8 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     }
   }
 
+  
+
   // Carregar os resultados da busca
   Future<void> _carregarBusca(String chave) async {
     try {
@@ -172,7 +212,9 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                   },
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    verificarPedidosPendentes();
+                  },
                   child: const Text(
                     "Meus Pedidos",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -323,7 +365,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                 return Busca(
                   nome: produto.nome,
                   fornecedor: fornecedorNome,
-                  // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
+                  imagem: produto.imagem,
                   preco: produto.preco,
                 );
               } else {
@@ -386,7 +428,7 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
                         },
                         child: Item(
                           nome: produto.nome,
-                          // imagem: produto.imagem, retirar o comentário depois de corrigir a lógica da imagem
+                          imagem: produto.imagem,
                           preco: produto.preco,
                         ),
                       ),

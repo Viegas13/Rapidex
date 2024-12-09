@@ -1,3 +1,4 @@
+import "dart:io";
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:interfaces/View/Ieditarperfilfornecedor.dart';
@@ -7,11 +8,12 @@ import 'package:interfaces/View/IAdicionarProduto.dart';
 import 'package:interfaces/View/IEditarProduto.dart';
 import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
+import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/View/IPedidosFornecedor.dart';
 
 class HomeFornecedorScreen extends StatefulWidget {
-  final String cnpjFornecedor;
-
-  HomeFornecedorScreen({super.key, required this.cnpjFornecedor});
+  HomeFornecedorScreen({super.key});
 
   @override
   _HomeFornecedorScreenState createState() => _HomeFornecedorScreenState();
@@ -22,26 +24,44 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   List<Produto> produtos = [];
   bool isLoading = true;
   late ProdutoDAO produtoDAO;
+  late FornecedorDAO fornecedorDAO;
+  String cnpj = '';
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
     produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+    fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
 
     conexaoDB.initConnection().then((_) {
       print('Conexão estabelecida no initState.');
-      carregarProdutos();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao estabelecer conexão no initState: $error');
     });
   }
 
+  Future<void> inicializarDados() async {
+    try {
+      cnpj = await fornecedorDAO.buscarCnpj(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cnpj.isEmpty) {
+        throw Exception('CNPJ não encontrado para o email e senha fornecidos.');
+      }
+      await carregarProdutos();
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+  }
+
   Future<void> carregarProdutos() async {
     try {
       print('Carregando produtos do fornecedor...');
-      final resultado =
-          await produtoDAO.listarProdutosFornecedor(widget.cnpjFornecedor);
+      print(cnpj);
+      final resultado = await produtoDAO.listarProdutosFornecedor(cnpj);
 
       setState(() {
         produtos = resultado;
@@ -58,10 +78,11 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   Future<void> excluirProduto(Produto produto) async {
     try {
       ProdutoDAO produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
-      await produtoDAO.removerProduto(produto.nome);
+      await produtoDAO.removerProduto(produto.produto_id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produto excluído com sucesso!')),
       );
+      await carregarProdutos();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao excluir produto')),
@@ -92,9 +113,23 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const PerfilFornecedorScreen(
-                          cnpj: '11111111111111',
-                        ),
+                        builder: (context) => const PerfilFornecedorScreen(),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.list_alt,
+                    color: Colors.white,
+                    size: 35.0,
+                  ),
+                  tooltip: 'Ver Pedidos',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PedidosFornecedorScreen(),
                       ),
                     );
                   },
@@ -121,18 +156,18 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
-                          leading: (produto.imagem != null &&
-                                  produto.imagem!.isNotEmpty)
-                              ? Image.memory(
-                                  produto.imagem!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons
-                                        .image_not_supported); // Ícone se a imagem for inválida
-                                  },
-                                )
-                              : Icon(Icons
-                                  .image), // Ícone padrão se não houver imagem
+                          leading: (produto.imagem != null && produto.imagem!.isNotEmpty)
+                            ? Image.file(
+                              File(produto.imagem), // Carrega imagem de arquivo local
+                              fit: BoxFit.cover,
+                              width: 50,
+                              height: 50,
+                              errorBuilder: (context, error, stackTrace) {
+                                print('Erro ao carregar imagem: $error');
+                                return const Icon(Icons.image_not_supported);
+                              },
+                            )
+                            : const Icon(Icons.image), // Ícone padrão se não houver URL // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
                               'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
@@ -147,7 +182,9 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => EditarProdutoScreen(
-                                          id: produto.produto_id),
+                                        id: produto.produto_id,
+                                        onProdutoEditado: carregarProdutos,
+                                      ),
                                     ),
                                   );
                                 },
@@ -172,7 +209,10 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AdicionarProdutoScreen()),
+            MaterialPageRoute(
+                builder: (context) => AdicionarProdutoScreen(
+                      onProdutoAdicionado: carregarProdutos,
+                    )),
           );
         },
         backgroundColor: Colors.orangeAccent,

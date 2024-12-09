@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/ItemPedido.dart';
+import 'package:interfaces/DTO/Produto.dart';
+import 'package:interfaces/View/IFinalizarpedido.dart';
 import 'package:interfaces/View/IHomeCliente.dart';
-import 'package:interfaces/View/IAlterarStatusPedido.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
+import 'package:interfaces/controller/SessionController.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
-import '../banco_de_dados/DAO/PedidoDAO.dart';
-import 'IFinalizarpedido.dart';
+import 'IAlterarStatusPedido.dart'; // Import da página - alterar pois não é a correta
 
 class CarrinhoPage extends StatefulWidget {
   const CarrinhoPage({Key? key}) : super(key: key);
@@ -13,61 +19,128 @@ class CarrinhoPage extends StatefulWidget {
 }
 
 class _CarrinhoPageState extends State<CarrinhoPage> {
-  final List<Map<String, dynamic>> produtosCarrinho = [
-    {'nome': 'Produto A', 'quantidade': 2, 'preco': 50.0},
-    {'nome': 'Produto B', 'quantidade': 1, 'preco': 30.0},
-    {'nome': 'Produto C', 'quantidade': 0, 'preco': 20.0},
-  ];
-
-  final String clienteCpf = '02083037669'; // CPF fixo do cliente
   late ConexaoDB conexaoDB;
-  late PedidoDAO pedidoDAO;
+  late ItemPedidoDAO itemPedidoDAO;
+  late ProdutoDAO produtoDAO;
+  late FornecedorDAO fornecedorDAO;
+  late List<ItemPedido> itensFinalizarPedido;
+
+  List<ItemPedido> itensCarrinho = [];
+  Map<int, String> nomesProdutos =
+      {}; // Mapa para armazenar os nomes dos produtos
   bool carregando = true;
+  Map<int, String> nomesFornecedores = {};
+  late ClienteDAO clienteDAO;
+  late String cpf_cliente; // CPF do cliente já refatorado com a sessão
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
     super.initState();
     conexaoDB = ConexaoDB();
-    pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
     conexaoDB.initConnection().then((_) {
-      verificarPedidosPendentes();
+      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+      itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
+      produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+      fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
+      inicializarDados();
+      _carregarItensCarrinho();
     }).catchError((error) {
-      print('Erro ao inicializar conexão: $error');
+      print('Erro ao estabelecer conexão no initState: $error');
     });
   }
 
-Future<void> verificarPedidosPendentes() async {
-  try {
-    // Garante que a conexão está aberta
-    if (conexaoDB.connection.isClosed) {
-      await conexaoDB.openConnection();
-    }
-
-    // Busca os pedidos com status pendente ou a caminho
-    final pedidos = await PedidoDAO(conexaoDB: conexaoDB).buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'a caminho']);
-
-      // Verifica se a lista de pedidos retornada está vazia ou não
-      if (pedidos != null && pedidos.isNotEmpty) {
-        final pedidoPendente = pedidos.first; // Pega o primeiro pedido encontrado
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => IAlterarStatusPedido(),
-          ),
-        );
+  Future<void> inicializarDados() async {
+    try {
+      cpf_cliente = await clienteDAO.buscarCpf(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cpf_cliente.isEmpty) {
+        throw Exception('CPF não encontrado para o email e senha fornecidos.');
       } else {
-        // Caso não haja pedidos pendentes, mantém a tela atual
-        setState(() {
-          carregando = false;
-        });
+        print("CPF encontrado NO ICARRINHO! Esse é ele:");
+        print(cpf_cliente);
       }
     } catch (e) {
-      print('Erro ao verificar pedidos pendentes: $e');
-      setState(() {
-        carregando = false;
-      });
+      print('Erro ao inicializar dados: $e');
+    }
+  }
+
+Future<void> _carregarItensCarrinho() async {
+  try {
+    final itens = await itemPedidoDAO.listarItensPedido();
+
+    final itensFiltrados = itens
+        .where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente)
+        .toList();
+
+    itensFinalizarPedido = List.from(itensFiltrados);
+
+    for (var item in itensFiltrados) {
+      final produto = await produtoDAO.buscarProduto(item.produtoId);
+      if (produto != null) {
+        nomesProdutos[item.produtoId] = produto.nome;
+
+        // Buscando o nome do fornecedor
+        final nomeFornecedor = await fornecedorDAO.buscarNomeFornecedor(produto.fornecedorCnpj);
+        nomesFornecedores[item.produtoId] = nomeFornecedor ?? 'Fornecedor Desconhecido';
+      } else {
+        nomesProdutos[item.produtoId] = 'Produto Desconhecido';
+        nomesFornecedores[item.produtoId] = 'Fornecedor Desconhecido';
       }
     }
+
+    setState(() {
+      itensCarrinho = itensFiltrados;
+      carregando = false;
+    });
+  } catch (e) {
+    print('Erro ao carregar itens do carrinho: $e');
+    setState(() {
+      carregando = false;
+    });
+  }
+}
+
+
+  Future<void> _removerItem(ItemPedido item) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmação'),
+        content: const Text('Deseja realmente excluir este item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      try {
+        await itemPedidoDAO.removerItemPedido(item.itemPedidoId);
+        setState(() {
+          itensCarrinho.remove(item);
+          nomesProdutos
+              .remove(item.produtoId); // Remover o nome do produto do mapa
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item removido com sucesso.')),
+        );
+      } catch (e) {
+        print('Erro ao remover item: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao remover o item.')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +149,11 @@ Future<void> verificarPedidosPendentes() async {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    final double subtotal = itensCarrinho.fold(
+      0.0,
+      (sum, item) => sum + (item.valorTotal),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +165,9 @@ Future<void> verificarPedidosPendentes() async {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => const HomeClienteScreen()),
+                builder: (context) =>
+                    const HomeClienteScreen(), // Retorna para a home do cliente
+              ),
             );
           },
         ),
@@ -97,68 +177,105 @@ Future<void> verificarPedidosPendentes() async {
         child: Column(
           children: [
             const Text(
-              'Produtos no Carrinho:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Produtos:',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...produtosCarrinho.map((produto) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(produto['nome']),
-                  Text("R\$ " + produto['preco'].toString()),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          setState(() {
-                            if (produto['quantidade'] > 0) {
-                              produto['quantidade']--;
-                            }
-                          });
-                        },
-                      ),
-                      Text(produto['quantidade'].toString()),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(() {
-                            produto['quantidade']++;
-                          });
-                        },
-                      ),
-                    ],
+            Expanded(
+              child: ListView.builder(
+  itemCount: itensCarrinho.length,
+  itemBuilder: (context, index) {
+    final item = itensCarrinho[index];
+    final nomeProduto = nomesProdutos[item.produtoId] ?? 'Produto Desconhecido';
+    final nomeFornecedor = nomesFornecedores[item.produtoId] ?? 'Fornecedor Desconhecido';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.grey.shade300,
+            child: const Icon(Icons.image, size: 30),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nomeProduto,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              );
-            }),
-            const Spacer(),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Fornecedor: $nomeFornecedor',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Quantidade: ${item.quantidade}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'R\$ ${item.valorTotal.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red, size: 30),
+            onPressed: () => _removerItem(item),
+          ),
+        ],
+      ),
+    );
+  },
+),
+
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                'SUBTOTAL = R\$ ${subtotal.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                final produtosFiltrados = produtosCarrinho
-                    .where((produto) => produto['quantidade'] > 0)
-                    .toList();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FinalizarPedidoPage(
-                      produtos: produtosFiltrados,
-                    ),
+                    /*Deixei enviando para essa página, mas mudar para
+                    FinalizarPedidoPage(), passando uma lista dos itens
+                    do pedido
+                    */
+                    builder: (context) => FinalizarPedidoPage(produtos:itensFinalizarPedido),
+                    //builder: (context) => IAlterarStatusPedido(),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: const Text(
                 'Finalizar Pedido',
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: 18),
               ),
             ),
           ],

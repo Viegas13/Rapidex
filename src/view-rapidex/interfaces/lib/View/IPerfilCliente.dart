@@ -86,7 +86,7 @@ Future<void> inicializarDados() async {
 
   Future<void> buscarEnderecos() async {
     try {
-      final enderecos = await enderecoDAO.listarEnderecos(cpf_cliente);
+      final enderecos = await enderecoDAO.listarEnderecosCliente(cpf_cliente);
       setState(() {
         enderecosFormatados = enderecos.map((endereco) {
           final complemento = endereco['complemento']?.isNotEmpty == true
@@ -99,6 +99,7 @@ Future<void> inicializarDados() async {
               .trim();
         }).toList();
       });
+      print('Endereços encontrados');
     } catch (e) {
       print('Erro ao buscar endereços: $e');
     }
@@ -164,7 +165,7 @@ Future<void> inicializarDados() async {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },
@@ -200,7 +201,7 @@ Future<void> inicializarDados() async {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const CadastroEndereco(cpf: '70275182606'),
+                              const CadastroEndereco(),
                         ),
                       );
                     },

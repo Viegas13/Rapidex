@@ -6,11 +6,11 @@ import 'package:interfaces/controller/SessionController.dart';
 import 'package:intl/intl.dart';
 import 'package:interfaces/widgets/CustomTextField.dart';
 import 'package:interfaces/DTO/Fornecedor.dart';
+import 'package:interfaces/controller/SessionController.dart';
 
 class EditarPerfilFornecedorScreen extends StatefulWidget {
-  final String cnpj;
 
-  const EditarPerfilFornecedorScreen({super.key, required this.cnpj});
+  const EditarPerfilFornecedorScreen({super.key});
 
   @override
   _EditarPerfilFornecedorScreenState createState() =>
@@ -26,7 +26,9 @@ class _EditarPerfilFornecedorScreenState
   final TextEditingController confirmarSenhaController =
       TextEditingController();
 
+  late String cnpj;
   late FornecedorDAO fornecedorDAO;
+  SessionController sessionController = SessionController();
 
   @override
   void initState() {
@@ -34,15 +36,27 @@ class _EditarPerfilFornecedorScreenState
     final conexaoDB = ConexaoDB();
     conexaoDB.initConnection().then((_) {
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
-      buscarFornecedor();
+      inicializarDados();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
     });
   }
 
+  Future<void> inicializarDados() async {
+  try { 
+    cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    if (cnpj.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    await buscarFornecedor();
+  } catch (e) {
+    print('Erro ao inicializar dados: $e');
+  }
+}
+
   Future<void> buscarFornecedor() async {
     try {
-      final fornecedorMap = await fornecedorDAO.buscarFornecedor(widget.cnpj);
+      final fornecedorMap = await fornecedorDAO.buscarFornecedor(cnpj);
       if (fornecedorMap != null) {
         final fornecedor = Fornecedor.fromMap(
             fornecedorMap); // Converte o mapa em um objeto Fornecedor
@@ -60,7 +74,7 @@ class _EditarPerfilFornecedorScreenState
   Future<void> salvarAlteracoes() async {
     try {
       // Buscar o fornecedor para obter a senha atual antes de atualizar os outros dados
-      final fornecedorMap = await fornecedorDAO.buscarFornecedor(widget.cnpj);
+      final fornecedorMap = await fornecedorDAO.buscarFornecedor(cnpj);
 
       // Certifique-se de que o mapa não é nulo e converta para um objeto Fornecedor
       if (fornecedorMap != null) {
@@ -68,7 +82,7 @@ class _EditarPerfilFornecedorScreenState
 
         // Atualizar os dados do fornecedor mantendo a senha atual, se não for alterada
         final fornecedorAtualizado = Fornecedor(
-          cnpj: widget.cnpj,
+          cnpj: cnpj,
           nome: nomeController.text,
           telefone: telefoneController.text,
           email: emailController.text,
