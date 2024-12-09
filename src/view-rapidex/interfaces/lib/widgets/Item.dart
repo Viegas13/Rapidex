@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -40,8 +42,8 @@ class Item extends StatelessWidget {
             Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-              child: Image.network(
-                imagem,
+              child: Image.file(
+                File(imagem),
                 fit: BoxFit.cover,
                 width: double.infinity,
               ),

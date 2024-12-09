@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,8 +22,8 @@ class Busca extends StatelessWidget {
     final formatter = NumberFormat.simpleCurrency(locale: 'pt_BR');
 
     return Container(
-      width: 120, // Largura fixa para itens
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
@@ -34,69 +36,51 @@ class Busca extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, // Alinha os itens à esquerda
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagem do produto
-
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-              child: Image.network(
-                imagem,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+          // Imagem principal
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              File(imagem),
+              fit: BoxFit.cover,
+              width: 80,
+              height: 80,
             ),
           ),
-          // Row para a imagem à esquerda e textos à direita
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start, // Alinha os textos no topo
+          const SizedBox(width: 12),
+          // Nome, fornecedor e preço
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagem
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      imagem, 
-                      fit: BoxFit.cover,
-                      width: 60,
-                      height: 60,
-                    ),
+                Text(
+                  nome,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                ), 
-                // Texto à direita da imagem
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nome,
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.left,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        fornecedor,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        formatter.format(preco),
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.green),
-                      ),
-                    ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  fornecedor,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  formatter.format(preco),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
