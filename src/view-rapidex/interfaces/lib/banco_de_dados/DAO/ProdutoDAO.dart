@@ -147,7 +147,7 @@ class ProdutoDAO {
       final results = await conexaoDB.connection.query(
         '''
   SELECT 
-    p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, 
+    p.produto_id, p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, 
     restritoPorIdade, quantidade, f.nome AS nome_fornecedor
   FROM produto p 
     JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
