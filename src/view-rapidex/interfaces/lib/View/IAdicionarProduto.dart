@@ -10,6 +10,7 @@ import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
+import 'dart:io';
 
 class AdicionarProdutoScreen extends StatefulWidget {
   final VoidCallback onProdutoAdicionado;
@@ -23,7 +24,7 @@ class AdicionarProdutoScreen extends StatefulWidget {
 class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   late ConexaoDB conexaoDB;
   late ProdutoDAO produtoDAO;
-  Uint8List? imagemSelecionada;
+  String? imagemSelecionadaPath;
   late FornecedorDAO fornecedorDAO;
   String cnpj = '';
   
@@ -78,20 +79,19 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
 }
 
   Future<void> selecionarImagem() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
+  final ImagePicker picker = ImagePicker();
+  final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
 
-    if (imagem != null) {
-      final Uint8List imageBytes = await imagem.readAsBytes();
-      setState(() {
-        imagemSelecionada = imageBytes;
-      });
-    }
+  if (imagem != null) {
+    setState(() {
+      imagemSelecionadaPath = imagem.path; // Armazena o caminho da imagem
+    });
   }
+}
 
-  Future<void> removerImagem() async{
+  Future<void> removerImagem() async {
   setState(() {
-    imagemSelecionada = null; // Reseta a imagem para null
+    imagemSelecionadaPath = null; // Reseta o caminho para null
   });
 }
 
@@ -108,6 +108,11 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
       exibirMensagem("A data de validade não está no formato correto!");
       return false;
     }
+  }
+
+  if (imagemSelecionadaPath == null || imagemSelecionadaPath!.isEmpty) {
+    exibirMensagem("A imagem do produto é obrigatória!");
+    return false;
   }
 
   if (precoController.text.isEmpty || double.tryParse(precoController.text) == null) {
@@ -134,16 +139,11 @@ void exibirMensagem(String mensagem) {
         throw Exception('CNPJ não foi inicializado.');
       }
 
-      Uint8List? imagemBytes;
-      if (imagemSelecionada != null) {
-        imagemBytes = imagemSelecionada!;
-      }
-
       Map<String, dynamic> produto = {
         'nome': nomeController.text,
         'validade': validadeController.text,
         'preco': precoController.text,
-        'imagem': imagemBytes,
+        'imagem': imagemSelecionadaPath!,
         'descricao': descricaoController.text,
         'fornecedor': cnpj,
         'restrito': restritoPorIdade,
@@ -232,24 +232,24 @@ void exibirMensagem(String mensagem) {
                   const SizedBox(height: 10),
                   GestureDetector(
                     onTap: () async {
-                      if (imagemSelecionada == null) {
+                      if (imagemSelecionadaPath == null) {
                         await selecionarImagem(); // Apenas seleciona imagem se não houver uma
                       }
                     },
                     child: Stack(
                       children: [
                         Container(
-                          height: 150,
+                          height: 120,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: imagemSelecionada != null
+                          child: imagemSelecionadaPath != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.memory(
-                                    imagemSelecionada!,
+                                  child: Image.file(
+                                    File(imagemSelecionadaPath!), // Exibe a imagem do caminho
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
@@ -262,15 +262,12 @@ void exibirMensagem(String mensagem) {
                                   ),
                                 ),
                         ),
-                        if (imagemSelecionada != null)
+                        if (imagemSelecionadaPath != null)
                           Positioned(
                             top: 5,
                             right: 5,
                             child: GestureDetector(
-                              onTap: () {
-                                // Remove a imagem
-                                removerImagem();
-                              },
+                              onTap: removerImagem,
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.red,
@@ -288,6 +285,7 @@ void exibirMensagem(String mensagem) {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10),
                   CustomTextField(
                     controller: descricaoController,
                     labelText: 'Descrição',

@@ -16,8 +16,8 @@ class PedidoDAO {
 
       await conexaoDB.connection.query(
         '''
-        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido)
-        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido)
+        INSERT INTO Pedido (cliente_cpf, fornecedor_cnpj, endereco_entrega, preco, frete, status_pedido, data_de_entrega)
+        VALUES (@cliente_cpf, @fornecedor_cnpj, @endereco_entrega, @preco, @frete, @status_pedido, @data_de_entrega)
         ''',
         substitutionValues: pedido.toMap(),
       );
@@ -97,6 +97,34 @@ class PedidoDAO {
       rethrow;
     }
   }
+  
+
+
+  Future <Pedido?> buscarPedidoPorId(int pedidoId) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      var result = await conexaoDB.connection.query(
+      '''
+      SELECT * 
+      FROM Pedido 
+      WHERE pedido_id = @pedido_id
+      ''',
+    substitutionValues: {'pedido_id': pedidoId},
+      );
+
+          if (result.isNotEmpty) {
+        return Pedido.fromMap(result[0].toColumnMap());
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar dados do pedido: $e');
+      return null;
+    }
+  }
 
   // Método para buscar pedidos por cliente
   Future<List<Pedido>> buscarPedidosPorCliente(String cliente_cpf) async {
@@ -110,6 +138,7 @@ class PedidoDAO {
         SELECT * 
         FROM Pedido 
         WHERE cliente_cpf = @cliente_cpf
+        ORDER BY pedido_id ASC
         ''',
         substitutionValues: {'cliente_cpf': cliente_cpf},
       );
@@ -119,9 +148,11 @@ class PedidoDAO {
           'pedido_id': row[0],
           'cliente_cpf': row[1],
           'fornecedor_cnpj': row[2],
-          'endereco_entrega': row[3],
-          'preco': row[4],
-          'status_pedido': row[5],
+          'preco': row[3],
+          'frete': row[4],
+          'endereco_entrega': row[5],
+          'status_pedido': row[6],
+          'data_de_entrega': row[7],
         });
       }).toList();
     } catch (e) {
@@ -172,6 +203,7 @@ class PedidoDAO {
           'frete': row[4],
           'endereco_entrega': row[5],
           'status_pedido': row[6],
+          'data_de_entrega': row[7],
         });
       }).toList();
     } catch (e) {

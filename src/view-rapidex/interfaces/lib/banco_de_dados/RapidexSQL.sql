@@ -46,10 +46,10 @@ CREATE TABLE Produto (
     nome VARCHAR(255),
     validade DATE,
     preco FLOAT,
-    imagem bytea,
+    imagem VARCHAR(255) NOT NULL,
     descricao VARCHAR(255),
     fornecedor_cnpj VARCHAR(255),
-    restritoPorIdade VARCHAR(10),
+    restritoPorIdade boolean,
     quantidade INT
     --FOREIGN KEY () REFERENCES Endereco()
 );
@@ -69,6 +69,7 @@ CREATE TABLE Pedido (
     fornecedor_cnpj VARCHAR(14),
     preco FLOAT,
     frete FLOAT,
+    data_de_entrega DATE,
     endereco_entrega VARCHAR(255), --endereco_entrega -> união de CEP + CPF (feito no código)
     status_pedido status_pedido DEFAULT 'pendente',
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE,
@@ -112,6 +113,7 @@ CREATE TABLE Cartao (
     nomeTitular VARCHAR(255),
     agencia BIGINT,
     bandeira VARCHAR(255),
+    
     cliente_cpf VARCHAR(255),
     FOREIGN KEY (cliente_cpf) REFERENCES Cliente(CPF) ON DELETE CASCADE
 );

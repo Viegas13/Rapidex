@@ -36,14 +36,15 @@ class Cartao {
   // Método para criar um objeto Cartao a partir de um mapa (útil para consultas no banco de dados)
   factory Cartao.fromMap(Map<String, dynamic> map) {
     return Cartao(
-      numero: map['numero'] as int,
-      cvv: map['cvv'] as int,
-      validade: map['validade'] as DateTime,
-      nomeTitular: map['nomeTitular'] as String,
-      agencia: map['agencia'] as int,
-      bandeira: map['bandeira'] as String,
-      clienteCpf: map['cliente_cpf'] as String,
-      cpf_titular: map['cpf_titular'] as String,
+      numero: map['numero'] != null ? map['numero'] as int : 0, // Valor padrão para `numero`
+      cvv: map['cvv'] != null ? map['cvv'] as int : 0, // Valor padrão para `cvv`
+      validade: map['validade'] ?? DateTime.now(), // Assume que `validade` já é DateTime
+      nomeTitular: map['nomeTitular'] ?? 'Sem Nome', // Texto padrão
+      agencia: map['agencia'] != null ? map['agencia'] as int : 0, // Valor padrão para `agencia`
+      bandeira: map['bandeira'] ?? 'Sem Bandeira', // Texto padrão
+      clienteCpf: map['cliente_cpf'] ?? '', // Texto padrão vazio
+      cpf_titular: map['cpf_titular'] ?? '', // Texto padrão vazio
     );
   }
+
 }
