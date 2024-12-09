@@ -4,6 +4,7 @@ import 'package:interfaces/DTO/Produto.dart';
 import 'package:interfaces/View/IFinalizarpedido.dart';
 import 'package:interfaces/View/IHomeCliente.dart';
 import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
+import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/controller/SessionController.dart';
@@ -21,13 +22,14 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
   late ConexaoDB conexaoDB;
   late ItemPedidoDAO itemPedidoDAO;
   late ProdutoDAO produtoDAO;
-
+  late FornecedorDAO fornecedorDAO;
   late List<ItemPedido> itensFinalizarPedido;
 
   List<ItemPedido> itensCarrinho = [];
   Map<int, String> nomesProdutos =
       {}; // Mapa para armazenar os nomes dos produtos
   bool carregando = true;
+  Map<int, String> nomesFornecedores = {};
   late ClienteDAO clienteDAO;
   late String cpf_cliente; // CPF do cliente já refatorado com a sessão
   SessionController sessionController = SessionController();
@@ -40,6 +42,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
       clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
       itemPedidoDAO = ItemPedidoDAO(conexaoDB: conexaoDB);
       produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
+      fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
       inicializarDados();
       _carregarItensCarrinho();
     }).catchError((error) {
@@ -63,41 +66,42 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     }
   }
 
-  Future<void> _carregarItensCarrinho() async {
-    try {
-      final itens = await itemPedidoDAO.listarItensPedido();
+Future<void> _carregarItensCarrinho() async {
+  try {
+    final itens = await itemPedidoDAO.listarItensPedido();
 
-      /* Filtrar itens com pedido_id == null(saber que aquele itemPedido não está em 
-      nenhum pedido do cliente ainda) e cliente_cpf == cpf_cliente para confirmar
-      que aquele itemPedido é de fato do cliente logado - já está refatorado usando a sessão
-      */
-      final itensFiltrados = itens
-          .where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente)
-          .toList();
+    final itensFiltrados = itens
+        .where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente)
+        .toList();
 
-      itensFinalizarPedido = itens.where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente).toList();
+    itensFinalizarPedido = List.from(itensFiltrados);
 
-      // Obter os nomes dos produtos e armazenar no mapa
-      for (var item in itensFiltrados) {
-        final produto = await produtoDAO.buscarProduto(item.produtoId);
-        if (produto != null) {
-          nomesProdutos[item.produtoId] = produto.nome;
-        } else {
-          nomesProdutos[item.produtoId] = 'Produto Desconhecido';
-        }
+    for (var item in itensFiltrados) {
+      final produto = await produtoDAO.buscarProduto(item.produtoId);
+      if (produto != null) {
+        nomesProdutos[item.produtoId] = produto.nome;
+
+        // Buscando o nome do fornecedor
+        final nomeFornecedor = await fornecedorDAO.buscarNomeFornecedor(produto.fornecedorCnpj);
+        nomesFornecedores[item.produtoId] = nomeFornecedor ?? 'Fornecedor Desconhecido';
+      } else {
+        nomesProdutos[item.produtoId] = 'Produto Desconhecido';
+        nomesFornecedores[item.produtoId] = 'Fornecedor Desconhecido';
       }
-
-      setState(() {
-        itensCarrinho = itensFiltrados;
-        carregando = false;
-      });
-    } catch (e) {
-      print('Erro ao carregar itens do carrinho: $e');
-      setState(() {
-        carregando = false;
-      });
     }
+
+    setState(() {
+      itensCarrinho = itensFiltrados;
+      carregando = false;
+    });
+  } catch (e) {
+    print('Erro ao carregar itens do carrinho: $e');
+    setState(() {
+      carregando = false;
+    });
   }
+}
+
 
   Future<void> _removerItem(ItemPedido item) async {
     final confirmar = await showDialog<bool>(
@@ -179,60 +183,62 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
-                itemCount: itensCarrinho.length,
-                itemBuilder: (context, index) {
-                  final item = itensCarrinho[index];
-                  final nomeProduto =
-                      nomesProdutos[item.produtoId] ?? 'Produto Desconhecido';
+  itemCount: itensCarrinho.length,
+  itemBuilder: (context, index) {
+    final item = itensCarrinho[index];
+    final nomeProduto = nomesProdutos[item.produtoId] ?? 'Produto Desconhecido';
+    final nomeFornecedor = nomesFornecedores[item.produtoId] ?? 'Fornecedor Desconhecido';
 
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Espaço reservado para a imagem do produto
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.grey.shade300,
-                          child: const Icon(Icons.image, size: 30),
-                        ),
-                        const SizedBox(width: 12),
-                        // Dados do item
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                nomeProduto,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Quantidade: ${item.quantidade}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'R\$ ${item.valorTotal.toStringAsFixed(2)}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Ícone da lixeira alinhado à direita
-                        IconButton(
-                          icon: const Icon(Icons.delete,
-                              color: Colors.red, size: 30),
-                          onPressed: () => _removerItem(item),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.grey.shade300,
+            child: const Icon(Icons.image, size: 30),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nomeProduto,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Fornecedor: $nomeFornecedor',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Quantidade: ${item.quantidade}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'R\$ ${item.valorTotal.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red, size: 30),
+            onPressed: () => _removerItem(item),
+          ),
+        ],
+      ),
+    );
+  },
+),
+
             ),
             const SizedBox(height: 16),
             Center(

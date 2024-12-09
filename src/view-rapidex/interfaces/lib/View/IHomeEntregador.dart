@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/DTO/Endereco.dart';
 import 'package:interfaces/DTO/Entrega.dart';
 import 'package:interfaces/DTO/Entregador.dart';
 import 'package:interfaces/DTO/Pedido.dart';
@@ -7,6 +8,7 @@ import 'package:interfaces/View/IAcompanhamentoEntregador.dart';
 import 'package:interfaces/View/IMinhasEntregas.dart';
 import 'package:interfaces/View/IPerfilEntregador.dart';
 import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
@@ -30,13 +32,13 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   EntregadorDAO? entregadorDAO;
   PedidoDAO? pedidoDAO;
   FornecedorDAO? fornecedorDAO;
+  EnderecoDAO? enderecoDAO;
 
   String? cpfLogado;
   
   SessionController sessionController = SessionController();
 
   Future<List<Pedido>>? pedidosDisponiveisFuture;
-  List<String> nomeFornecedores = [];
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
       entregaDAO = EntregaDAO(conexaoDB: conexaoDB);
       pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
+      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
 
       setEntregadorCPF().then((_) {
         setState(() {
@@ -77,15 +80,24 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
     return await fornecedorDAO!.buscarNomeFornecedor(cnpj);
   }
 
+  Future<String?> getEnderecoFornecedor(String cnpj) async {
+    final enderecoFornecedor = await enderecoDAO!.listarEnderecosFornecedor(cnpj);
+
+    if (enderecoFornecedor.isNotEmpty) {
+      return enderecoFornecedor[0]['rua'].toString() + ' ' + enderecoFornecedor[0]['numero'].toString() + ', ' + enderecoFornecedor[0]['bairro'].toString();
+    }
+
+    return null;
+  }
+
   Future<void> alterarStatusPedido(int idPedido, String status) async {
     await pedidoDAO!.atualizarStatusPedido(idPedido, status);
   }
 
-  // falta acrescentar o endereço de retirada
-  Future<void> criarEntregaPeloPedido(int novoIdPedido, String novoEntregadorCPF, String novoEnderecoEntrega, double novoValorFinal) async {
+  Future<void> criarEntregaPeloPedido(int novoIdPedido, String novoEntregadorCPF, String novoEnderecoRetirada, String novoEnderecoEntrega, double novoValorFinal) async {
     Entrega novaEntrega = Entrega(pedidoId: novoIdPedido,
       entregadorCPF: novoEntregadorCPF, status: Status.aguardando_retirada,
-      enderecoRetirada: "Implementar", enderecoEntrega: novoEnderecoEntrega, valorFinal: novoValorFinal);
+      enderecoRetirada: novoEnderecoRetirada, enderecoEntrega: novoEnderecoEntrega, valorFinal: novoValorFinal);
     
     await entregaDAO!.cadastrarEntrega(novaEntrega);
   }
@@ -107,8 +119,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            const PerfilEntregadorScreen(),
+                        builder: (context) => const PerfilEntregadorScreen(),
                       ),
                     );
                   },
@@ -194,81 +205,103 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                           final nomeFornecedor =
                               fornecedorSnapshot.data ?? "Fornecedor não encontrado";
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        nomeFornecedor,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        //"Endereço: ${pedido.enderecoRetirada}",
-                                        "Retirada: - Implementar",
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "Entrega: ${pedido.endereco_entrega}",
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "Valor: R\$ ${pedido.frete.toStringAsFixed(2)}",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
+                          return FutureBuilder<String?>(
+                            future: getEnderecoFornecedor(pedido.fornecedor_cnpj),
+                            builder: (context, enderecoSnapshot) {
+                              if (enderecoSnapshot.connectionState == ConnectionState.waiting) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text("Carregando endereço de retirada..."),
+                                );
+                              }
+
+                              if (enderecoSnapshot.hasError) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text("Erro ao carregar endereço de retirada."),
+                                );
+                              }
+
+                              final enderecoRetirada = enderecoSnapshot.data ?? "Endereço de retirada não encontrado";
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
                                       ),
                                     ],
                                   ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      alterarStatusPedido(pedido.pedido_id!, 'aceito');
-                                      criarEntregaPeloPedido(pedido.pedido_id!, cpfLogado!, pedido.endereco_entrega, pedido.preco);
-
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const AcompanhamentoEntregadorScreen(),
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              nomeFornecedor,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "Retirada: $enderecoRetirada",
+                                              style: const TextStyle(fontSize: 14),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "Entrega: ${pedido.endereco_entrega}",
+                                              style: const TextStyle(fontSize: 14),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              "Valor: R\$ ${pedido.frete.toStringAsFixed(2)}",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                    child: const Text("Aceitar"),
+                                      ),
+                                      // Botão "Aceitar" abaixo do texto
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.orange,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          alterarStatusPedido(pedido.pedido_id!, 'aceito');
+                                          criarEntregaPeloPedido(pedido.pedido_id!, cpfLogado!, pedido.endereco_entrega, enderecoRetirada, pedido.preco);
+
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const AcompanhamentoEntregadorScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text("Aceitar"),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            },
                           );
                         },
                       );
