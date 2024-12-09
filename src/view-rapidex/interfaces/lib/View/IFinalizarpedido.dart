@@ -218,12 +218,12 @@ import 'package:interfaces/View/IHomeCliente.dart';
           pedido.fornecedor_cnpj = Iproduto.fornecedorCnpj;
           }
 
-
+        await pedidoDAO.cadastrarPedido(pedido);
         List<Pedido> listaDePedidos = await pedidoDAO.buscarPedidosPorCliente(pedido.cliente_cpf);
         int pedidoId = 1; // Valor padrão caso a lista esteja vazia
         if (listaDePedidos.isNotEmpty) {
           Pedido ultimoPedido = listaDePedidos.last; // Último pedido cadastrado
-          pedidoId = ultimoPedido.pedido_id!; // Incrementa o último pedidoId
+          pedidoId = 1 +  ultimoPedido.pedido_id!; // Incrementa o último pedidoId
         }
         // Atualizar pedidoId de cada produto e persistir no banco
         widget.produtos.forEach((produto) async {
@@ -233,7 +233,7 @@ import 'package:interfaces/View/IHomeCliente.dart';
           
         });
 
-        await pedidoDAO.cadastrarPedido(pedido);
+
 
         if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
