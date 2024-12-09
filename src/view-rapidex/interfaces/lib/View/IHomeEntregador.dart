@@ -117,10 +117,14 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   }
 
   Future<String?> getEnderecoEntrega(String chaveCepCpf) async {
-    String? cep = chaveCepCpf.substring(0, 8);
-    String? cpf = chaveCepCpf.substring(8);
+    String? cep = chaveCepCpf.substring(1, 9);
+    String? cpf = chaveCepCpf.substring(9);
 
     final enderecoEntrega = await enderecoDAO!.getEnderecoCepCpf(cpf, cep);
+
+    print(cep);
+    print(cpf);
+    print(enderecoEntrega.isNotEmpty);
 
     if (enderecoEntrega.isNotEmpty) {
       return enderecoEntrega[0]['rua'].toString() +
@@ -129,6 +133,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
           ', ' +
           enderecoEntrega[0]['bairro'].toString();
     }
+
+    return null;
   }
 
   @override
@@ -356,8 +362,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                                               criarEntregaPeloPedido(
                                                   pedido.pedido_id!,
                                                   cpfLogado!,
-                                                  pedido.endereco_entrega,
                                                   enderecoRetirada,
+                                                  enderecoEntrega,
                                                   pedido.preco);
 
                                               Navigator.pushReplacement(
