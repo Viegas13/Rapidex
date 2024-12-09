@@ -3,6 +3,7 @@ import 'package:interfaces/View/DetalhesProdutoBottomSheet.dart';
 import 'package:interfaces/View/IListaPedidos.dart';
 import 'package:interfaces/View/IPerfilCliente.dart';
 import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/banco_de_dados/DAO/ClienteDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/PedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
@@ -34,6 +35,8 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
   late ProdutoDAO produtoDAO;
   late PedidoDAO pedidoDAO;
+  late String cpf_cliente;
+  late ClienteDAO clienteDAO;
   late FornecedorDAO fornecedorDAO;
   final TextEditingController buscaController = TextEditingController();
 
@@ -45,9 +48,11 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
     super.initState();
     final conexaoDB = ConexaoDB();
     pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
+    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
     conexaoDB.initConnection().then((_) {
       produtoDAO = ProdutoDAO(conexaoDB: conexaoDB);
       fornecedorDAO = FornecedorDAO(conexaoDB: conexaoDB);
+      inicializarDados();
       carregarProdutos();
     }).catchError((error) {
       print('Erro ao inicializar conexão: $error');
@@ -56,11 +61,21 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
 
   bool carregando = true;
 
+      Future<void> inicializarDados() async {
+    try {
+    cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
+    if (cpf_cliente.isEmpty) {
+      throw Exception('CPF não encontrado para o email e senha fornecidos.');
+    }
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+    }
   Future<void> verificarPedidosPendentes() async {
   
   try {
     // Busca os pedidos com status pendente ou a caminho
-    final pedidos = await pedidoDAO.buscarPedidosPorStatus(cliente_cpf: "02083037669", status_pedido: ['pendente', 'em preparo', 'pronto', 'retirado']);
+    final pedidos = await pedidoDAO.buscarPedidosPorStatus(cliente_cpf: cpf_cliente , status_pedido: ['pendente', 'em preparo', 'aceito', 'pronto', 'retirado']);
 
       // Verifica se a lista de pedidos retornada está vazia ou não
       if (pedidos != null && pedidos.isNotEmpty) {
@@ -165,7 +180,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
       print('Carregando produtos buscados...');
 
       final resultado = await produtoDAO.buscarProdutosPorNome(chave);
-
       print('Produtos carregados: ${resultado.length}');
       setState(() {
         busca = resultado;
