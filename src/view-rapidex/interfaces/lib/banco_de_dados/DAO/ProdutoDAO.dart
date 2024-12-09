@@ -152,7 +152,7 @@ class ProdutoDAO {
     restritoPorIdade, quantidade, f.nome AS nome_fornecedor
   FROM produto p 
     JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
-  WHERE p.nome = @chave OR f.nome = @chave;
+  WHERE p.nome like  '%' + @chave + '%' OR  f.nome like '%' +  @chave + '%';
   ''',
         substitutionValues: {
           'chave': chave,

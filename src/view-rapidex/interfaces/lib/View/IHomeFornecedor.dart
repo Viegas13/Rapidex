@@ -94,12 +94,12 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orangeAccent,
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.only(top: 20, left: 0, right: 20),
-            color: Colors.orangeAccent,
+            color: Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -121,7 +121,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                 IconButton(
                   icon: const Icon(
                     Icons.list_alt,
-                    color: Colors.white,
+                    color: Colors.grey,
                     size: 35.0,
                   ),
                   tooltip: 'Ver Pedidos',
@@ -156,18 +156,22 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         child: ListTile(
-                          leading: (produto.imagem != null && produto.imagem!.isNotEmpty)
-                            ? Image.file(
-                              File(produto.imagem), // Carrega imagem de arquivo local
-                              fit: BoxFit.cover,
-                              width: 50,
-                              height: 50,
-                              errorBuilder: (context, error, stackTrace) {
-                                print('Erro ao carregar imagem: $error');
-                                return const Icon(Icons.image_not_supported);
-                              },
-                            )
-                            : const Icon(Icons.image), // Ícone padrão se não houver URL // Ícone padrão se não houver imagem
+                          leading: (produto.imagem != null &&
+                                  produto.imagem!.isNotEmpty)
+                              ? Image.file(
+                                  File(produto
+                                      .imagem), // Carrega imagem de arquivo local
+                                  fit: BoxFit.cover,
+                                  width: 50,
+                                  height: 50,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('Erro ao carregar imagem: $error');
+                                    return const Icon(
+                                        Icons.image_not_supported);
+                                  },
+                                )
+                              : const Icon(Icons
+                                  .image), // Ícone padrão se não houver URL // Ícone padrão se não houver imagem
                           title: Text(produto.nome),
                           subtitle: Text(
                               'Preço: R\$ ${produto.preco}\nQuantidade: ${produto.quantidade}'),
@@ -215,7 +219,7 @@ class _HomeFornecedorScreenState extends State<HomeFornecedorScreen> {
                     )),
           );
         },
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.orange,
         child: const Icon(Icons.add),
       ),
     );
