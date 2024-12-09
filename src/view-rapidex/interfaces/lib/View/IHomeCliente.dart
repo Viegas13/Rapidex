@@ -165,7 +165,6 @@ class _HomeClienteScreenState extends State<HomeClienteScreen> {
       print('Carregando produtos buscados...');
 
       final resultado = await produtoDAO.buscarProdutosPorNome(chave);
-
       print('Produtos carregados: ${resultado.length}');
       setState(() {
         busca = resultado;
