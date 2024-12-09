@@ -219,15 +219,13 @@ import 'package:interfaces/View/IHomeCliente.dart';
           }
 
         await pedidoDAO.cadastrarPedido(pedido);
+        
         List<Pedido> listaDePedidos = await pedidoDAO.buscarPedidosPorCliente(pedido.cliente_cpf);
-        int pedidoId = 1; // Valor padrão caso a lista esteja vazia
-        if (listaDePedidos.isNotEmpty) {
-          Pedido ultimoPedido = listaDePedidos.last; // Último pedido cadastrado
-          pedidoId = 1 +  ultimoPedido.pedido_id!; // Incrementa o último pedidoId
-        }
+        Pedido ultimoPedido = listaDePedidos.last; // Último pedido cadastrado
+
         // Atualizar pedidoId de cada produto e persistir no banco
         widget.produtos.forEach((produto) async {
-          produto.pedidoId = pedidoId; // Atualiza pedidoId
+          produto.pedidoId = ultimoPedido.pedido_id!; // Atualiza pedidoId
           itemPedidoDAO.atualizarIDItemPedido(produto.itemPedidoId, produto.pedidoId); // Atualiza no banco de dados
           print('pedidoID atualizado para produto '); // Verifica no log
           
