@@ -7,6 +7,7 @@ import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/controller/SessionController.dart';
+import 'dart:math';
 
 class AcompanhamentoEntregadorScreen extends StatefulWidget {
   const AcompanhamentoEntregadorScreen({super.key});
@@ -30,6 +31,9 @@ class _AcompanhamentoEntregadorScreenState
   int countDeEstado = 0;
   String textoBotaoDeEstado = 'Notificar - A Caminho';
 
+  Random random = new Random();
+  late int randomTempo;
+
   late Future<void> entregaFuture = _initializeEntregaFuture();
 
   Future<void> _initializeEntregaFuture() async {
@@ -37,8 +41,12 @@ class _AcompanhamentoEntregadorScreenState
 
     try {
       await conexaoDB.initConnection();
+      
       entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
       entregaDAO = EntregaDAO(conexaoDB: conexaoDB);
+
+      randomTempo = random.nextInt(35) + 25;
+
       await getEntregaVigente();
     } catch (error) {
       print('Erro ao inicializar entregaFuture: $error');
@@ -148,8 +156,8 @@ class _AcompanhamentoEntregadorScreenState
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Chegada: 00:00h',
+                            Text(
+                              'Tempo para Chegada: 00:${randomTempo}',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.normal,
