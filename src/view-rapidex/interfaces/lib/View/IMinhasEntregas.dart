@@ -112,7 +112,7 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Número da Entrega: ${entrega.entregaId}",
+                          "Entrega Nº: ${index + 1}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -124,7 +124,7 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
                         Text("Endereço de Entrega: ${entrega.enderecoEntrega}"),
                         const SizedBox(height: 4),
                         Text(
-                          "Valor recebido: ${entrega.valorFinal * 0.05}",
+                          "Valor recebido: R\$ ${(entrega.valorFinal * 0.05).toStringAsFixed(2)}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
