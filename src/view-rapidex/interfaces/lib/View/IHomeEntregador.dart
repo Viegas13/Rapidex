@@ -26,7 +26,6 @@ class HomeEntregadorScreen extends StatefulWidget {
 }
 
 class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
-
   EntregaDAO? entregaDAO;
   Entregador? entregadorLogado;
   EntregadorDAO? entregadorDAO;
@@ -35,7 +34,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   EnderecoDAO? enderecoDAO;
 
   String? cpfLogado;
-  
+
   SessionController sessionController = SessionController();
 
   Future<List<Pedido>>? pedidosDisponiveisFuture;
@@ -54,7 +53,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
 
       setEntregadorCPF().then((_) {
         setState(() {
-          pedidosDisponiveisFuture = pedidoDAO?.buscarPedidosDisponiveisEntrega();
+          pedidosDisponiveisFuture =
+              pedidoDAO?.buscarPedidosDisponiveisEntrega();
         });
       });
 
@@ -81,10 +81,15 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   }
 
   Future<String?> getEnderecoFornecedor(String cnpj) async {
-    final enderecoFornecedor = await enderecoDAO!.listarEnderecosFornecedor(cnpj);
+    final enderecoFornecedor =
+        await enderecoDAO!.listarEnderecosFornecedor(cnpj);
 
     if (enderecoFornecedor.isNotEmpty) {
-      return enderecoFornecedor[0]['rua'].toString() + ' ' + enderecoFornecedor[0]['numero'].toString() + ', ' + enderecoFornecedor[0]['bairro'].toString();
+      return enderecoFornecedor[0]['rua'].toString() +
+          ' ' +
+          enderecoFornecedor[0]['numero'].toString() +
+          ', ' +
+          enderecoFornecedor[0]['bairro'].toString();
     }
 
     return null;
@@ -94,12 +99,42 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
     await pedidoDAO!.atualizarStatusPedido(idPedido, status);
   }
 
-  Future<void> criarEntregaPeloPedido(int novoIdPedido, String novoEntregadorCPF, String novoEnderecoRetirada, String novoEnderecoEntrega, double novoValorFinal) async {
-    Entrega novaEntrega = Entrega(pedidoId: novoIdPedido,
-      entregadorCPF: novoEntregadorCPF, status: Status.aguardando_retirada,
-      enderecoRetirada: novoEnderecoRetirada, enderecoEntrega: novoEnderecoEntrega, valorFinal: novoValorFinal);
-    
+  Future<void> criarEntregaPeloPedido(
+      int novoIdPedido,
+      String novoEntregadorCPF,
+      String novoEnderecoRetirada,
+      String novoEnderecoEntrega,
+      double novoValorFinal) async {
+    Entrega novaEntrega = Entrega(
+        pedidoId: novoIdPedido,
+        entregadorCPF: novoEntregadorCPF,
+        status: Status.aguardando_retirada,
+        enderecoRetirada: novoEnderecoRetirada,
+        enderecoEntrega: novoEnderecoEntrega,
+        valorFinal: novoValorFinal);
+
     await entregaDAO!.cadastrarEntrega(novaEntrega);
+  }
+
+  Future<String?> getEnderecoEntrega(String chaveCepCpf) async {
+    String? cep = chaveCepCpf.substring(1, 9);
+    String? cpf = chaveCepCpf.substring(9);
+
+    final enderecoEntrega = await enderecoDAO!.getEnderecoCepCpf(cpf, cep);
+
+    print(cep);
+    print(cpf);
+    print(enderecoEntrega.isNotEmpty);
+
+    if (enderecoEntrega.isNotEmpty) {
+      return enderecoEntrega[0]['rua'].toString() +
+          ' ' +
+          enderecoEntrega[0]['numero'].toString() +
+          ', ' +
+          enderecoEntrega[0]['bairro'].toString();
+    }
+
+    return null;
   }
 
   @override
@@ -202,104 +237,150 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                             );
                           }
 
-                          final nomeFornecedor =
-                              fornecedorSnapshot.data ?? "Fornecedor não encontrado";
+                          final nomeFornecedor = fornecedorSnapshot.data ??
+                              "Fornecedor não encontrado";
 
                           return FutureBuilder<String?>(
-                            future: getEnderecoFornecedor(pedido.fornecedor_cnpj),
+                            future:
+                                getEnderecoFornecedor(pedido.fornecedor_cnpj),
                             builder: (context, enderecoSnapshot) {
-                              if (enderecoSnapshot.connectionState == ConnectionState.waiting) {
+                              if (enderecoSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return const Padding(
                                   padding: EdgeInsets.all(16.0),
-                                  child: Text("Carregando endereço de retirada..."),
+                                  child: Text(
+                                      "Carregando endereço de retirada..."),
                                 );
                               }
 
                               if (enderecoSnapshot.hasError) {
                                 return const Padding(
                                   padding: EdgeInsets.all(16.0),
-                                  child: Text("Erro ao carregar endereço de retirada."),
+                                  child: Text(
+                                      "Erro ao carregar endereço de retirada."),
                                 );
                               }
 
-                              final enderecoRetirada = enderecoSnapshot.data ?? "Endereço de retirada não encontrado";
+                              final enderecoRetirada = enderecoSnapshot.data ??
+                                  "Endereço de retirada não encontrado";
 
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 8.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              nomeFornecedor,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              "Retirada: $enderecoRetirada",
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              "Entrega: ${pedido.endereco_entrega}",
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              "Valor: R\$ ${pedido.frete.toStringAsFixed(2)}",
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      // Botão "Aceitar" abaixo do texto
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.orange,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                              // Adicionando o FutureBuilder para o endereço de entrega
+                              return FutureBuilder<String?>(
+                                future:
+                                    getEnderecoEntrega(pedido.endereco_entrega),
+                                builder: (context, enderecoEntregaSnapshot) {
+                                  if (enderecoEntregaSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                          "Carregando endereço de entrega..."),
+                                    );
+                                  }
+
+                                  if (enderecoEntregaSnapshot.hasError) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                          "Erro ao carregar endereço de entrega."),
+                                    );
+                                  }
+
+                                  final enderecoEntrega =
+                                      enderecoEntregaSnapshot.data ??
+                                          "Endereço de entrega não encontrado";
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0, vertical: 8.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 3),
                                           ),
-                                        ),
-                                        onPressed: () {
-                                          alterarStatusPedido(pedido.pedido_id!, 'aceito');
-                                          criarEntregaPeloPedido(pedido.pedido_id!, cpfLogado!, pedido.endereco_entrega, enderecoRetirada, pedido.preco);
-
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => const AcompanhamentoEntregadorScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: const Text("Aceitar"),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  nomeFornecedor,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "Retirada: $enderecoRetirada",
+                                                  style: const TextStyle(
+                                                      fontSize: 14),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "Entrega: $enderecoEntrega", // Exibe o endereço de entrega
+                                                  style: const TextStyle(
+                                                      fontSize: 14),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  "Valor: R\$ ${pedido.frete.toStringAsFixed(2)}",
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Botão "Aceitar" abaixo do texto
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.orange,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              alterarStatusPedido(
+                                                  pedido.pedido_id!, 'aceito');
+                                              criarEntregaPeloPedido(
+                                                  pedido.pedido_id!,
+                                                  cpfLogado!,
+                                                  enderecoRetirada,
+                                                  enderecoEntrega,
+                                                  pedido.preco);
+
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const AcompanhamentoEntregadorScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text("Aceitar"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );

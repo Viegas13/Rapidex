@@ -233,6 +233,7 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
       // Atualizar pedidoId de cada produto e persistir no banco
       widget.produtos.forEach((produto) async {
         produto.pedidoId = ultimoPedido.pedido_id!; // Atualiza pedidoId
+        itemPedidoDAO.atualizarEstoque(produto.produtoId, produto.quantidade);
         itemPedidoDAO.atualizarIDItemPedido(produto.itemPedidoId,
             produto.pedidoId); // Atualiza no banco de dados
         print('pedidoID atualizado para produto '); // Verifica no log

@@ -99,7 +99,7 @@ class ProdutoDAO {
     }
   }
 
-    Future<List<Produto>> listarTodosProdutos() async {
+  Future<List<Produto>> listarTodosProdutos() async {
     try {
       await verificarConexao();
 
@@ -107,6 +107,7 @@ class ProdutoDAO {
         '''
         SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
+        WHERE quantidade > 0
         ''',
       );
 
