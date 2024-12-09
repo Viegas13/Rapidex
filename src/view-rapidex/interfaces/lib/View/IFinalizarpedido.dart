@@ -1,6 +1,7 @@
   import 'package:flutter/material.dart';
   import 'package:interfaces/DTO/Cartao.dart';
   import 'package:interfaces/DTO/Produto.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
   import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
   import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
   import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
@@ -216,7 +217,7 @@
         if (Iproduto != null) {
           pedido.fornecedor_cnpj = Iproduto.fornecedorCnpj;
           }
-        await pedidoDAO.cadastrarPedido(pedido);
+
 
         List<Pedido> listaDePedidos = await pedidoDAO.buscarPedidosPorCliente(pedido.cliente_cpf);
         Pedido ultimoPedido = listaDePedidos.last; // Último pedido cadastrado
@@ -228,17 +229,24 @@
           print('pedidoID atualizado para produto '); // Verifica no log
           
         });
+
+        await pedidoDAO.cadastrarPedido(pedido);
+
+        if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pedido finalizado com sucesso!')),
-        );
-        Navigator.pop(context);
+        const SnackBar(content: Text('Pedido finalizado com sucesso!')),
+          );
+        }
       } catch (e) {
+      print('Erro ao finalizar o pedido: $e');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao finalizar o pedido.')),
         );
-        print('Erro ao finalizar o pedido: $e');
       }
     }
+    }
+
 
     @override
     Widget build(BuildContext context) {
@@ -357,7 +365,14 @@
             const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: finalizarPedido,
+                  onPressed: (){ 
+                  finalizarPedido();
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HomeClienteScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding:
