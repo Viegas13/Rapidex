@@ -27,6 +27,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
   Fornecedor? fornecedor;
   String cnpj = '';
   SessionController sessionController = SessionController();
+  String? enderecoSelecionado;
 
   @override
   void initState() {
@@ -90,6 +91,7 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
       print('Erro ao excluir conta: $e');
     }
   }
+
   Future<void> buscarEnderecos() async {
     try {
       final enderecos = await enderecoDAO.listarEnderecosFornecedor(cnpj);
@@ -104,6 +106,10 @@ class _PerfilFornecedorScreenState extends State<PerfilFornecedorScreen> {
           return '${endereco['rua']} ${endereco['numero']}, ${endereco['bairro']} $complemento $referencia'
               .trim();
         }).toList();
+        if (enderecosFormatados.isNotEmpty) {
+          enderecoSelecionado ??= enderecosFormatados[0];
+          enderecoController.text = enderecoSelecionado!;
+        }
       });
     } catch (e) {
       print('Erro ao buscar endereços: $e');

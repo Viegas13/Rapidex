@@ -10,7 +10,8 @@ class PedidosFornecedorScreen extends StatefulWidget {
   const PedidosFornecedorScreen({super.key});
 
   @override
-  _PedidosFornecedorScreenState createState() => _PedidosFornecedorScreenState();
+  _PedidosFornecedorScreenState createState() =>
+      _PedidosFornecedorScreenState();
 }
 
 class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
@@ -44,7 +45,9 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
   }
 
   Future<void> carregarPedidos() async {
-    String cnpj = await fornecedorDAO.buscarCnpj(sessionController.email, sessionController.senha) ?? '';
+    String cnpj = await fornecedorDAO.buscarCnpj(
+            sessionController.email, sessionController.senha) ??
+        '';
 
     if (cnpj.isEmpty) {
       print('Fornecedor não encontrado ou CNPJ vazio!');
@@ -60,16 +63,21 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
       final String todayStr = DateFormat('yyyy-MM-dd').format(today);
 
       setState(() {
-        pedidosAndamento = pedidos.where((pedido) =>
-          pedido.status_pedido != 'retirado' &&
-          pedido.status_pedido != 'cancelado' &&
-          DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) == todayStr
-        ).toList();
-        
-        pedidosHistorico = pedidos.where((pedido) =>
-          (pedido.status_pedido == 'retirado' || pedido.status_pedido == 'cancelado') &&
-          DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) == todayStr
-        ).toList();
+        pedidosAndamento = pedidos
+            .where((pedido) =>
+                pedido.status_pedido != 'retirado' &&
+                pedido.status_pedido != 'cancelado' &&
+                DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) ==
+                    todayStr)
+            .toList();
+
+        pedidosHistorico = pedidos
+            .where((pedido) =>
+                (pedido.status_pedido == 'retirado' ||
+                    pedido.status_pedido == 'cancelado') &&
+                DateFormat('yyyy-MM-dd').format(pedido.data_de_entrega) ==
+                    todayStr)
+            .toList();
 
         isLoading = false;
       });
@@ -97,9 +105,9 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Pedidos do Fornecedor'),
-          backgroundColor: Colors.orange, 
+          backgroundColor: Colors.orange,
           bottom: const TabBar(
-            indicatorColor: Colors.orange, 
+            indicatorColor: Colors.orange,
             tabs: [
               Tab(text: 'Em Andamento'),
               Tab(text: 'Histórico'),
@@ -107,7 +115,8 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
           ),
         ),
         body: isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.orange))
             : TabBarView(
                 children: [
                   _buildPedidosListView(pedidosAndamento),
@@ -127,7 +136,8 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
           future: buscarItensDoPedido(pedido.pedido_id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: Colors.orange));
+              return const Center(
+                  child: CircularProgressIndicator(color: Colors.orange));
             } else if (snapshot.hasError) {
               return ListTile(
                 title: Text('Pedido #${pedido.pedido_id}'),
@@ -168,7 +178,8 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
                             child: Text(status),
                           );
                         }).toList(),
-                        dropdownColor: Colors.orange[50],  // Fundo do dropdown laranja claro
+                        dropdownColor: Colors
+                            .orange[50], // Fundo do dropdown laranja claro
                       ),
                     ],
                   ),
@@ -185,12 +196,16 @@ class _PedidosFornecedorScreenState extends State<PedidosFornecedorScreen> {
     try {
       await pedidoDAO.atualizarStatusPedido(pedido.pedido_id, novoStatus);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Status do pedido atualizado com sucesso!', style: TextStyle(color: Colors.orange))),
+        const SnackBar(
+            content: Text('Status do pedido atualizado com sucesso!',
+                style: TextStyle(color: Colors.orange))),
       );
       carregarPedidos(); // Recarrega a lista de pedidos após a alteração
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao atualizar status', style: TextStyle(color: Colors.red))),
+        const SnackBar(
+            content: Text('Erro ao atualizar status',
+                style: TextStyle(color: Colors.red))),
       );
       print('Erro ao atualizar status: $e');
     }

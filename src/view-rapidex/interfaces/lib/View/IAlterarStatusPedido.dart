@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interfaces/View/IHomeCliente.dart';
 import '../banco_de_dados/DAO/PedidoDAO.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
 import '../DTO/Pedido.dart';
@@ -51,24 +52,61 @@ class _IAlterarStatusPedidoState extends State<IAlterarStatusPedido> {
     }
   }
 
-  Future<void> alterarStatusPedido(String novoStatus) async {
+  Future<void> cancelarPedido() async {
     if (pedido == null) return;
 
     try {
-      await pedidoDAO.atualizarStatusPedido(pedido!.pedido_id, novoStatus);
+      await pedidoDAO.atualizarStatusPedido(pedido!.pedido_id, 'cancelado');
       setState(() {
-        pedido?.status_pedido =  novoStatus ; // Atualiza o status localmente
+        pedido?.status_pedido = 'cancelado'; // Atualiza o status localmente
       });
 
+      // Exibe um SnackBar para informar que o pedido foi cancelado
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Status atualizado para $novoStatus')),
+        const SnackBar(content: Text('Pedido cancelado com sucesso!')),
+      );
+
+      // Redireciona para a tela HomeClienteScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeClienteScreen(),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar status')),
+        const SnackBar(content: Text('Erro ao cancelar pedido')),
       );
       print('Erro: $e');
     }
+  }
+
+  void _confirmarCancelamento() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmar Cancelamento'),
+          content:
+              const Text('Tem certeza de que deseja cancelar este pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+              child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+                cancelarPedido(); // Cancela o pedido
+              },
+              child: const Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -89,7 +127,8 @@ class _IAlterarStatusPedidoState extends State<IAlterarStatusPedido> {
                     children: [
                       Text(
                         'Pedido ID: ${pedido!.pedido_id}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -98,22 +137,18 @@ class _IAlterarStatusPedidoState extends State<IAlterarStatusPedido> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Alterar Status:',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        'Cancelar Pedido:',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      ...[
-                        'pendente',
-                        'em preparo',
-                        'pronto',
-                        'retirado',
-                        'cancelado',
-                      ].map((status) {
-                        return ElevatedButton(
-                          onPressed: () => alterarStatusPedido(status),
-                          child: Text(status.toUpperCase()),
-                        );
-                      }).toList(),
+                      ElevatedButton(
+                        onPressed: _confirmarCancelamento,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child: const Text('CANCELAR PEDIDO'),
+                      ),
                     ],
                   ),
                 ),
