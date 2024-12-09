@@ -99,7 +99,7 @@ class ProdutoDAO {
     }
   }
 
-    Future<List<Produto>> listarTodosProdutos() async {
+  Future<List<Produto>> listarTodosProdutos() async {
     try {
       await verificarConexao();
 
@@ -107,6 +107,7 @@ class ProdutoDAO {
         '''
         SELECT produto_id, nome, validade, preco, imagem, descricao, fornecedor_cnpj, restritoPorIdade, quantidade
         FROM produto
+        WHERE quantidade > 0
         ''',
       );
 
@@ -147,7 +148,7 @@ class ProdutoDAO {
       final results = await conexaoDB.connection.query(
         '''
   SELECT 
-    p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, 
+    p.produto_id, p.nome, validade, preco, imagem, descricao, fornecedor_cnpj, 
     restritoPorIdade, quantidade, f.nome AS nome_fornecedor
   FROM produto p 
     JOIN fornecedor f ON f.cnpj = p.fornecedor_cnpj
