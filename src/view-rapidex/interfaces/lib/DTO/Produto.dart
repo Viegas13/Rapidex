@@ -1,11 +1,8 @@
-import 'dart:typed_data';
-
 class Produto {
   final int produto_id;
   final String nome;
   final DateTime? validade;
   final double preco;
-  // final Uint8List? imagem;
   final String imagem;
   final String descricao;
   final String fornecedorCnpj;
