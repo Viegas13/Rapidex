@@ -97,25 +97,23 @@ class PedidoDAO {
       rethrow;
     }
   }
-  
 
-
-  Future <Pedido?> buscarPedidoPorId(int pedidoId) async {
+  Future<Pedido?> buscarPedidoPorId(int pedidoId) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
       var result = await conexaoDB.connection.query(
-      '''
+        '''
       SELECT * 
       FROM Pedido 
       WHERE pedido_id = @pedido_id
       ''',
-    substitutionValues: {'pedido_id': pedidoId},
+        substitutionValues: {'pedido_id': pedidoId},
       );
 
-          if (result.isNotEmpty) {
+      if (result.isNotEmpty) {
         return Pedido.fromMap(result[0].toColumnMap());
       } else {
         return null;
@@ -167,7 +165,7 @@ class PedidoDAO {
       final result = await conexaoDB.connection.query(
         '''
         SELECT * FROM Pedido 
-        WHERE status_pedido = 'em preparo'
+        WHERE status_pedido in ('em preparo', 'pronto')
         ''',
       );
 
@@ -177,7 +175,7 @@ class PedidoDAO {
       return [];
     }
   }
-  
+
   Future<List<Pedido>> buscarPedidosPorFornecedor(
       String fornecedor_cnpj) async {
     try {
@@ -215,7 +213,6 @@ class PedidoDAO {
   Future<List<Map<String, dynamic>>> buscarItensPorPedido(int? pedidoId) async {
     final connection = conexaoDB.connection;
 
-
     final List<List<dynamic>> results = await connection.query(
       '''
       SELECT ip.produto_id, p.nome, ip.quantidade, ip.valor_total
@@ -225,7 +222,6 @@ class PedidoDAO {
       ''',
       substitutionValues: {'pedidoId': pedidoId},
     );
-
 
     if (results.isEmpty) {
       print('Nenhum resultado encontrado para pedido_id: $pedidoId');

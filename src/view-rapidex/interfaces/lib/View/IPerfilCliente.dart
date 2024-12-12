@@ -200,7 +200,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 16),
+                  /*const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -226,7 +226,7 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
                     labelText: 'Cartões',
                     controller: cartaoController,
                     items: const ["Visa"],
-                  ),
+                  ),*/
                   const SizedBox(height: 16),
                 ],
               ),
