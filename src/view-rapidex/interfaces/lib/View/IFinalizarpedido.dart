@@ -261,138 +261,159 @@ class _FinalizarPedidoPageState extends State<FinalizarPedidoPage> {
         backgroundColor: Colors.orange,
         title: const Text('Finalizar Pedido'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Produtos no Pedido:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ...widget.produtos.map((produto) {
-              return Text(
-                " Quantidade: ${produto.quantidade} - Total: R\$ ${(produto.valorTotal).toStringAsFixed(2)}",
-              );
-            }),
-            const SizedBox(height: 16),
-            const Text(
-              'Forma de Pagamento:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<String>(
-              hint: const Text('Selecione a forma de pagamento'),
-              value: formaPagamento,
-              onChanged: (value) {
-                setState(() {
-                  formaPagamento = value;
-                  if (formaPagamento != 'Cartão') {
-                    cartaoSelecionado = null;
-                  }
-                });
-              },
-              items: ['Dinheiro', 'Cartão']
-                  .map((forma) => DropdownMenuItem(
-                        value: forma,
-                        child: Text(forma),
-                      ))
-                  .toList(),
-            ),
-            if (formaPagamento == 'Cartão') ...[
+      body: SingleChildScrollView(
+        // Torna a tela rolável verticalmente
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Produtos no Pedido:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              // Envolvendo itens longos em SingleChildScrollView horizontal
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widget.produtos.map((produto) {
+                    return Text(
+                      " Quantidade: ${produto.quantidade} - Total: R\$ ${(produto.valorTotal).toStringAsFixed(2)}",
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Forma de Pagamento:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButton<String>(
+                hint: const Text('Selecione a forma de pagamento'),
+                value: formaPagamento,
+                onChanged: (value) {
+                  setState(() {
+                    formaPagamento = value;
+                    if (formaPagamento != 'Cartão') {
+                      cartaoSelecionado = null;
+                    }
+                  });
+                },
+                items: ['Dinheiro', 'Cartão']
+                    .map((forma) => DropdownMenuItem(
+                          value: forma,
+                          child: Text(forma),
+                        ))
+                    .toList(),
+              ),
+              if (formaPagamento == 'Cartão') ...[
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      // Garante que o texto não cause overflow
+                      child: Text(
+                        'Selecione um Cartão:',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: carregarCartoes,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                        maxWidth: 600), // Ajusta o tamanho máximo
+                    child: selecionarCartao(),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CadastroCartaoScreen()),
+                    );
+                    carregarCartoes();
+                  },
+                  child: const Text('Cadastrar Novo Cartão'),
+                ),
+              ],
+              const SizedBox(height: 24),
+              DropdownTextField(
+                labelText: 'Endereço',
+                controller: enderecoController,
+                items: enderecosFormatados.isNotEmpty &&
+                        enderecosFormatados[0] != 'Carregando...'
+                    ? enderecosFormatados
+                    : ['Nenhum endereço disponível'],
+                onItemSelected: (selectedValue) {
+                  setState(() {
+                    enderecoController.text = selectedValue;
+                    cep = selectedValue.substring(4, 13);
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Selecione um Cartão:',
+                    'Data de Entrega:',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: carregarCartoes, // Botão de refresh
+                  ElevatedButton(
+                    onPressed: selecionarDataEntrega,
+                    child: const Text('Selecionar Data'),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              selecionarCartao(),
-              TextButton(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CadastroCartaoScreen()),
-                  );
-                  carregarCartoes();
-                },
-                child: const Text('Cadastrar Novo Cartão'),
-              ),
-            ],
-            const SizedBox(height: 24),
-            DropdownTextField(
-              labelText: 'Endereço',
-              controller: enderecoController,
-              items: enderecosFormatados.isNotEmpty &&
-                      enderecosFormatados[0] != 'Carregando...'
-                  ? enderecosFormatados
-                  : ['Nenhum endereço disponível'],
-              onItemSelected: (selectedValue) {
-                setState(() {
-                  enderecoController.text = selectedValue;
-                  cep = selectedValue.substring(4, 13);
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Data de Entrega:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              TextField(
+                controller: dataEntregaController,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Deixe em branco para efetuar entrega hoje',
+                  border: OutlineInputBorder(),
                 ),
-                ElevatedButton(
-                  onPressed: selecionarDataEntrega,
-                  child: const Text('Selecionar Data'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: dataEntregaController,
-              readOnly: true,
-              decoration: const InputDecoration(
-                labelText: 'Deixe em branco para efetuar entrega hoje',
-                border: OutlineInputBorder(),
               ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  finalizarPedido();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const HomeClienteScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    finalizarPedido();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HomeClienteScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Finalizar Pedido',
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
-                child: const Text(
-                  'Finalizar Pedido',
-                  style: TextStyle(color: Colors.black),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

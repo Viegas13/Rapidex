@@ -30,13 +30,15 @@ class EnderecoDAO {
     }
   }
 
-  Future<void> cadastrarEnderecoFornecedor(Map<String, dynamic> endereco) async {
+  Future<void> cadastrarEnderecoFornecedor(
+      Map<String, dynamic> endereco) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
       }
 
-      final String enderecoId = '${endereco['cep']}_${endereco['fornecedor_cnpj']}';
+      final String enderecoId =
+          '${endereco['cep']}_${endereco['fornecedor_cnpj']}';
 
       await conexaoDB.connection.query(
         '''
@@ -55,7 +57,8 @@ class EnderecoDAO {
     }
   }
 
-  Future<List<Map<String, dynamic>>> listarEnderecosCliente(String clienteCpf) async {
+  Future<List<Map<String, dynamic>>> listarEnderecosCliente(
+      String clienteCpf) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -91,7 +94,8 @@ class EnderecoDAO {
     }
   }
 
-  Future<List<Map<String, dynamic>>> listarEnderecosFornecedor(String fornecedorCnpj) async {
+  Future<List<Map<String, dynamic>>> listarEnderecosFornecedor(
+      String fornecedorCnpj) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();
@@ -105,6 +109,44 @@ class EnderecoDAO {
       ''',
         substitutionValues: {
           'fornecedor_cnpj': fornecedorCnpj,
+        },
+      );
+
+      print('Resultados encontrados: $results');
+
+      return results.map((row) {
+        return {
+          'endereco_id': row[0],
+          'rua': row[1],
+          'numero': row[2],
+          'bairro': row[3],
+          'cep': row[4],
+          'complemento': row[5],
+          'referencia': row[6],
+        };
+      }).toList();
+    } catch (e) {
+      print('Erro ao listar endereços: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getEnderecoCepCpf(
+      String clienteCpf, String cep) async {
+    try {
+      if (conexaoDB.connection.isClosed) {
+        await conexaoDB.openConnection();
+      }
+
+      final results = await conexaoDB.connection.query(
+        '''
+        SELECT endereco_id, rua, numero, bairro, cep, complemento, referencia
+        FROM Endereco
+        WHERE cliente_cpf = @cliente_cpf AND CEP = @cep
+        ''',
+        substitutionValues: {
+          'cliente_cpf': clienteCpf,
+          'cep': cep,
         },
       );
 

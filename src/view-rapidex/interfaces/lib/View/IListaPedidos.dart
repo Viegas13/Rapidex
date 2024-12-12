@@ -46,18 +46,21 @@ class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
       }
 
       // Busca os pedidos do cliente
-      List<Pedido> listaPedidos = await pedidoDAO.buscarPedidosPorCliente(cpfCliente);
+      List<Pedido> listaPedidos =
+          await pedidoDAO.buscarPedidosPorCliente(cpfCliente);
 
-      // Filtra os pedidos para excluir os que estão com status "cancelado"
+      // Filtra os pedidos para incluir somente os com status "cancelado" ou "concluído"
       List<Pedido> pedidosFiltrados = listaPedidos
-          .where((pedido) => pedido.status_pedido.toLowerCase() != "cancelado")
+          .where((pedido) => !["cancelado", "concluído"]
+              .contains(pedido.status_pedido.toLowerCase()))
           .toList();
 
       setState(() {
         pedidos = pedidosFiltrados
             .map((pedido) => {
                   'id': pedido.pedido_id,
-                  'descricao': 'Pedido ${pedido.pedido_id} - R\$${pedido.preco.toStringAsFixed(2)} - Stauts: ${pedido.status_pedido}'
+                  'descricao':
+                      'Pedido ${pedido.pedido_id} - R\$${pedido.preco.toStringAsFixed(2)} - Status: ${pedido.status_pedido}'
                 })
             .toList();
         isLoading = false;
@@ -87,7 +90,8 @@ class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => IAlterarStatusPedido(pedidoId: pedido['id']),
+                            builder: (context) =>
+                                IAlterarStatusPedido(pedidoId: pedido['id']),
                           ),
                         );
                       },

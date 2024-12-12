@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 
 class PerfilClienteScreen extends StatefulWidget {
-
   const PerfilClienteScreen({super.key});
 
   @override
@@ -35,34 +34,37 @@ class _PerfilClienteScreenState extends State<PerfilClienteScreen> {
   late EnderecoDAO enderecoDAO;
   late String cpf_cliente;
   List<String> enderecosFormatados = ['Carregando...'];
+  String? enderecoSelecionado;
 
   SessionController sessionController = SessionController();
-  
-  @override
-void initState() {
-  super.initState();
-  final conexaoDB = ConexaoDB();
-  conexaoDB.initConnection().then((_) {
-    clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
-    enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
-    inicializarDados(); 
-  }).catchError((error) {
-    print('Erro ao inicializar conexão: $error');
-  });
-}
 
-Future<void> inicializarDados() async {
-  try {
-    cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
-    if (cpf_cliente.isEmpty) {
-      throw Exception('CPF não encontrado para o email e senha fornecidos.');
-    }
-    await buscarCliente();
-    await buscarEnderecos();
-  } catch (e) {
-    print('Erro ao inicializar dados: $e');
+  @override
+  void initState() {
+    super.initState();
+    final conexaoDB = ConexaoDB();
+    conexaoDB.initConnection().then((_) {
+      clienteDAO = ClienteDAO(conexaoDB: conexaoDB);
+      enderecoDAO = EnderecoDAO(conexaoDB: conexaoDB);
+      inicializarDados();
+    }).catchError((error) {
+      print('Erro ao inicializar conexão: $error');
+    });
   }
-}
+
+  Future<void> inicializarDados() async {
+    try {
+      cpf_cliente = await clienteDAO.buscarCpf(
+              sessionController.email, sessionController.senha) ??
+          '';
+      if (cpf_cliente.isEmpty) {
+        throw Exception('CPF não encontrado para o email e senha fornecidos.');
+      }
+      await buscarCliente();
+      await buscarEnderecos();
+    } catch (e) {
+      print('Erro ao inicializar dados: $e');
+    }
+  }
 
   Future<void> buscarCliente() async {
     try {
@@ -98,7 +100,12 @@ Future<void> inicializarDados() async {
           return '${endereco['rua']} ${endereco['numero']}, ${endereco['bairro']} $complemento $referencia'
               .trim();
         }).toList();
+        if (enderecosFormatados.isNotEmpty) {
+          enderecoSelecionado ??= enderecosFormatados[0];
+          enderecoController.text = enderecoSelecionado!;
+        }
       });
+
       print('Endereços encontrados');
     } catch (e) {
       print('Erro ao buscar endereços: $e');
@@ -164,8 +171,7 @@ Future<void> inicializarDados() async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const CadastroEndereco(),
+                          builder: (context) => const CadastroEndereco(),
                         ),
                       );
                     },
@@ -194,14 +200,13 @@ Future<void> inicializarDados() async {
                       });
                     },
                   ),
-                  const SizedBox(height: 16),
+                  /*const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const CadastroEndereco(),
+                          builder: (context) => const CadastroEndereco(),
                         ),
                       );
                     },
@@ -221,7 +226,7 @@ Future<void> inicializarDados() async {
                     labelText: 'Cartões',
                     controller: cartaoController,
                     items: const ["Visa"],
-                  ),
+                  ),*/
                   const SizedBox(height: 16),
                 ],
               ),
