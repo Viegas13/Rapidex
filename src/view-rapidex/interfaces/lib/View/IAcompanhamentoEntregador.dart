@@ -46,7 +46,7 @@ class _AcompanhamentoEntregadorScreenState
 
     try {
       await conexaoDB.initConnection();
-      
+
       entregadorDAO = EntregadorDAO(conexaoDB: conexaoDB);
       entregaDAO = EntregaDAO(conexaoDB: conexaoDB);
       pedidoDAO = PedidoDAO(conexaoDB: conexaoDB);
@@ -62,15 +62,18 @@ class _AcompanhamentoEntregadorScreenState
 
   Future<void> getEntregaVigente() async {
     entregadorLogado = await entregadorDAO?.BuscarEntregadorParaLogin(
-        sessionController.email.toString(),
-        sessionController.senha.toString());
+        sessionController.email.toString(), sessionController.senha.toString());
 
-    List<Status> status = [Status.aguardando_retirada, Status.a_caminho, Status.chegou];
+    List<Status> status = [
+      Status.aguardando_retirada,
+      Status.a_caminho,
+      Status.chegou
+    ];
 
     cpfLogado = entregadorLogado!.cpf;
 
-    entrega = await entregaDAO?.buscarEntregaPorEntregador3Status(
-        cpfLogado!, status);
+    entrega =
+        await entregaDAO?.buscarEntregaPorEntregador3Status(cpfLogado!, status);
 
     setState(() {});
   }
@@ -83,6 +86,7 @@ class _AcompanhamentoEntregadorScreenState
         countDeEstado++;
 
         entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.a_caminho);
+        pedidoDAO?.atualizarStatusPedido(entrega?.pedidoId, 'retirado');
       } else if (countDeEstado == 1) {
         textoBotaoDeEstado = "Finalizar Entrega";
 
@@ -91,6 +95,7 @@ class _AcompanhamentoEntregadorScreenState
         entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.chegou);
       } else {
         entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.entregue);
+        pedidoDAO?.atualizarStatusPedido(entrega?.pedidoId, 'concluido');
 
         Navigator.push(
           context,
@@ -101,11 +106,15 @@ class _AcompanhamentoEntregadorScreenState
   }
 
   Future<String?> getEnderecoFornecedor(String cnpj) async {
-    final enderecoFornecedor = await enderecoDAO!.listarEnderecosFornecedor(cnpj);
+    final enderecoFornecedor =
+        await enderecoDAO!.listarEnderecosFornecedor(cnpj);
 
     if (enderecoFornecedor.isNotEmpty) {
-      
-      return enderecoFornecedor[0]['rua'].toString() + ' ' + enderecoFornecedor[0]['numero'].toString() + ', ' + enderecoFornecedor[0]['bairro'].toString();
+      return enderecoFornecedor[0]['rua'].toString() +
+          ' ' +
+          enderecoFornecedor[0]['numero'].toString() +
+          ', ' +
+          enderecoFornecedor[0]['bairro'].toString();
     }
 
     return null;

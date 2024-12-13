@@ -8,6 +8,8 @@ import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ItemPedidoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/controller/SessionController.dart';
+import 'package:interfaces/widgets/ImagemItem.dart';
+import 'package:interfaces/widgets/Item.dart';
 import '../banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'IAlterarStatusPedido.dart'; // Import da página - alterar pois não é a correta
 
@@ -50,6 +52,16 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     });
   }
 
+  Future<String?> buscarImagemProduto(int produtoId) async {
+    try {
+      final produto = await produtoDAO.buscarProduto(produtoId);
+      return produto?.imagem;
+    } catch (e) {
+      print('Erro ao buscar imagem do produto: $e');
+      return null;
+    }
+  }
+
   Future<void> inicializarDados() async {
     try {
       cpf_cliente = await clienteDAO.buscarCpf(
@@ -66,42 +78,43 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     }
   }
 
-Future<void> _carregarItensCarrinho() async {
-  try {
-    final itens = await itemPedidoDAO.listarItensPedido();
+  Future<void> _carregarItensCarrinho() async {
+    try {
+      final itens = await itemPedidoDAO.listarItensPedido();
 
-    final itensFiltrados = itens
-        .where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente)
-        .toList();
+      final itensFiltrados = itens
+          .where((item) => item.pedidoId == 0 && item.clienteCpf == cpf_cliente)
+          .toList();
 
-    itensFinalizarPedido = List.from(itensFiltrados);
+      itensFinalizarPedido = List.from(itensFiltrados);
 
-    for (var item in itensFiltrados) {
-      final produto = await produtoDAO.buscarProduto(item.produtoId);
-      if (produto != null) {
-        nomesProdutos[item.produtoId] = produto.nome;
+      for (var item in itensFiltrados) {
+        final produto = await produtoDAO.buscarProduto(item.produtoId);
+        if (produto != null) {
+          nomesProdutos[item.produtoId] = produto.nome;
 
-        // Buscando o nome do fornecedor
-        final nomeFornecedor = await fornecedorDAO.buscarNomeFornecedor(produto.fornecedorCnpj);
-        nomesFornecedores[item.produtoId] = nomeFornecedor ?? 'Fornecedor Desconhecido';
-      } else {
-        nomesProdutos[item.produtoId] = 'Produto Desconhecido';
-        nomesFornecedores[item.produtoId] = 'Fornecedor Desconhecido';
+          // Buscando o nome do fornecedor
+          final nomeFornecedor =
+              await fornecedorDAO.buscarNomeFornecedor(produto.fornecedorCnpj);
+          nomesFornecedores[item.produtoId] =
+              nomeFornecedor ?? 'Fornecedor Desconhecido';
+        } else {
+          nomesProdutos[item.produtoId] = 'Produto Desconhecido';
+          nomesFornecedores[item.produtoId] = 'Fornecedor Desconhecido';
+        }
       }
+
+      setState(() {
+        itensCarrinho = itensFiltrados;
+        carregando = false;
+      });
+    } catch (e) {
+      print('Erro ao carregar itens do carrinho: $e');
+      setState(() {
+        carregando = false;
+      });
     }
-
-    setState(() {
-      itensCarrinho = itensFiltrados;
-      carregando = false;
-    });
-  } catch (e) {
-    print('Erro ao carregar itens do carrinho: $e');
-    setState(() {
-      carregando = false;
-    });
   }
-}
-
 
   Future<void> _removerItem(ItemPedido item) async {
     final confirmar = await showDialog<bool>(
@@ -183,62 +196,71 @@ Future<void> _carregarItensCarrinho() async {
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
-  itemCount: itensCarrinho.length,
-  itemBuilder: (context, index) {
-    final item = itensCarrinho[index];
-    final nomeProduto = nomesProdutos[item.produtoId] ?? 'Produto Desconhecido';
-    final nomeFornecedor = nomesFornecedores[item.produtoId] ?? 'Fornecedor Desconhecido';
+                itemCount: itensCarrinho.length,
+                itemBuilder: (context, index) {
+                  final item = itensCarrinho[index];
+                  final nomeProduto =
+                      nomesProdutos[item.produtoId] ?? 'Produto Desconhecido';
+                  final nomeFornecedor = nomesFornecedores[item.produtoId] ??
+                      'Fornecedor Desconhecido';
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.grey.shade300,
-            child: const Icon(Icons.image, size: 30),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nomeProduto,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Fornecedor: $nomeFornecedor',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Quantidade: ${item.quantidade}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'R\$ ${item.valorTotal.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red, size: 30),
-            onPressed: () => _removerItem(item),
-          ),
-        ],
-      ),
-    );
-  },
-),
-
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                              8), // Controle o arredondamento das bordas
+                          child: Container(
+                            width: 60, // Defina a largura desejada
+                            height: 60, // Defina a altura desejada
+                            color: Colors.grey.shade300, // Cor de fundo
+                            child: ImagemItem(
+                                imagemFuture:
+                                    buscarImagemProduto(item.produtoId)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nomeProduto,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Fornecedor: $nomeFornecedor',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Quantidade: ${item.quantidade}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'R\$ ${item.valorTotal.toStringAsFixed(2)}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete,
+                              color: Colors.red, size: 30),
+                          onPressed: () => _removerItem(item),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 16),
             Center(
@@ -260,7 +282,8 @@ Future<void> _carregarItensCarrinho() async {
                     FinalizarPedidoPage(), passando uma lista dos itens
                     do pedido
                     */
-                    builder: (context) => FinalizarPedidoPage(produtos:itensFinalizarPedido),
+                    builder: (context) =>
+                        FinalizarPedidoPage(produtos: itensFinalizarPedido),
                     //builder: (context) => IAlterarStatusPedido(),
                   ),
                 );

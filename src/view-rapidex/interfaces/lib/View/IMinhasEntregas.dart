@@ -12,8 +12,7 @@ class MinhasEntregasScreen extends StatefulWidget {
   const MinhasEntregasScreen({super.key});
 
   @override
-  _MinhasEntregasScreenState createState() =>
-      _MinhasEntregasScreenState();
+  _MinhasEntregasScreenState createState() => _MinhasEntregasScreenState();
 }
 
 class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
@@ -21,7 +20,7 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
   EntregaDAO? entregaDAO;
   Entregador? entregadorLogado;
   String? cpfLogado;
-  
+
   SessionController sessionController = SessionController();
 
   Future<List<Entrega>>? entregasFeitasFuture;
@@ -37,7 +36,8 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
 
       setEntregadorCPF().then((_) {
         setState(() {
-          entregasFeitasFuture = entregaDAO?.buscarEntregasPorEntregadorStatus(cpfLogado!, Status.entregue);
+          entregasFeitasFuture = entregaDAO?.buscarEntregasPorEntregadorStatus(
+              cpfLogado!, Status.entregue);
         });
       });
 
@@ -64,10 +64,11 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Minhas Entregas"),
-        backgroundColor: Colors.white, 
-        elevation: 0, 
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black), // Ícone da seta de voltar
+          icon: const Icon(Icons.arrow_back,
+              color: Colors.black), // Ícone da seta de voltar
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -78,7 +79,7 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
         ),
       ),
       body: Container(
-        color: Colors.orange, 
+        color: Colors.orange,
         child: FutureBuilder<List<Entrega>>(
           future: entregasFeitasFuture,
           builder: (context, snapshot) {
@@ -101,7 +102,8 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
               itemBuilder: (context, index) {
                 final entrega = entregasFeitas[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -119,12 +121,13 @@ class _MinhasEntregasScreenState extends State<MinhasEntregasScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text("Endereço do Fornecedor: ${entrega.enderecoRetirada}"),
+                        Text(
+                            "Endereço do Fornecedor: ${entrega.enderecoRetirada}"),
                         const SizedBox(height: 4),
                         Text("Endereço de Entrega: ${entrega.enderecoEntrega}"),
                         const SizedBox(height: 4),
                         Text(
-                          "Valor recebido: R\$ ${(entrega.valorFinal * 0.05).toStringAsFixed(2)}",
+                          "Valor recebido: R\$ ${(entrega.valorFinal * 0.01).toStringAsFixed(2)}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

@@ -54,7 +54,7 @@ CREATE TABLE Produto (
     --FOREIGN KEY () REFERENCES Endereco()
 );
 
-CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'aceito', 'pronto', 'retirado', 'cancelado');
+CREATE TYPE status_pedido AS ENUM ('pendente', 'em preparo', 'aceito', 'pronto', 'retirado', 'cancelado', 'concluido');
 -- pendente -> acabou de criar o pedido
 -- em preparo -> fornecedor marca que começou o preparo
 -- aceito -> algum entregador aceitou o pedido para realizar entrega
