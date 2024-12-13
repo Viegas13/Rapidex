@@ -7,7 +7,6 @@ import 'package:interfaces/widgets/ImageLabelField.dart';
 import 'package:interfaces/banco_de_dados/DBHelper/ConexaoDB.dart';
 import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 import 'package:interfaces/View/IHomeFornecedor.dart';
-import 'package:interfaces/View/IHomeFornecedor.dart';
 import 'package:interfaces/controller/SessionController.dart';
 import 'package:interfaces/banco_de_dados/DAO/FornecedorDAO.dart';
 import 'dart:io';
@@ -33,7 +32,6 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen> {
   final TextEditingController validadeController = TextEditingController();
   final TextEditingController precoController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
-  bool restritoPorIdade = false;
   int quantidade = 1;
   final TextEditingController quantidadeController = TextEditingController(text: '1');
 
@@ -146,7 +144,7 @@ void exibirMensagem(String mensagem) {
         'imagem': imagemSelecionadaPath!,
         'descricao': descricaoController.text,
         'fornecedor': cnpj,
-        'restrito': restritoPorIdade,
+        'restrito': false,
         'quantidade': quantidadeController.text,
       };
 
@@ -293,44 +291,6 @@ void exibirMensagem(String mensagem) {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Restrito por idade?',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    children: [
-                      Row(
-                        children: [
-                          Radio<bool>(
-                            value: true,
-                            groupValue: restritoPorIdade,
-                            onChanged: (value) {
-                              setState(() {
-                                restritoPorIdade = value!;
-                              });
-                            },
-                          ),
-                          const Text('Sim'),
-                        ],
-                      ),
-                      const SizedBox(width: 20),
-                      Row(
-                        children: [
-                          Radio<bool>(
-                            value: false,
-                            groupValue: restritoPorIdade,
-                            onChanged: (value) {
-                              setState(() {
-                                restritoPorIdade = value!;
-                              });
-                            },
-                          ),
-                          const Text('Não'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

@@ -185,7 +185,7 @@ class ProdutoDAO {
         return null;
       }
     } catch (e) {
-      print('Erro ao buscar dados do cliente: $e');
+      print('Erro ao buscar dados do produto: $e');
       return null;
     }
   }
