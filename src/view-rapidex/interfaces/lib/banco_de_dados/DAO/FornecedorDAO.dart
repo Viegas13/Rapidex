@@ -30,7 +30,7 @@ class FornecedorDAO {
   }
 
   // Buscar fornecedor para login
-  Future<Fornecedor?> BuscarFornecedorParaLogin(
+  Future<Fornecedor?> buscarFornecedorParaLogin(
       String email, String senha) async {
     try {
       var result = await conexaoDB.connection.query(

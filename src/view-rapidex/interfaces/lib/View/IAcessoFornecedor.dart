@@ -55,7 +55,7 @@ class _AcessoFornecedorScreenState extends State<AcessoFornecedorScreen> {
     String senha = senhaController.text;
 
     Fornecedor? fornecedorLogado =
-        await fornecedorDAO.BuscarFornecedorParaLogin(email, senha);
+        await fornecedorDAO.buscarFornecedorParaLogin(email, senha);
 
     if (fornecedorLogado != null) {
       setState(() {
