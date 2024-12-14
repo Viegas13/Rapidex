@@ -110,7 +110,7 @@ class ClienteDAO {
     }
   }
 
-  Future<Cliente?> BuscarClienteParaLogin(String email, String senha) async {
+  Future<Cliente?> buscarClienteParaLogin(String email, String senha) async {
     try {
       if (conexaoDB.connection.isClosed) {
         await conexaoDB.openConnection();

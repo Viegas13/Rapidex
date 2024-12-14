@@ -61,7 +61,7 @@ class _AcompanhamentoEntregadorScreenState
   }
 
   Future<void> getEntregaVigente() async {
-    entregadorLogado = await entregadorDAO?.BuscarEntregadorParaLogin(
+    entregadorLogado = await entregadorDAO?.buscarEntregadorParaLogin(
         sessionController.email.toString(), sessionController.senha.toString());
 
     List<Status> status = [
@@ -73,7 +73,7 @@ class _AcompanhamentoEntregadorScreenState
     cpfLogado = entregadorLogado!.cpf;
 
     entrega =
-        await entregaDAO?.buscarEntregaPorEntregador3Status(cpfLogado!, status);
+        await entregaDAO?.buscarEntregaPorEntregadorStatus2(cpfLogado!, status);
 
     setState(() {});
   }

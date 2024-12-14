@@ -55,7 +55,7 @@ class _AcessoEntregadorScreenState extends State<AcessoEntregadorScreen> {
     String senha = senhaController.text;
 
     Entregador? entregadorLogado =
-        await entregadorDAO.BuscarEntregadorParaLogin(email, senha);
+        await entregadorDAO.buscarEntregadorParaLogin(email, senha);
 
     if (entregadorLogado != null) {
       setState(() {

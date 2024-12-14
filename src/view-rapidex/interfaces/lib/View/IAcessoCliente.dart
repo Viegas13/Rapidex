@@ -57,7 +57,7 @@ class _AcessoClienteScreenState extends State<AcessoClienteScreen> {
     String senha = senhaController.text;
 
     Cliente? clienteLogado =
-        await clienteDAO.BuscarClienteParaLogin(email, senha);
+        await clienteDAO.buscarClienteParaLogin(email, senha);
 
     if (clienteLogado != null) {
       setState(() {

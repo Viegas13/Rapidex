@@ -89,7 +89,7 @@ class EntregadorDAO {
     }
   }
 
-  Future<Entregador?> BuscarEntregadorParaLogin(
+  Future<Entregador?> buscarEntregadorParaLogin(
       String email, String senha) async {
     try {
       if (conexaoDB.connection.isClosed) {

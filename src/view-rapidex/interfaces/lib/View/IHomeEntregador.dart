@@ -65,7 +65,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
   }
 
   Future<void> setEntregadorCPF() async {
-    entregadorLogado = await entregadorDAO?.BuscarEntregadorParaLogin(
+    entregadorLogado = await entregadorDAO?.buscarEntregadorParaLogin(
       sessionController.email.toString(),
       sessionController.senha.toString(),
     );
