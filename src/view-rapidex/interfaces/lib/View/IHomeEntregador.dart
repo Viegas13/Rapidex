@@ -8,6 +8,7 @@ import 'package:interfaces/View/IAcompanhamentoEntregador.dart';
 import 'package:interfaces/View/IMinhasEntregas.dart';
 import 'package:interfaces/View/IPerfilEntregador.dart';
 import 'package:interfaces/View/Icarrinho.dart';
+import 'package:interfaces/View/IMap.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
@@ -128,7 +129,7 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
 
     if (enderecoEntrega.isNotEmpty) {
       return enderecoEntrega[0]['rua'].toString() +
-          ' ' +
+          ', ' +
           enderecoEntrega[0]['numero'].toString() +
           ', ' +
           enderecoEntrega[0]['bairro'].toString();
@@ -370,7 +371,8 @@ class _HomeEntregadorScreenState extends State<HomeEntregadorScreen> {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      const AcompanhamentoEntregadorScreen(),
+                                                      //const AcompanhamentoEntregadorScreen(),
+                                                      AcompanhamentoEntregadorScreen(enderecoFornecedor: enderecoRetirada, enderecoCliente: enderecoEntrega),
                                                 ),
                                               );
                                             },

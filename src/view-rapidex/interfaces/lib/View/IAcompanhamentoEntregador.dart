@@ -4,6 +4,7 @@ import 'package:interfaces/DTO/Entregador.dart';
 import 'package:interfaces/DTO/Pedido.dart';
 import 'package:interfaces/DTO/Status.dart';
 import 'package:interfaces/View/IHomeEntregador.dart';
+import 'package:interfaces/View/IMap.dart';
 import 'package:interfaces/banco_de_dados/DAO/EnderecoDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregaDAO.dart';
 import 'package:interfaces/banco_de_dados/DAO/EntregadorDAO.dart';
@@ -13,7 +14,9 @@ import 'package:interfaces/controller/SessionController.dart';
 import 'dart:math';
 
 class AcompanhamentoEntregadorScreen extends StatefulWidget {
-  const AcompanhamentoEntregadorScreen({super.key});
+  final String enderecoFornecedor, enderecoCliente;
+
+  const AcompanhamentoEntregadorScreen({super.key, required this.enderecoFornecedor, required this.enderecoCliente});
 
   @override
   _AcompanhamentoEntregadorScreenState createState() =>
@@ -127,10 +130,7 @@ class _AcompanhamentoEntregadorScreenState
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/mapa.png', // Caminho para a imagem
-              fit: BoxFit.cover, // Ajusta a imagem ao tamanho da tela
-            ),
+            child: MapScreen(enderecoFornecedor: widget.enderecoFornecedor, enderecoCliente: widget.enderecoCliente),
           ),
           Center(
             child: FutureBuilder<void>(
@@ -167,7 +167,7 @@ class _AcompanhamentoEntregadorScreenState
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Retirada: ${entrega!.enderecoRetirada}',
+                              'Retirada: ${widget.enderecoFornecedor}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -175,18 +175,10 @@ class _AcompanhamentoEntregadorScreenState
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Entrega: ${entrega!.enderecoEntrega}',
+                              'Entrega: ${widget.enderecoCliente}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tempo para Chegada: 00:${randomTempo}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
                               ),
                             ),
                             const SizedBox(height: 16),
