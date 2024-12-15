@@ -51,6 +51,7 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
     late String cpf_cliente;
     SessionController sessionController = SessionController();
     List<Cartao> cartoes = [];
+    List<Map<String, dynamic>> itensDetalhados = [];
     bool isLoading = false;
 
     @override
@@ -74,6 +75,18 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
     }
 
     Future<void> inicializarDados() async {
+
+      for (var item in widget.produtos) {
+        Produto? produto = await produtoDAO.buscarProduto(item.produtoId);
+        if (produto != null) {
+          itensDetalhados.add({
+            'quantidade': item.quantidade,
+            'nome': produto.nome,
+            'valorTotal': item.valorTotal,
+          });
+        }
+      }
+
     try {
     cpf_cliente = await clienteDAO.buscarCpf(sessionController.email, sessionController.senha) ?? '';
     if (cpf_cliente.isEmpty) {
@@ -232,9 +245,6 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
           print('pedidoID atualizado para produto '); // Verifica no log
           
         });
-
-
-
         if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pedido finalizado com sucesso!')),
@@ -252,98 +262,112 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
 
 
     @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.orange,
-          title: const Text('Finalizar Pedido'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Produtos no Pedido:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.orange,
+      title: const Text('Finalizar Pedido'),
+    ),
+    body: SingleChildScrollView( // Torna a tela rolável verticalmente
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Produtos no Pedido:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            // Envolvendo itens longos em SingleChildScrollView horizontal
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: itensDetalhados.map((produto) {
+                  return Text(
+                    "Produto: ${produto['nome']} - Quantidade: ${produto['quantidade']} - Total: R\$ ${(produto['valorTotal']).toStringAsFixed(2)}",
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: 8),
-              
-              ...widget.produtos.map((produto) {
-                return Text(
-                  " Quantidade: ${produto.quantidade} - Total: R\$ ${(produto.valorTotal).toStringAsFixed(2)}",
-                );
-              }),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Forma de Pagamento:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            DropdownButton<String>(
+              hint: const Text('Selecione a forma de pagamento'),
+              value: formaPagamento,
+              onChanged: (value) {
+                setState(() {
+                  formaPagamento = value;
+                  if (formaPagamento != 'Cartão') {
+                    cartaoSelecionado = null;
+                  }
+                });
+              },
+              items: ['Dinheiro', 'Cartão']
+                  .map((forma) => DropdownMenuItem(
+                        value: forma,
+                        child: Text(forma),
+                      ))
+                  .toList(),
+            ),
+            if (formaPagamento == 'Cartão') ...[
               const SizedBox(height: 16),
-              const Text(
-                'Forma de Pagamento:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButton<String>(
-                hint: const Text('Selecione a forma de pagamento'),
-                value: formaPagamento,
-                onChanged: (value) {
-                  setState(() {
-                    formaPagamento = value;
-                    if (formaPagamento != 'Cartão') {
-                      cartaoSelecionado = null;
-                    }
-                  });
-                },
-                items: ['Dinheiro', 'Cartão']
-                    .map((forma) => DropdownMenuItem(
-                          value: forma,
-                          child: Text(forma),
-                        ))
-                    .toList(),
-              ),
-              if (formaPagamento == 'Cartão') ...[
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Text(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded( // Garante que o texto não cause overflow
+                    child: Text(
                       'Selecione um Cartão:',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: carregarCartoes, // Botão de refresh
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                selecionarCartao(),
-                TextButton(
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CadastroCartaoScreen()),
-                    );
-                    carregarCartoes();
-                  },
-                  child: const Text('Cadastrar Novo Cartão'),
-                ),
-              ],
-              const SizedBox(height: 24),
-              DropdownTextField(
-                    labelText: 'Endereço',
-                    controller: enderecoController,
-                    items: enderecosFormatados.isNotEmpty &&
-                            enderecosFormatados[0] != 'Carregando...'
-                        ? enderecosFormatados
-                        : ['Nenhum endereço disponível'],
-                    onItemSelected: (selectedValue) {
-                      setState(() {
-                        enderecoController.text = selectedValue;
-                        cep = selectedValue.substring(4,13);
-                      });
-                    },
                   ),
-                  const SizedBox(height: 16),
-                              Row(
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: carregarCartoes,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600), // Ajusta o tamanho máximo
+                  child: selecionarCartao(),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CadastroCartaoScreen()),
+                  );
+                  carregarCartoes();
+                },
+                child: const Text('Cadastrar Novo Cartão'),
+              ),
+            ],
+            const SizedBox(height: 24),
+            DropdownTextField(
+              labelText: 'Endereço',
+              controller: enderecoController,
+              items: enderecosFormatados.isNotEmpty &&
+                      enderecosFormatados[0] != 'Carregando...'
+                  ? enderecosFormatados
+                  : ['Nenhum endereço disponível'],
+              onItemSelected: (selectedValue) {
+                setState(() {
+                  enderecoController.text = selectedValue;
+                  cep = selectedValue.substring(4, 13);
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
@@ -366,33 +390,34 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
               ),
             ),
             const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: (){ 
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
                   finalizarPedido();
                   Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeClienteScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Finalizar Pedido',
-                    style: TextStyle(color: Colors.black),
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HomeClienteScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: const Text(
+                  'Finalizar Pedido',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    ),
+  );
   }
+}

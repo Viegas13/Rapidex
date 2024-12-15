@@ -12,9 +12,9 @@ class IListaPedidosScreen extends StatefulWidget {
 }
 
 class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
-  late String cpfCliente; // CPF do cliente, carregado da sessão
-  List<Map<String, dynamic>> pedidos = []; // Lista de pedidos
-  bool isLoading = true; // Indica se os dados ainda estão carregando
+  late String cpfCliente;
+  List<Map<String, dynamic>> pedidos = [];
+  bool isLoading = true;
   SessionController sessionController = SessionController();
   late PedidoDAO pedidoDAO;
   late ConexaoDB conexaoDB;
@@ -35,7 +35,6 @@ class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
 
   Future<void> carregarDados() async {
     try {
-      // Inicializa o CPF do cliente com base na sessão
       cpfCliente = await clienteDAO.buscarCpf(
             sessionController.email,
             sessionController.senha,
@@ -45,13 +44,11 @@ class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
         throw Exception('CPF não encontrado para o email e senha fornecidos.');
       }
 
-      // Busca os pedidos do cliente
       List<Pedido> listaPedidos =
           await pedidoDAO.buscarPedidosPorCliente(cpfCliente);
 
-      // Filtra os pedidos para incluir somente os com status "cancelado" ou "concluído"
       List<Pedido> pedidosFiltrados = listaPedidos
-          .where((pedido) => !["cancelado", "concluído"]
+          .where((pedido) => !["cancelado", "concluido"]
               .contains(pedido.status_pedido.toLowerCase()))
           .toList();
 
@@ -76,46 +73,72 @@ class _IListaPedidosScreenState extends State<IListaPedidosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Lista de Pedidos")),
+      appBar: AppBar(
+        title: const Text(
+          "Lista de Pedidos",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.orange,
+        centerTitle: true,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : pedidos.isEmpty
-              ? const Center(child: Text("Nenhum pedido encontrado."))
-              : ListView.builder(
-                  itemCount: pedidos.length,
-                  itemBuilder: (context, index) {
-                    final pedido = pedidos[index];
-                    return ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                IAlterarStatusPedido(pedidoId: pedido['id']),
+              ? const Center(
+                  child: Text(
+                    "Nenhum pedido encontrado.",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: Colors.white,
+                  child: ListView.builder(
+                    itemCount: pedidos.length,
+                    itemBuilder: (context, index) {
+                      final pedido = pedidos[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 16.0,
+                        ),
+                        color: Colors.orange.shade50,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16.0),
+                          title: Text(
+                            pedido['descricao'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
-                        );
-                      },
-                      child: Text(pedido['descricao']),
-                    );
-                  },
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.orange,
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    IAlterarStatusPedido(pedidoId: pedido['id']),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
-    );
-  }
-}
-
-// Página de destino ao clicar em um pedido
-class PaginaX extends StatelessWidget {
-  final int pedidoId;
-
-  const PaginaX({Key? key, required this.pedidoId}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Detalhes do Pedido")),
-      body: Center(
-        child: Text("Exibindo detalhes do pedido ID: $pedidoId"),
-      ),
     );
   }
 }
