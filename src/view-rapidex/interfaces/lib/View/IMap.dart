@@ -43,22 +43,21 @@ class _MapScreenState extends State<MapScreen> {
     try {
       print("antes da posOrigem");
 
-      setState(() async{
-        _posOrigem = await getPosicaoAtual();
+      // Execute operações assíncronas antes de atualizar o estado
+      _posOrigem = await getPosicaoAtual();
+      print(_posOrigem);
 
-        print(_posOrigem);
+      _initialCameraPosition = CameraPosition(
+        target: _posOrigem!,
+        zoom: 11.5,
+      );
 
-        
-        _initialCameraPosition = CameraPosition(
-          target: _posOrigem!,
-          zoom: 11.5,
-        );   
+      _posDestinoRetirada = await enderecoToCoordenadas(widget.enderecoFornecedor + ", Brasil");
+      _posDestinoEntrega = await enderecoToCoordenadas(widget.enderecoCliente + ", Brasil");
 
-        _posDestinoRetirada = await enderecoToCoordenadas(widget.enderecoFornecedor + ", Brasil");
-        _posDestinoEntrega = await enderecoToCoordenadas(widget.enderecoCliente + ", Brasil");
-
+      // Depois de concluir as operações, atualize o estado
+      setState(() {
         _addMarcadores();
-
         _isLoading = false;
       });
     } catch (error) {
@@ -159,14 +158,15 @@ class _MapScreenState extends State<MapScreen> {
                         .map((e) => LatLng(e.latitude, e.longitude))
                         .toList(),
                   ),
-                Polyline(
-                  polylineId: const PolylineId('overview_polyline2'),
-                  color: Colors.red,
-                  width: 5,
-                  points: _infoRetiradaEntrega!.polylinePoints
-                      .map((e) => LatLng(e.latitude, e.longitude))
-                      .toList(),
-                ),
+                if (_infoRetiradaEntrega != null)
+                  Polyline(
+                    polylineId: const PolylineId('overview_polyline2'),
+                    color: Colors.red,
+                    width: 5,
+                    points: _infoRetiradaEntrega!.polylinePoints
+                        .map((e) => LatLng(e.latitude, e.longitude))
+                        .toList(),
+                  ),
               },
             ),
           if (_infoOrigemRetirada != null && _infoRetiradaEntrega != null)
