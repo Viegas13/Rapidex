@@ -227,6 +227,7 @@ import 'package:interfaces/banco_de_dados/DAO/ProdutoDAO.dart';
         // Atualizar pedidoId de cada produto e persistir no banco
         widget.produtos.forEach((produto) async {
           produto.pedidoId = ultimoPedido.pedido_id!; // Atualiza pedidoId
+          itemPedidoDAO.atualizarEstoque(produto.produtoId, produto.quantidade); // decresce do estoque a quantidade de produtos adquirida
           itemPedidoDAO.atualizarIDItemPedido(produto.itemPedidoId, produto.pedidoId); // Atualiza no banco de dados
           print('pedidoID atualizado para produto '); // Verifica no log
           
