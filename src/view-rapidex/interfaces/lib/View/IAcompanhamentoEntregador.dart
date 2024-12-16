@@ -88,7 +88,7 @@ class _AcompanhamentoEntregadorScreenState
 
         countDeEstado++;
 
-        entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.a_caminho);
+        entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.a_caminho); 
         pedidoDAO?.atualizarStatusPedido(entrega?.pedidoId, 'retirado');
       } else if (countDeEstado == 1) {
         textoBotaoDeEstado = "Finalizar Entrega";
@@ -96,6 +96,7 @@ class _AcompanhamentoEntregadorScreenState
         countDeEstado++;
 
         entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.chegou);
+        pedidoDAO?.atualizarStatusPedido(entrega?.pedidoId, 'chegou');
       } else {
         entregaDAO?.atualizarStatusEntrega(cpfLogado!, Status.entregue);
         pedidoDAO?.atualizarStatusPedido(entrega?.pedidoId, 'concluido');
