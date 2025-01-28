@@ -1,2 +1,2 @@
 # Rapidex
-Trabalho de Conclusão de curso - Informática 2024
+Trabalho de Conclusão de Curso - Informática 2024
